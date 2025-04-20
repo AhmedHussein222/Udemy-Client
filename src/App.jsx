@@ -1,8 +1,15 @@
 import React from 'react'
+import Header from './Components/Header/Header'
+import { CssBaseline } from '@mui/material';
+import Footer from './Components/Footer/Footer';
 
 function App() {
   return (
-    <div>App</div>
+<CssBaseline>
+  <Header/>
+  <Footer/>
+</CssBaseline>
+   
   )
 }
 
