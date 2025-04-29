@@ -1,7 +1,6 @@
 import React from "react";
 import {
   Box,
-  Container,
   Grid,
   Typography,
   Link,
@@ -13,7 +12,7 @@ import {
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import LanguageIcon from "@mui/icons-material/Language";
-import { useTheme } from "@mui/material/styles";
+
 
 import udemyLogo from "../../assets/logo-udemy-inverted.svg";
 import logo4 from "../../assets/eventbrite-light.svg";
@@ -91,6 +90,7 @@ const footerSections = [
 ];
 
 export default function Footer() {
+  // const theme = useTheme();
   const isMobile = useMediaQuery("(max-width:768px)");
 
 
@@ -213,67 +213,68 @@ export default function Footer() {
       </Box>
 
       <Divider sx={{ bgcolor: "#555", my: 4 }} />
+{/* الصف الخامس */}
+<Box sx={{ px: { xs: 2, md: 8 }, pb: 4 }}>
+  <Grid
+    container
+    spacing={2}
+    alignItems="center"
+    justifyContent="space-between"
+  >
+    {/* شمال */}
+    <Grid item xs={12} md={4}>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 1,
+          justifyContent: { xs: "flex-start", md: "flex-start" },
+        }}
+      >
+        <img src={udemyLogo} alt="Udemy" style={{ height: 24 }} />
+        <Typography sx={{ fontSize: "13px", color: "#ccc" }}>
+          © 2025 Udemy, Inc.
+        </Typography>
+      </Box>
+    </Grid>
 
-        {/* الصف الخامس */}
-        <Box sx={{ px: { xs: 2, md: 8 }, pb: 4 }}>
-          <Grid
-            container
-            spacing={2}
-            alignItems="center"
-            justifyContent="space-between"
-          >
-            {/* شمال */}
-            <Grid item xs={12} md={4}>
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 1,
-                  justifyContent: { xs: "flex-start", md: "flex-start" },
-                }}
-              >
-                <img src={udemyLogo} alt="Udemy" style={{ height: 24 }} />
-                <Typography sx={{ fontSize: "13px", color: "#ccc" }}>
-                  © 2025 Udemy, Inc.
-                </Typography>
-              </Box>
-            </Grid>
+    {/* النص */}
+    <Grid item xs={12} md={4}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: { xs: "flex-start", md: "center" },
+        }}
+      >
+        <Link
+          href="#"
+          underline="hover"
+          color="inherit"
+          sx={{ fontSize: "13px" }}
+        >
+          Cookie settings
+        </Link>
+      </Box>
+    </Grid>
 
-            {/* النص */}
-            <Grid item xs={12} md={4}>
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: { xs: "flex-start", md: "center" },
-                }}
-              >
-                <Link
-                  href="#"
-                  underline="hover"
-                  color="inherit"
-                  sx={{ fontSize: "13px" }}
-                >
-                  Cookie settings
-                </Link>
-              </Box>
-            </Grid>
+    {/* اليمين */}
+    <Grid item xs={12} md={4}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: { xs: "flex-start", md: "flex-end" },
+          alignItems: "center",
+          gap: 1,
+        }}
+      >
+        <LanguageIcon sx={{ fontSize: 20 }} />
+        <Typography sx={{ fontSize: "13px" }}>English</Typography>
+      </Box>
+    </Grid>
+  </Grid>
+</Box>
 
-            {/* اليمين */}
-            <Grid item xs={12} md={4}>
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: { xs: "flex-start", md: "flex-end" },
-                  alignItems: "center",
-                  gap: 1,
-                }}
-              >
-                <LanguageIcon sx={{ fontSize: 20 }} />
-                <Typography sx={{ fontSize: "13px" }}>English</Typography>
-              </Box>
-            </Grid>
-          </Grid>
-        </Box>
+
     </Box>
   );
 }
