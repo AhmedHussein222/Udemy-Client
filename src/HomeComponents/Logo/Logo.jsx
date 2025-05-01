@@ -15,15 +15,19 @@ const Logo = () => {
 
   return (
     <div className="trusted-container">
-      <Typography variant='' className="trusted-title" sx={{ marginBottom: '40px' }}>
-        Trusted by over 16,000 companies and millions of learners around the world
-      </Typography>
-      <div className="logos-container">
-        {logos.map((logo, index) => (
-          <img key={index} src={logo} alt={`Logo ${index}`} className="logo-image" />
-        ))}
-      </div>
-    </div>
+  <div style={{ marginBottom: '40px' }}>
+    <Typography variant='' className="trusted-title">
+      Trusted by over 16,000 companies and millions of learners around the world
+    </Typography>
+  </div>
+
+  <div className="logos-container">
+    {logos.map((logo, index) => (
+      <img key={index} src={logo} alt={`Logo ${index}`} className="logo-image" />
+    ))}
+  </div>
+</div>
+
   );
 };
 

@@ -1,10 +1,11 @@
 import React from 'react'
-import Header from './Components/Header/Header'
-import Home from './Components/Home/Home'
+import Header from './HomeComponents/Header/Header'
+import Home from './HomeComponents/Home/Home'
 import { CssBaseline } from '@mui/material';
-import Footer from './Components/Footer/Footer';
-import Navbar from './Components/NavBar/NavBar';
-import Logo from './Components/Logo/Logo'
+import Footer from './HomeComponents/Footer/Footer';
+import Navbar from './HomeComponents/NavBar/NavBar';
+import Logo from './HomeComponents/Logo/Logo'
+import Home2 from './HomeComponents/Home2/Home2'
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
   <Home/>
   <Navbar/>
   <Logo/>
+  <Home2/>
   <Footer/>
 </CssBaseline>
    

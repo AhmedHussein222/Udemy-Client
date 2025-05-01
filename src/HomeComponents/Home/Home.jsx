@@ -87,11 +87,11 @@ return (
 
     {/* Cards Section */}
     <Box sx={{ flexGrow: 1, mt: 5 }}>
-      <Grid container spacing={4} justifyContent="center">
+      <Grid container spacing={2} justifyContent="center">
         
         {/* Full Stack Card */}
         <Grid item xs={12} sm={6} md={4}>
-          <Card sx={{ borderRadius: 4 }}>
+          <Card sx={{ borderRadius: 4,width:400 }}>
             <Box
               component="img"
               src={fullstackImg}
@@ -124,7 +124,7 @@ return (
 
         {/* Digital Marketer Card */}
         <Grid item xs={12} sm={6} md={4}>
-          <Card sx={{ borderRadius: 4 }}>
+          <Card sx={{ borderRadius: 4 ,width:400 }}>
             <Box
               component="img"
               src={digitalMarketerImg}
@@ -157,7 +157,7 @@ return (
 
         {/* Data Science Card */}
         <Grid item xs={12} sm={6} md={4}>
-          <Card sx={{ borderRadius: 4 }}>
+          <Card sx={{ borderRadius: 4 , width:400}}>
             <Box
               component="img"
               src={dataScienceImg}
@@ -197,7 +197,7 @@ return (
     color: "#5624d0",
     backgroundColor: "#fff",
     padding: "15px 20px",
-    marginLeft: "70px",
+    marginLeft: "10px",
     borderRadius: "4px",
     fontWeight: "bold",
     fontSize: "16px",
