@@ -1,6 +1,5 @@
 import React from 'react'
-import Header from './HomeComponents/Header/Header'
-import Home from './HomeComponents/Home/Home'
+import Header from './Components/Header/Header'
 import { CssBaseline } from '@mui/material';
 import Footer from './Components/Footer/Footer';
 import Cart from './Components/Cart/Cart';
@@ -13,19 +12,14 @@ import CreateCourse from './Components/InstructorSignup/components/CreateCourse/
 
 function App() {
   return (
-<CssBaseline>
-  <Header/>
-  {/* <Cart/> */}
-  {/* <Signup /> */}
-  {/* <Login /> */}
-  {/* <InsSignup /> */}
-  <Welcomehome />
-  {/* <Sidebar/> */}
-  {/* <Footer/> */}
+    <CssBaseline>
+      <Header />
+      {/* <Sidebar/> */}
+      <RouterProvider router={router}></RouterProvider>
 
-</CssBaseline>
-   
-  )
+      <Footer />
+    </CssBaseline>
+  );
 }
 
-export default App
+export default App;
