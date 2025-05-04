@@ -2,20 +2,27 @@ import React from 'react'
 import Header from './HomeComponents/Header/Header'
 import Home from './HomeComponents/Home/Home'
 import { CssBaseline } from '@mui/material';
-import Footer from './HomeComponents/Footer/Footer';
-import Navbar from './HomeComponents/NavBar/NavBar';
-import Logo from './HomeComponents/Logo/Logo'
-import Home2 from './HomeComponents/Home2/Home2'
+import Footer from './Components/Footer/Footer';
+import Cart from './Components/Cart/Cart';
+import Signup from './Components/SignUpStudents/Signup';
+import Login from './Components/LoginUsers/Login';
+import InsSignup from './Components/InstructorSignup/InsSignup';
+import Welcomehome from './Components/InstructorSignup/welcomehome';
+import Sidebar from './Components/InstructorSignup/components/Drawer/sidebar';
+import CreateCourse from './Components/InstructorSignup/components/CreateCourse/createcourse';
 
 function App() {
   return (
 <CssBaseline>
   <Header/>
-  <Home/>
-  <Navbar/>
-  <Logo/>
-  <Home2/>
-  <Footer/>
+  {/* <Cart/> */}
+  {/* <Signup /> */}
+  {/* <Login /> */}
+  {/* <InsSignup /> */}
+  <Welcomehome />
+  {/* <Sidebar/> */}
+  {/* <Footer/> */}
+
 </CssBaseline>
    
   )
