@@ -13,9 +13,12 @@
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
     "@mui/icons-material": "^7.0.2",
+    "@mui/lab": "^7.0.0-beta.11",
     "@mui/material": "^7.0.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-hook-form": "^7.56.1",
+    "react-router-dom": "^7.5.3",
     "react-slick": "^0.30.3",
     "slick-carousel": "^1.8.1"
   },
