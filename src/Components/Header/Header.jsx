@@ -60,77 +60,75 @@ const Header = () => {
               </Box>
             </>
           ) : (
-            <Box sx={{ display: "flex", alignItems: "center", gap: 2, width: "100%" }}>
-              {/* Logo */}
-              <img src={logo} style={{ width: 90 }} alt="logo" />
+            <>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                <img src={logo} style={{ width: 90 }} alt="logo" />
+                <Typography sx={linkStyle}>Explore</Typography>
+              </Box>
 
-              {/* Explore */}
-              <Typography sx={linkStyle}>Explore</Typography>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                <Box
+                  onMouseEnter={() => setOpenBusiness(true)}
+                  onMouseLeave={() => setOpenBusiness(false)}
+                  sx={{ position: "relative" }}
+                >
+                  <Typography sx={linkStyle}>Udemy Business</Typography>
+                  {openBusiness && (
+                    <Box sx={popoverStyle}>
+                      <Typography variant="h6" fontWeight="bold" sx={{ color: "#001a33" }}>
+                        Get your team access to over 27,000 top Udemy courses, anytime, anywhere.
+                      </Typography>
+                      <Button variant="contained" size="small" sx={businessBtnStyle}>
+                        Try Udemy Business
+                      </Button>
+                    </Box>
+                  )}
+                </Box>
 
-              {/* Search Bar */}
-              <Paper
-                component="form"
-                onSubmit={(e) => e.preventDefault()}
-                sx={{
-                  ...searchBarStyle,
-                  flexGrow: 1,
-                  maxWidth: 600,
-                }}
-              >
-                <IconButton type="submit" sx={searchBtnStyle}>
-                <SearchIcon sx={{ color: "gray" }} />
+                <Box
+                  onMouseEnter={() => setOpenTeach(true)}
+                  onMouseLeave={() => setOpenTeach(false)}
+                  sx={{ position: "relative" }}
+                >
+                  <Typography sx={linkStyle}>Teach on Udemy</Typography>
+                  {openTeach && (
+                    <Box sx={popoverStyle}>
+                      <Typography variant="h6" fontWeight="bold" sx={{ color: "#001a33" }}>
+                        Turn what you know into an opportunity and reach millions around the world.
+                      </Typography>
+                      <Button variant="contained" sx={teachBtnStyle}>Learn more</Button>
+                    </Box>
+                  )}
+                </Box>
+
+                <IconButton sx={iconBtnStyle}>
+                  <ShoppingCartOutlinedIcon />
                 </IconButton>
-                <InputBase sx={{ flex: 1, fontSize: "16px" }} placeholder="Search for anything" />
-              </Paper>
-
-              {/* Udemy Business */}
-              <Box
-                onMouseEnter={() => setOpenBusiness(true)}
-                onMouseLeave={() => setOpenBusiness(false)}
-                sx={{ position: "relative" }}
-              >
-                <Typography sx={linkStyle}>Udemy Business</Typography>
-                {openBusiness && (
-                  <Box sx={popoverStyle}>
-                    <Typography variant="h6" fontWeight="bold" sx={{ color: "#001a33" }}>
-                      Get your team access to over 27,000 top Udemy courses, anytime, anywhere.
-                    </Typography>
-                    <Button variant="contained" size="small" sx={businessBtnStyle}>
-                      Try Udemy Business
-                    </Button>
-                  </Box>
-                )}
+                <Button variant="outlined" sx={loginBtnStyle}>Log in</Button>
+                <Button variant="contained" sx={signupBtnStyle}>Sign up</Button>
+                <Button variant="outlined" sx={langBtnStyle}>
+                  <LanguageIcon />
+                </Button>
               </Box>
-
-              {/* Teach on Udemy */}
-              <Box
-                onMouseEnter={() => setOpenTeach(true)}
-                onMouseLeave={() => setOpenTeach(false)}
-                sx={{ position: "relative" }}
-              >
-                <Typography sx={linkStyle}>Teach on Udemy</Typography>
-                {openTeach && (
-                  <Box sx={popoverStyle}>
-                    <Typography variant="h6" fontWeight="bold" sx={{ color: "#001a33" }}>
-                      Turn what you know into an opportunity and reach millions around the world.
-                    </Typography>
-                    <Button variant="contained" sx={teachBtnStyle}>Learn more</Button>
-                  </Box>
-                )}
-              </Box>
-
-              {/* Icons and Buttons */}
-              <IconButton sx={iconBtnStyle}>
-                <ShoppingCartOutlinedIcon />
-              </IconButton>
-              <Button variant="outlined" sx={loginBtnStyle}>Log in</Button>
-              <Button variant="contained" sx={signupBtnStyle}>Sign up</Button>
-              <Button variant="outlined" sx={langBtnStyle}>
-                <LanguageIcon />
-              </Button>
-            </Box>
+            </>
           )}
         </Box>
+
+        {/* Search Bar - Desktop */}
+        {!isMobile && (
+          <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+            <Paper
+              component="form"
+              onSubmit={(e) => e.preventDefault()}
+              sx={searchBarStyle}
+            >
+              <InputBase sx={{ flex: 1, fontSize: "18px" }} placeholder="  Search for anything" />
+              <IconButton type="submit" sx={searchBtnStyle}>
+                <SearchIcon sx={{ color: "#fff" }} />
+              </IconButton>
+            </Paper>
+          </Box>
+        )}
 
         {/* Search Bar - Mobile */}
         {isMobile && showSearch && (
@@ -256,34 +254,31 @@ const teachBtnStyle = {
 };
 
 const searchBarStyle = {
-  p: "0px 0px",
+  p: "6px 8px",
   display: "flex",
-  alignItems: "left",
+  alignItems: "center",
+  width: "80%",
   borderRadius: 999,
-  border: "1px solid gray",
-  // transition: "0.2s",
+  boxShadow: 1,
+  border: "1px solid #ccc",
+  transition: "0.2s",
   "&:focus-within": {
     borderColor: "#8000ff",
   },
 };
 
 const searchBtnStyle = {
-  backgroundColor: "transparent",
+  backgroundColor: "#e0ccff",
   borderRadius: "50%",
-  p: 2,
+  p: 1.5,
   ml: 1,
   transition: "0.2s",
   "&:hover": {
-    backgroundColor: "transparent",
-  },
-  "& .MuiSvgIcon-root": {
-    color: "gray",
-    transition: "0.2s",
+    backgroundColor: "#8000ff",
   },
   "&:hover .MuiSvgIcon-root": {
-    color: "black",
+    color: "#fff",
   },
 };
-
 
 export default Header;
