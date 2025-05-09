@@ -104,6 +104,7 @@
   
   .option-card {
     display: flex;
+    height: 170px;
     gap: 12px;
     padding: 12px;
     border-left: 4px solid #d1c4e9;

@@ -3,6 +3,8 @@ import Skeleton from "@mui/material/Skeleton";
 import { db } from "../../Firebase/firebase";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import Card from "@mui/material/Card";
+import { Button } from "@mui/material";
+import Box from "@mui/material/Box";
 import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
 import StarIcon from "@mui/icons-material/Star";
@@ -222,6 +224,27 @@ const NavBar = () => {
           ))}
         </div>
       )}
+      <Box mt={4} textAlign="left">
+  <Button
+    variant="outlined"
+    sx={{
+      color: " #5624d0",
+      borderColor: " #5624d0",
+      fontWeight: "bold",
+      textTransform: "none",
+      px: 4,
+      py: 1.5,
+      borderRadius: "6px",
+      "&:hover": {
+        borderColor: "darkviolet",
+        color: "darkviolet",
+      },
+    }}
+  >
+    Show All {selectedSubcategory?.name} Courses
+  </Button>
+</Box>
+
     </div>
   );
 };

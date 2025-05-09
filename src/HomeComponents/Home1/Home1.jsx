@@ -1,6 +1,7 @@
-import React ,{ useState }from "react";
+import React from "react";
+import { useNavigate } from 'react-router-dom';
 import './Home1.css';
-import { db } from '../../Firebase/firebase';
+// import { db } from '../../Firebase/firebase';
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css"; 
 import "slick-carousel/slick/slick-theme.css";
@@ -13,6 +14,8 @@ import dataScienceImg from "../../assets/Data.png";
 import { Card, CardContent, Typography, Box ,Grid } from "@mui/material";
 
 const Home1 = () => {
+
+  const navigate = useNavigate();
 
 const InfoBox = ({ title, sx }) => (
   <Box sx={{ 
@@ -193,7 +196,9 @@ return (
     </Box>
     
     <Box sx={{ display: "flex", justifyContent: "left", mt: 5 }}>
-  <button style={{
+  <button
+  onClick={() => navigate('/career-accelerators')}
+   style={{
     border: "1px solid #5624d0",
     color: "#5624d0",
     backgroundColor: "#fff",
