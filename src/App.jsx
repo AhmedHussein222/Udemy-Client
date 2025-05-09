@@ -9,6 +9,7 @@ import InsSignup from './Components/InstructorSignup/InsSignup';
 import Welcomehome from './Components/InstructorSignup/welcomehome';
 import Sidebar from './Components/InstructorSignup/components/Drawer/sidebar';
 import CreateCourse from './Components/InstructorSignup/components/CreateCourse/createcourse';
+import EditProfilePage from './Components/Userprofile/userprofile';
 
 function App() {
   return (
@@ -18,10 +19,10 @@ function App() {
   {/* <Signup /> */}
   {/* <Login /> */}
   {/* <InsSignup /> */}
-  <Welcomehome />
+  {/* <Welcomehome /> */}
   {/* <Sidebar/> */}
   {/* <Footer/> */}
-
+<EditProfilePage />
 </CssBaseline>
    
   )

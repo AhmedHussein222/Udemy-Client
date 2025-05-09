@@ -25,7 +25,6 @@ const iconMap = {
   Tools: <BuildOutlinedIcon sx={{ color: 'white' }} />,
   Resources: <HelpOutlineOutlinedIcon sx={{ color: 'white' }} />,
 };
-
 function Sidebar() {
   const [open, setOpen] = useState(false); 
 //   const [auth, setAuth] = React.useState(true);
@@ -101,8 +100,6 @@ function Sidebar() {
                 <MenuIcon sx={{ color: 'black' }} />
               </IconButton>
             </Box>
-
-           
               <Box display="flex" alignItems="center">
                 <Typography variant="body1" color={grey[700]} sx={{ fontWeight: 'bold' }}>
                   Student
@@ -136,7 +133,6 @@ function Sidebar() {
                   <MenuItem onClick={handleClose}>My account</MenuItem>
                 </Menu>
               </Box>
-          
           </Stack>
         </Toolbar>
       </AppBar>
