@@ -10,6 +10,7 @@ import Welcomehome from './Components/InstructorSignup/welcomehome';
 import Sidebar from './Components/InstructorSignup/components/Drawer/sidebar';
 import CreateCourse from './Components/InstructorSignup/components/CreateCourse/createcourse';
 import EditProfilePage from './Components/Userprofile/userprofile';
+import Wishlist from './Components/Wishlist/wishlist';
 
 function App() {
   return (
@@ -22,7 +23,8 @@ function App() {
   {/* <Welcomehome /> */}
   {/* <Sidebar/> */}
   {/* <Footer/> */}
-<EditProfilePage />
+  <Wishlist />
+{/* <EditProfilePage /> */}
 </CssBaseline>
    
   )
