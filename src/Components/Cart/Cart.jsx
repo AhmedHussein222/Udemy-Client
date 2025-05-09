@@ -13,7 +13,7 @@ function Cart() {
 
   return (
     <Box>
- //#region If card is empty
+ {/* region If card is empty */}
         <Box  sx={{ px: 3}}>
     <Typography variant="h4" sx={{ textAlign: "start", marginTop: "20px", fontWeight: "bold" }}>
       Shopping Cart

@@ -19,6 +19,8 @@ import SearchIcon from "@mui/icons-material/Search";
 import LanguageIcon from "@mui/icons-material/Language";
 import MenuIcon from "@mui/icons-material/Menu";
 import logo from "../../assets/logo-udemy.svg";
+import { useNavigate } from 'react-router-dom';
+
 
 const Header = () => {
   const [openBusiness, setOpenBusiness] = useState(false);
@@ -26,6 +28,8 @@ const Header = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const isMobile = useMediaQuery("(max-width:768px)");
+  const navigate = useNavigate();
+
 
   const toggleDrawer = () => {
     setDrawerOpen(!drawerOpen);
@@ -95,7 +99,7 @@ const Header = () => {
                     <Typography variant="h6" fontWeight="bold" sx={{ color: "#001a33" }}>
                       Get your team access to over 27,000 top Udemy courses, anytime, anywhere.
                     </Typography>
-                    <Button variant="contained" size="small" sx={businessBtnStyle}>
+                    <Button variant="contained" size="small" sx={businessBtnStyle} >
                       Try Udemy Business
                     </Button>
                   </Box>
@@ -120,11 +124,12 @@ const Header = () => {
               </Box>
 
               {/* Icons and Buttons */}
-              <IconButton sx={iconBtnStyle}>
-                <ShoppingCartOutlinedIcon />
-              </IconButton>
-              <Button variant="outlined" sx={loginBtnStyle}>Log in</Button>
-              <Button variant="contained" sx={signupBtnStyle}>Sign up</Button>
+              <IconButton onClick={() => navigate('/cart')}>
+                  <ShoppingCartOutlinedIcon />
+                </IconButton>
+
+              <Button variant="outlined" sx={loginBtnStyle} onClick={() => navigate('/login')}>Log in</Button>
+              <Button variant="contained" sx={signupBtnStyle} onClick={() => navigate('/signup')}> Sign up</Button>
               <Button variant="outlined" sx={langBtnStyle}>
                 <LanguageIcon />
               </Button>

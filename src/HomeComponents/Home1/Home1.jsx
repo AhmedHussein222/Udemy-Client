@@ -1,5 +1,6 @@
 import React ,{ useState }from "react";
-import './Home.css';
+import './Home1.css';
+import { db } from '../../Firebase/firebase';
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css"; 
 import "slick-carousel/slick/slick-theme.css";
@@ -11,7 +12,7 @@ import digitalMarketerImg from "../../assets/Digital.png";
 import dataScienceImg from "../../assets/Data.png";
 import { Card, CardContent, Typography, Box ,Grid } from "@mui/material";
 
-const Home = () => {
+const Home1 = () => {
 
 const InfoBox = ({ title, sx }) => (
   <Box sx={{ 
@@ -224,4 +225,4 @@ return (
 );
 };
 
-export default Home;
+export default Home1;

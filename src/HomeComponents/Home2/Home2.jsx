@@ -1,81 +1,27 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./Home2.css";
-import C1 from '../../assets/DevCourses/C1.webp'
-import C2 from '../../assets/DevCourses/C2.webp'
-import C3 from '../../assets/DevCourses/C3.webp'
-import C4 from '../../assets/DevCourses/C4.jpg'
-import C5 from '../../assets/DevCourses/C5.webp'
-import { ArrowForwardIos } from '@mui/icons-material';
-import logo1 from '../../assets/hands.webp'
-import logo2 from '../../assets/certificate.webp'
-import logo3 from '../../assets/empty.webp'
-import logo4 from '../../assets/organizations.webp'
-
-const courses = [
-  {
-    id: 1,
-    image: C1,
-    title: "Web Development Bootcamp",
-    description: "Learn web development from scratch.",
-    rating: 4.5,
-    students: 1200,
-    price: "€49.99",
-    oldPrice: "€99.99",
-  },
-  {
-    id: 2,
-    image: C2,
-    title: "Python for Data Science",
-    description: "Master Python and data science.",
-    rating: 4.7,
-    students: 1500,
-    price: "€39.99",
-    oldPrice: "€79.99",
-  },
-  {
-    id: 3,
-    image: C3,
-    title: "Python for Data Science",
-    description: "Master Python and data science.",
-    rating: 4.7,
-    students: 1500,
-    price: "€39.99",
-    oldPrice: "€79.99",
-  },
-  {
-    id: 4,
-    image: C4,
-    title: "Python for Data Science",
-    description: "Master Python and data science.",
-    rating: 4.7,
-    students: 1500,
-    price: "€39.99",
-    oldPrice: "€79.99",
-  },
-  {
-    id: 5,
-    image: C5,
-    title: "Python for Data Science",
-    description: "Master Python and data science.",
-    rating: 4.7,
-    students: 1500,
-    price: "€39.99",
-    oldPrice: "€79.99",
-  },
-];
+import { db } from "../../Firebase/firebase";
+import { collection, getDocs } from "firebase/firestore";
+import { ArrowForwardIos } from "@mui/icons-material";
+import logo1 from "../../assets/S1.png";
+import logo2 from "../../assets/S2.png";
+import logo3 from "../../assets/S3.png";
+import logo4 from "../../assets/S4.png";
 
 const leftCards = [
   {
     id: 1,
     img: logo1,
     title: "Hands-on training",
-    description: "Upskill effectively with AI-powered coding exercises, practice tests, and quizzes.",
+    description:
+      "Upskill effectively with AI-powered coding exercises, practice tests, and quizzes.",
   },
   {
     id: 2,
-    img:logo2,
+    img: logo2,
     title: "Expert-led content",
-    description: "Learn from industry professionals with real-world experience.",
+    description:
+      "Learn from industry professionals with real-world experience.",
   },
   {
     id: 3,
@@ -91,28 +37,80 @@ const leftCards = [
   },
 ];
 
+
 const CourseCard = ({ course }) => {
+  const ratingValue = course.rating?.rate ?? 0;
+  const ratingCount = course.rating?.count ?? 0;
+
   return (
     <div className="course-card">
-      <img src={course.image} alt={course.title} className="course-image" />
-      <h3>{course.title}</h3>
-      <p>{course.description}</p>
-      <div className="rating">
-        <span>{course.rating}</span>
-        <span className="stars">{"★".repeat(Math.round(course.rating)) + "☆".repeat(5 - Math.round(course.rating))}</span>
-        <span>({course.students} learners)</span>
-      </div>
-      <div className="pricing">
-        <span className="price">{course.price}</span>
-        <span className="old-price">{course.oldPrice}</span>
+      <img src={course.thumbnail} alt={course.title} className="course-image" />
+
+      <div className="course-info">
+        <h3 className="course-title">{course.title}</h3>
+        <p className="instructor">{course.description}</p>
+
+        <div className="rating">
+          <span className="rating-value">{ratingValue}</span>
+          <span className="stars">
+            {"☆".repeat(Math.round(ratingValue)) + "★".repeat(5 - Math.round(ratingValue))}
+          </span>
+          <span className="students">({ratingCount.toLocaleString()})</span>
+        </div>
+
+        <div className="pricing">
+  {course.price === 0 ? (
+    <>
+      <span className="price free">Free</span>
+      {course.discount > 0 && (
+        <span className="old-price">
+          {(course.price + course.discount).toFixed(2)} EGP
+        </span>
+      )}
+    </>
+  ) : (
+    <>
+      <span className="price">{course.price} EGP</span>
+      {course.discount > 0 && (
+        <span className="old-price">
+          {(course.price + course.discount).toFixed(2)} EGP
+        </span>
+      )}
+    </>
+  )}
+</div>
+
+
+        {course.badge && <div className="badge">{course.badge}</div>}
       </div>
     </div>
   );
 };
 
+
+
 const Home2 = () => {
   const [selected, setSelected] = useState(1);
+  const [courses, setCourses] = useState([]);
 
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, "Courses"));
+        const coursesData = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        console.log("Courses data:", coursesData); // هنا 👈
+        setCourses(coursesData);
+      } catch (error) {
+        console.error("Error fetching courses:", error);
+      }
+    };
+  
+    fetchCourses();
+  }, []);
+  
   return (
     <>
       <section className="courses-section">
@@ -147,7 +145,11 @@ const Home2 = () => {
           </div>
 
           <div className="right-preview">
-            <img src={leftCards.find((c) => c.id === selected)?.img} alt="Preview" className="preview-img" />
+            <img
+              src={leftCards.find((c) => c.id === selected)?.img}
+              alt="Preview"
+              className="preview-img"
+            />
           </div>
         </div>
       </section>
