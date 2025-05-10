@@ -1,0 +1,170 @@
+/* Title Styling */
+.section-title {
+    font-size: 40px;
+    color: #021629; 
+    font-weight: bold;
+    text-align: left;
+    padding: 30px 20px;
+    font-family: initial;
+  }
+  
+  /* Courses Section */
+  .courses-section {
+    padding: 20px;
+  }
+  
+  /* Scrollable Container for Horizontal Scroll */
+  .courses-container {
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;
+    padding-bottom: 10px;
+    scroll-snap-type: x mandatory;
+  }
+  
+  /* Hide Scrollbar */
+  .courses-container::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .course-card {
+    flex: 0 0 auto; 
+    width: 250px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: left;
+    scroll-snap-align: start; 
+  }
+  
+  .course-image {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+    border-radius: 6px;
+  }
+  
+  .course-card h3 {
+    font-size: 20px;
+    font-weight: bold;
+    margin-top: 10px;
+  }
+  
+  .course-card p {
+    font-size: 14px;
+    color: #666;
+    margin: 10px 0;
+  }
+  
+  /* Rating Section */
+  .rating {
+    font-size: 14px;
+    color: #585858; 
+    margin-bottom: 10px;
+  }
+  
+  .stars {
+    margin: 0 5px;
+  }
+  
+  /* Pricing */
+  .pricing {
+    font-size: 16px;
+    margin-top: 10px;
+}
+
+.price {
+    color: #000000; 
+    font-weight: bold;
+  }
+  
+  .old-price {
+    text-decoration: line-through;
+    color: #4d4b4b; 
+    margin-left: 10px;
+  }
+  
+  /* Focus Section */
+.focus-section {
+    margin-top: 50px;
+    background-color: #eef1f8;
+  }
+  
+  .focus-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+  
+  .left-options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .option-card {
+    display: flex;
+    height: 170px;
+    gap: 12px;
+    padding: 12px;
+    border-left: 4px solid #d1c4e9;
+    cursor: pointer;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    transition: border 0.3s;
+    align-items: center;
+  }
+  
+  .option-card.active {
+    border-left: 6px solid #8e2de2; 
+    background-color: #fff;
+    border-right: 1px solid #8e2de2; 
+    border-top: 1px solid #8e2de2; 
+    border-bottom: 1px solid #8e2de2; 
+  }
+  
+  .option-img {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 8px;
+  }
+  
+  .option-card h4 {
+    margin: 0;
+    font-weight: bold;
+  }
+  
+  .explore-link {
+    color: #8e2de2;
+    font-weight: bold;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    margin-top: 8px;
+  }
+  
+  .right-preview {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f1f1f1;
+    border-radius: 8px;
+    padding: 16px;
+  }
+  
+  .preview-img {
+    max-width: 100%;
+    border-radius: 10px;
+  }
+
+  .price.free {
+    color: green;
+    font-weight: bold;
+  }
+
+  .rating .stars {
+    color: gold;
+  }
+  
+  
