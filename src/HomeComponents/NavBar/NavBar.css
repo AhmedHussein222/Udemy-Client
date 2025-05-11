@@ -1,0 +1,178 @@
+/* navbar-container for center alignment */
+.navbar-container {
+  background-color: white;
+  border-bottom: 1px solid #ddd;
+  padding: 10px 20px;
+    
+  }
+  
+  
+  /* Basic styling for navbar */
+  .navbar {
+    display: flex;
+  gap: 20px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+
+  }
+  
+  /* Styling for nav items */
+  .nav-item {
+    padding: 10px 0;
+  color: gray;
+  font-weight: bold;
+  font-size: 18px;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: all 0.3s ease;
+  }
+  
+  /* Hover effect */
+  .nav-item:hover {
+    color: #1f365d; 
+  }
+  
+  /* Active state with underline */
+  .nav-item.selected {
+    color: #1f365d; 
+    border-bottom: 3px solid #12223d; 
+  }
+
+  .bigConainer{
+    background-color: #eef1f8;
+  }
+  
+  /* Subsection styling (drop down) */
+  .subsection {
+    position: relative;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: #eef1f8;
+    color: #15243e;
+    font-size: 18px;
+    font-weight: bold;
+    z-index: 1;
+    padding: 10px 10px;
+    display: flex;
+    gap: 10px;
+    justify-content: start;
+    overflow-x: auto;      
+    white-space: nowrap;   
+    
+  }
+  
+  
+  .subsection::-webkit-scrollbar {
+      height: 6px;
+    }
+    
+    .subsection::-webkit-scrollbar-thumb {  
+        border-radius: 10px;
+    }
+    .sub-item {
+      display: inline-block;
+      padding: 15px 20px;
+      background-color: #dddfe5;
+      border-radius: 40px;
+      margin-right: 10px;
+      margin-top: 30px;
+      text-align: left;
+      position: relative;
+      transition: background-color 0.3s, color 0.3s;
+      cursor: pointer;
+      white-space: nowrap; 
+    }
+    
+      
+      .sub-item:hover {
+        background-color: #aab9d6; 
+      }
+      
+      .sub-item.active {
+        background-color: #162846; 
+        color: #ffffff;
+      }
+      
+      .sub-item.active h4,
+      .sub-item.active p {
+        color: white;
+      }
+      
+      .sub-item h4 {
+        margin: 0;
+        font-size: 20px;
+        font-weight: bold;
+        color: #15243f;
+      }
+      
+      .sub-item p {
+        margin: 5px 0 0;
+        font-size: 14px;
+        color: #68696b;
+      }
+      
+      .cards-container {
+        display: flex;
+        background-color: #eef1f8;
+        overflow-x: auto;
+        gap: 16px;
+        padding: 16px;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none; 
+      
+      }
+      
+      .cards-container::-webkit-scrollbar {
+        display: none; 
+      }
+      
+      .card {
+        flex: 0 0 auto;
+        width: 350px;
+        border: 1px solid #ccc;
+        padding: 12px;
+        border-radius: 8px;
+        background-color: #fff;
+        scroll-snap-align: start;
+      }
+      
+      .card-image {
+        width: 100%;
+        height: 150px;
+        object-fit: cover;
+        border-radius: 8px;
+      }
+      
+
+      
+      .skeleton-card {
+        width: 250px;
+        height: 130px;
+        background: linear-gradient(90deg, #eee 25%, #f5f5f5 50%, #eee 75%);
+        background-size: 800px 104px;
+        border-radius: 10px;
+        animation: shimmer 1.3s infinite;
+      }
+      
+      @keyframes shimmer {
+        0% {
+          background-position: -500px 0;
+        }
+        100% {
+          background-position: 500px 0;
+        }
+      }   
+
+      .hide-scrollbar {
+        overflow-x: auto;
+        scrollbar-width: none; /* Firefox */
+        -ms-overflow-style: none;  /* Internet Explorer 10+ */
+      }
+      
+      .hide-scrollbar::-webkit-scrollbar {
+        display: none; /* Chrome, Safari, Opera */
+      }
+      
