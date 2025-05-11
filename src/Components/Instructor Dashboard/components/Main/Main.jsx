@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { Children, useState } from 'react';
 import { Box, Drawer, Button, List, Divider, ListItem, ListItemButton, ListItemIcon, ListItemText, Grid, Stack } from '@mui/material';
 import OndemandVideoIcon from '@mui/icons-material/OndemandVideo';
 import CommentOutlinedIcon from '@mui/icons-material/CommentOutlined';
@@ -16,6 +16,7 @@ import Menu from '@mui/material/Menu';
 import { grey } from '@mui/material/colors';
 import Home from '../Home/home';
 import CreateCourse from '../CreateCourse/createcourse';
+import { Outlet } from 'react-router-dom';
 
 
 const iconMap = {
@@ -25,7 +26,7 @@ const iconMap = {
   Tools: <BuildOutlinedIcon sx={{ color: 'white' }} />,
   Resources: <HelpOutlineOutlinedIcon sx={{ color: 'white' }} />,
 };
-function Sidebar() {
+function InsMain() {
   const [open, setOpen] = useState(false); 
 //   const [auth, setAuth] = React.useState(true);
   const [anchorEl, setAnchorEl] = React.useState(null); 
@@ -149,15 +150,13 @@ function Sidebar() {
       >
         {DrawerList}
       </Drawer>
+    <Outlet />
     
     
-    
-{/* <Home /> */}
-<CreateCourse />
     </Box>
 
 
   );
 }
 
-export default Sidebar;
+export default InsMain;
