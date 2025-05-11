@@ -13,6 +13,7 @@ import CreateCourse from './Components/InstructorSignup/components/CreateCourse/
 
 function App() {
   return (
+      <UserProvider>
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Layout />}>
@@ -28,6 +29,7 @@ function App() {
         </Route>
       </Routes>
     </BrowserRouter>
+    </UserProvider>
   );
 }
 

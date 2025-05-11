@@ -10,12 +10,19 @@ import {
     Typography,
   } from '@mui/material';
   import MailOutlineIcon from '@mui/icons-material/MailOutline';
-  import React from 'react';
 import { grey } from '@mui/material/colors';
 import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { collection, query, where, getDocs } from "firebase/firestore";
+import { db } from "./firebaseConfig";
+
 
   
   function Login() {
+const [firebaseError, setFirebaseError] = useState("");
+const [loading, setLoading] = useState(false);
+const navigate = useNavigate();
 
  const { register, handleSubmit, formState: { errors } } = useForm({
     defaultValues: {
@@ -23,9 +30,35 @@ import { useForm } from "react-hook-form";
     },
   });
 
-  const onSubmit = async (data) => {
-        console.log(data);
-  };
+  const checkIfUserExists = async (email) => {
+  const usersRef = collection(db, "Users");
+  const q = query(usersRef, where("email", "==", email));
+  const querySnapshot = await getDocs(q);
+  return !querySnapshot.empty;
+};
+
+
+const onSubmit = async (data) => {
+  setLoading(true);
+  setFirebaseError("");
+
+  try {
+    const exists = await checkIfUserExists(data.email);
+
+    if (exists) {
+      navigate("/home", { state: { email: data.email } });
+    } else {
+      navigate("/signup", { state: { email: data.email } });
+    }
+  } catch (error) {
+    setFirebaseError("Something went wrong.");
+    console.error(error);
+  }
+
+  setLoading(false);
+};
+
+
 
     
     return (
@@ -78,24 +111,33 @@ import { useForm } from "react-hook-form";
 
 
 
-    <Button
-      type="submit"
-      fullWidth
-      variant="contained"
-      startIcon={<MailOutlineIcon fontSize="small" />}
-      sx={{
-        backgroundColor: '#8000ff',
-        color: '#fff',
-        textTransform: 'none',
-        fontWeight: 'bold',
-        borderRadius: '4px',
-        py: 1.2,
-        mt: 1,
-        '&:hover': { backgroundColor: '#6a1b9a' },
-      }}
-    >
-      Continue with email
-    </Button>
+<Button
+  type="submit"
+  fullWidth
+  variant="contained"
+  startIcon={<MailOutlineIcon fontSize="small" />}
+  sx={{
+    backgroundColor: '#8000ff',
+    color: '#fff',
+    textTransform: 'none',
+    fontWeight: 'bold',
+    borderRadius: '4px',
+    py: 1.2,
+    mt: 1,
+    '&:hover': { backgroundColor: '#6a1b9a' },
+  }}
+  disabled={loading}
+>
+  {loading ? "Loading..." : "Continue with email"}
+</Button>
+
+{firebaseError && (
+  <Typography color="error" textAlign="center">
+    {firebaseError}
+  </Typography>
+)}
+
+
   </Stack>
 </form>
 

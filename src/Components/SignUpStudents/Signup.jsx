@@ -10,12 +10,23 @@ import {
     Typography,
   } from '@mui/material';
   import MailOutlineIcon from '@mui/icons-material/MailOutline';
-  import React from 'react';
+  import React, { useState } from 'react';
 import { grey } from '@mui/material/colors';
 import { useForm } from "react-hook-form";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { auth } from "./firebaseConfig";
+import { Link, useNavigate } from 'react-router-dom';
+import {  doc, setDoc } from "firebase/firestore";
+import { db } from "./firebaseConfig";
+import { fetchSignInMethodsForEmail } from "firebase/auth";
+
 
   
   function Signup() {
+const [firebaseError, setFirebaseError] = useState("");
+const [loading, setLoading] = useState(false);
+const navigate = useNavigate();
+
     const {register,  handleSubmit, formState: { errors }, } = useForm({
         defaultValues: {
           fullname: "",
@@ -23,11 +34,39 @@ import { useForm } from "react-hook-form";
         },
       });
       
-      const onSubmit = (data) => {
-        console.log("Form data:", data);
-      };
-      
-    
+const onSubmit = async (data) => {
+  setLoading(true);
+  setFirebaseError("");
+
+  try {
+    const methods = await fetchSignInMethodsForEmail(auth, data.email);
+    if (methods.length > 0) {
+      setFirebaseError("This email is already registered.");
+      setLoading(false);
+      return;
+    }
+    const userCredential = await createUserWithEmailAndPassword(
+      auth,
+      data.email,
+    );
+const [first_name, last_name] = data.fullname.trim().split(" ");
+    const user = userCredential.user;
+await setDoc(doc(db, "Users", user.uid), {
+  first_name,
+  last_name: last_name || "",
+  email: data.email,
+  createdAt: new Date()
+});
+
+
+    navigate("/home");
+  } catch (error) {
+    console.error("Signup error:", error.message);
+    setFirebaseError(error.message);
+  }
+
+  setLoading(false);
+};
     return (
         <Box sx={{ flexGrow: 1, p: { xs: 2, md: 4 } }}>
         <Grid container spacing={4} alignItems="center" justifyContent={'space-around'}>
@@ -94,24 +133,32 @@ import { useForm } from "react-hook-form";
       />
     </FormGroup>
 
-    <Button
-      type="submit"
-      fullWidth
-      variant="contained"
-      startIcon={<MailOutlineIcon fontSize="small" />}
-      sx={{
-        backgroundColor: '#8000ff',
-        color: '#fff',
-        textTransform: 'none',
-        fontWeight: 'bold',
-        borderRadius: '4px',
-        py: 1.2,
-        mt: 1,
-        '&:hover': { backgroundColor: '#6a1b9a' },
-      }}
-    >
-      Continue with email
-    </Button>
+<Button
+  type="submit"
+  fullWidth
+  variant="contained"
+  startIcon={<MailOutlineIcon fontSize="small" />}
+  sx={{
+    backgroundColor: '#8000ff',
+    color: '#fff',
+    textTransform: 'none',
+    fontWeight: 'bold',
+    borderRadius: '4px',
+    py: 1.2,
+    mt: 1,
+    '&:hover': { backgroundColor: '#6a1b9a' },
+  }}
+  disabled={loading}
+>
+  {loading ? "Loading..." : "Continue with email"}
+</Button>
+{firebaseError && (
+  <Typography color="error" textAlign="center">
+    {firebaseError}
+  </Typography>
+)}
+
+
   </Stack>
 </form>
 
@@ -220,9 +267,8 @@ import { useForm } from "react-hook-form";
       >
         <Typography variant="body2">
           Already have an account?{' '}
-          <a href="#" style={{ color: '#8000ff', fontWeight: 'bold' }}>
-            Login
-          </a>
+         <Link to="/Login" style={{ color: '#8000ff', fontWeight: 'bold' }}>Login</Link>
+
         </Typography>
       </Box>
     </Box>

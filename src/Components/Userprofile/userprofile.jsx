@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Avatar,
   Box,
@@ -20,6 +20,12 @@ import {
   FormControlLabel,
   Radio,
 } from '@mui/material';
+import { useContext } from "react";
+import { UserContext } from "./UserContext";
+import { db } from './firebaseConfig'; 
+import { doc, setDoc ,getDoc } from "firebase/firestore";
+import { auth } from './firebaseConfig';
+
 
 
 const drawerWidth = 250;
@@ -34,7 +40,80 @@ const profileSections = [
 const EditProfilePage = () => {
   const [activeSection, setActiveSection] = useState('profile');
   const [imageUrl, setImageUrl] = useState('');
+    const { user } = useContext(UserContext);
+const [formData, setFormData] = useState({
+  firstName: "",
+  lastName: "",
+  headline: "",
+  biography: "",
+  language: "English",
+  links: {
+    facebook: "",
+    instagram: "",
+    linkedin: "",
+    youtube: ""
+  },
+  gender: "female"
+});
 
+useEffect(() => {
+  const fetchUserProfile = async () => {
+    if (user) {
+      const userDocRef = doc(db, "Users", user.uid);
+      const docSnap = await getDoc(userDocRef);
+
+      if (docSnap.exists()) {
+        setFormData((prev) => ({
+          ...prev,
+          ...docSnap.data(),
+          links: {
+            ...prev.links,
+            ...(docSnap.data().links || {}) 
+          }
+        }));
+      }
+    }
+  };
+
+  fetchUserProfile();
+}, [user]);
+
+const handleChange = (e) => {
+  const { name, value } = e.target;
+
+  if (["facebook", "instagram", "linkedin", "youtube"].includes(name)) {
+    setFormData((prevData) => ({
+      ...prevData,
+      links: {
+        ...prevData.links,
+        [name]: value
+      }
+    }));
+  } else {
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value
+    }));
+  }
+};
+
+
+
+const saveProfileData = async () => {
+  try {
+    const user = auth.currentUser; 
+
+    if (user) {
+      await setDoc(doc(db, "Users", user.uid), formData);
+      alert("Profile saved successfully");
+    } else {
+      alert("No user is logged in");
+    }
+  } catch (error) {
+    console.error("Error saving profile data: ", error);
+    alert("Error saving profile data");
+  }
+};
   const renderSectionContent = () => {
     switch (activeSection) {
       case 'profile':
@@ -44,75 +123,113 @@ const EditProfilePage = () => {
           <Typography variant="h4" gutterBottom>Public profile</Typography>
             <Typography variant="subtitle1" gutterBottom>Basics:</Typography>
 
-            <TextField fullWidth label="First Name" margin="normal" />
-            <TextField fullWidth label="Last Name" margin="normal" />
-            <TextField fullWidth label="Headline" margin="normal" />
-            <TextField
-              fullWidth
-              label="Biography"
-              placeholder="Write your biography here"
-              multiline
-              rows={4}
-              margin="normal"
-            />
-            <TextField
-              select
-              fullWidth
-              defaultValue="English"
-              margin="normal"
-            >
-              <MenuItem value="English">English</MenuItem>
-              <MenuItem value="عربي">عربي</MenuItem>
-            </TextField>
+<TextField
+  fullWidth
+  label="First Name"
+  margin="normal"
+  name="firstName"
+  value={formData.firstName}
+  onChange={handleChange}
+/>
+
+<TextField
+  fullWidth
+  label="Last Name"
+  margin="normal"
+  name="lastName"
+  value={formData.lastName}
+  onChange={handleChange}
+/>
+<TextField
+  fullWidth
+  label="Biography"
+  placeholder="Write your biography here"
+  multiline
+  rows={4}
+  margin="normal"
+  name="biography"
+  value={formData.biography}
+  onChange={handleChange}
+/>
+
+
+<TextField
+  fullWidth
+  label="Headline"
+  margin="normal"
+  name="headline"
+  value={formData.headline}
+  onChange={handleChange}
+/>
+
+<TextField
+  select
+  fullWidth
+  name="language"
+  value={formData.language}
+  onChange={handleChange}
+  margin="normal"
+>
+  <MenuItem value="English">English</MenuItem>
+  <MenuItem value="عربي">عربي</MenuItem>
+</TextField>
+
 
             <Divider sx={{ my: 2 }} />
             <Typography variant="subtitle1" gutterBottom>Links:</Typography>
 
-            {['Facebook', 'Instagram', 'Linkedin', 'Youtube'].map((platform) => (
-              <FormControl fullWidth margin="normal" key={platform}>
-                <InputLabel htmlFor={`${platform.toLowerCase()}-username`}>{platform}</InputLabel>
-                <OutlinedInput
-                  id={`${platform.toLowerCase()}-username`}
-                  label={platform}
-                  startAdornment={
-                    <InputAdornment position="start">
-                      {platform.toLowerCase()}.com/
-                    </InputAdornment>
-                  }
-                />
-              </FormControl>
-            ))}
-            <FormControl>
-  <FormLabel id="demo-radio-buttons-group-label" mt={2}>Gender</FormLabel>
+{['facebook', 'instagram', 'linkedin', 'youtube'].map((platform) => (
+  <FormControl fullWidth margin="normal" key={platform}>
+    <InputLabel htmlFor={`${platform}-username`}>{platform}</InputLabel>
+    <OutlinedInput
+      id={`${platform}-username`}
+      name={platform}
+      value={formData.links[platform]}
+      onChange={handleChange}
+      startAdornment={
+        <InputAdornment position="start">
+          {platform}.com/
+        </InputAdornment>
+      }
+    />
+  </FormControl>
+))}
+
+<FormControl>
+  <FormLabel id="gender-radio-buttons-group-label" mt={2}>Gender</FormLabel>
   <RadioGroup
-    aria-labelledby="demo-radio-buttons-group-label"
-    defaultValue="female"
-    name="radio-buttons-group"
+    aria-labelledby="gender-radio-buttons-group-label"
+    name="gender"
+    value={formData.gender}
+    onChange={handleChange}
   >
     <FormControlLabel value="female" control={<Radio />} label="Female" />
     <FormControlLabel value="male" control={<Radio />} label="Male" />
   </RadioGroup>
 </FormControl>
 
-            <Button
-              variant="contained"
-              sx={{
-                backgroundColor: "#8000ff",
-                color: "#fff",
-                textTransform: "none",
-                fontWeight: "bold",
-                borderRadius: "4px",
-                py: 1,
-                mt: 2,
-                mb: 3,
-                display: "block",
-                mx: "auto",
-                "&:hover": { backgroundColor: "#6a1b9a" },
-              }}
-              size='large'
-            >
-              Save
-            </Button>
+
+        <Button
+  variant="contained"
+  sx={{
+    backgroundColor: "#8000ff",
+    color: "#fff",
+    textTransform: "none",
+    fontWeight: "bold",
+    borderRadius: "4px",
+    py: 1,
+    mt: 2,
+    mb: 3,
+    display: "block",
+    mx: "auto",
+    "&:hover": { backgroundColor: "#6a1b9a" },
+  }}
+  size="large"
+  onClick={saveProfileData} 
+>
+  Save
+</Button>
+
           </Box>
 
           </>
