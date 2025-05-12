@@ -16,7 +16,7 @@ import Menu from '@mui/material/Menu';
 import { grey } from '@mui/material/colors';
 import Home from '../Home/home';
 import CreateCourse from '../CreateCourse/createcourse';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useNavigate } from 'react-router-dom';
 
 
 const iconMap = {
@@ -27,6 +27,7 @@ const iconMap = {
   Resources: <HelpOutlineOutlinedIcon sx={{ color: 'white' }} />,
 };
 function InsMain() {
+  let nav = useNavigate()
   const [open, setOpen] = useState(false); 
 //   const [auth, setAuth] = React.useState(true);
   const [anchorEl, setAnchorEl] = React.useState(null); 
@@ -102,7 +103,7 @@ function InsMain() {
               </IconButton>
             </Box>
               <Box display="flex" alignItems="center">
-                <Typography variant="body1" color={grey[700]} sx={{ fontWeight: 'bold' }}>
+                <Typography variant="body1" onClick={() => nav("/")} color={grey[700]} sx={{ fontWeight: 'bold' }}>
                   Student
                 </Typography>
                 <IconButton

@@ -1,4 +1,4 @@
-import { CssBaseline } from "@mui/material";
+import { CssBaseline, } from "@mui/material";
 import { createBrowserRouter, Outlet, RouterProvider } from "react-router-dom";
 import Cart from "./Components/Cart/Cart";
 import Footer from "./Components/Footer/Footer";
@@ -10,6 +10,7 @@ import Login from "./Components/LoginUsers/Login";
 import Signup from "./Components/SignUpStudents/Signup";
 import InsMain from "./Components/Instructor Dashboard/components/Main/Main";
 import Home from "./Components/Instructor Dashboard/components/Home/home";
+import EditCourse from "./Components/Instructor Dashboard/components/Edit Course/edit";
 
 const router = createBrowserRouter([
   {
@@ -27,6 +28,7 @@ const router = createBrowserRouter([
     children:[
       { path: "", element: <Home /> },
       { path: "create", element: <CreateCourse /> },
+      { path: "edit", element: <EditCourse /> },
 
     ]
   },
@@ -35,10 +37,11 @@ const router = createBrowserRouter([
 function Main() {
   return (
     <>
+    <CssBaseline>
       <Header />
       <Outlet />
-
       <Footer />
+    </CssBaseline>
     </>
   );
 }
