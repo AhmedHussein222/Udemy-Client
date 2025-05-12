@@ -154,6 +154,7 @@ export default function Home3() {
             display: "flex",
             gap: "16px",
             overflowX: "auto",
+            justifyContent:'space-around',
             scrollbarWidth: "none", // Firefox
             msOverflowStyle: "none", // IE/Edge
             margin: "0 auto", // لضمان أن الكروت في منتصف الصفحة
@@ -198,41 +199,52 @@ export default function Home3() {
       </div>
 
       {/* AI for Business Leaders */}
-      <Grid
-        container
-        spacing={4}
-        alignItems="center"
-        justifyContent="space-between"
-        mb={6}
-        sx={{ display: "flex", flexDirection: { xs: "column", md: "row" } }}
-      >
-        <Grid item xs={12} md={6}>
-          <Typography
-            variant="h4"
-            fontWeight={700}
-            color="#15243f"
-            gutterBottom
-            fontFamily="initial"
-          >
-            AI for Business Leaders
-          </Typography>
-          <Typography variant="body1" paragraph>
-            Build an AI-habit for you and your team that builds hands-on skills
-            to help you lead effectively.
-          </Typography>
-          <Button variant="outlined" endIcon={<ArrowForwardIcon />}>
-            Start Learning
-          </Button>
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <Box
-            component="img"
-            src={Ai}
-            width="80%" // أو أي عرض تفضليه للصورة
-            alt="AI cards"
-          />
-        </Grid>
-      </Grid>
+<Grid
+  container
+  spacing={4}
+  alignItems="center"
+   justifyContent='space-around'
+  mb={6} 
+>
+  <Grid item xs={12} md={4}>
+    <Typography
+      variant="h4"
+      fontWeight={700}
+      color="#15243f"
+      gutterBottom
+      fontFamily="initial"
+    >
+      AI for Business Leaders
+    </Typography>
+    <Typography variant="body1" paragraph>
+      Build an AI-habit for you and your <br/> team that builds hands-on skills
+      to help you lead effectively.
+    </Typography>
+    <Button variant="outlined" endIcon={<ArrowForwardIcon />}  sx={{color:'#8000ff'}}>
+      Start Learning
+    </Button>
+  </Grid>
+
+  <Grid item xs={12} md={8} display="flex" justifyContent="center">
+    <Box
+      component="img"
+      src={Ai}
+      alt="AI cards"
+      sx={{
+        width: "100%",
+        maxWidth: 500,
+        height: 800
+      }}
+    />
+  </Grid>
+</Grid>
+
+
+
+
+
+
+
 
       {/* Trending Now */}
       <Box mb={6} sx={{ backgroundColor: "#f5f5f5", p: 3, borderRadius: 1 }}>
@@ -246,155 +258,186 @@ export default function Home3() {
           Trending Now
         </Typography>
 
-        <Grid container spacing={2}>
-          <Grid item xs={12} md={3}>
-            <Typography variant="h4" fontWeight={600}>
-              ChatGPT is a top skill
-            </Typography>
-            <Button
-              variant="text"
-              sx={{
-                pl: 0,
-                color: "#5624d0",
-                fontWeight: "bold",
-                textTransform: "none",
-                fontSize: "18px",
-              }}
-              endIcon={<ArrowForwardIcon />}
-            >
-              See ChatGPT courses
-            </Button>
-            <Typography variant="body2" color="text.secondary" mt={1}>
-              4,558,101 learners
-            </Typography>
-            <Button
-              fullWidth
-              variant="outlined"
-              sx={{
-                mt: 2,
-                color: "#5624d0",
-                borderColor: "#5624d0",
-                fontWeight: "bold",
-              }}
-            >
-              Show all trending skills
-            </Button>
-          </Grid>
-
-          {Object.entries(trendingSkills).map(([category, skills], idx) => (
-            <Grid item xs={12} md={3} key={idx}>
-              <Typography variant="h5" fontWeight={600}>
-                {category}
-              </Typography>
-              {skills.map((skill, i) => (
-                <Box key={i} mt={1}>
-                  <Typography
-                    variant="body1"
-                    sx={{
-                      color: "#5624d0",
-                      fontSize: "18px",
-                      fontWeight: "bold",
-                    }}
-                  >
-                    {skill.name}
-                  </Typography>
-                  <Typography
-                    variant="caption"
-                    color="text.secondary"
-                    sx={{ display: "block" }}
-                  >
-                    {skill.learners.toLocaleString()}
-                  </Typography>
-                </Box>
-              ))}
-            </Grid>
-          ))}
-        </Grid>
-      </Box>
-      {/* Bloz */}
-
-      <Box sx={{ mb: 6 }}>
-        <Slider
-          dots={true}
-          arrows={false}
-          infinite={true}
-          speed={500}
-          slidesToShow={1}
-          slidesToScroll={1}
+      <Grid container spacing={4} wrap="wrap">
+  <Grid item xs={12} md={3}>
+    <Box sx={{ height: "100%", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+      <Box>
+        <Typography variant="h4" fontWeight={600}>
+          ChatGPT is a top skill
+        </Typography>
+        <Button
+          variant="text"
+          sx={{
+            pl: 0,
+            color: "#5624d0",
+            fontWeight: "bold",
+            textTransform: "none",
+            fontSize: "18px",
+          }}
+          endIcon={<ArrowForwardIcon />}
         >
-          {boozData.map((item, index) => (
-            <Box
-              key={index}
+          See ChatGPT courses
+        </Button>
+        <Typography variant="body2" color="text.secondary" mt={1}>
+          4,558,101 learners
+        </Typography>
+      </Box>
+
+      <Button
+        fullWidth
+        variant="outlined"
+        sx={{
+          mt: 2,
+          color: "#5624d0",
+          borderColor: "#5624d0",
+          fontWeight: "bold",
+        }}
+      >
+        Show all trending skills
+      </Button>
+    </Box>
+  </Grid>
+
+  {Object.entries(trendingSkills).map(([category, skills], idx) => (
+    <Grid item xs={12} md={3} key={idx}>
+      <Box>
+        <Typography variant="h5" fontWeight={600}>
+          {category}
+        </Typography>
+        {skills.map((skill, i) => (
+          <Box key={i} mt={1}>
+            <Typography
+              variant="body1"
               sx={{
-                display: "flex",
-                flexDirection: "row", // تأكد من أن العناصر في نفس الصف
-                alignItems: "center", // محاذاة العناصر بشكل عمودي في المركز
-                justifyContent: "space-between",
-                gap: 4,
+                color: "#5624d0",
+                fontSize: "18px",
+                fontWeight: "bold",
               }}
             >
-              {/* النصوص والزرار */}
-              <Box
-                sx={{
-                  flex: 1,
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "center",
-                }}
-              >
-                <img
-                  src={item.logo}
-                  alt="logo"
-                  style={{ maxWidth: "100px", marginBottom: "16px" }}
-                />
-                <Typography variant="h6" fontWeight={700} gutterBottom>
-                  {item.title}
-                </Typography>
-                <Box sx={{ display: "flex", gap: 4, flexWrap: "wrap", mb: 2 }}>
-                  {item.stats.map((stat, i) => (
-                    <Box key={i}>
-                      <Typography variant="h4" fontWeight={700}>
-                        {stat.percent}
-                      </Typography>
-                      <Typography variant="body2">{stat.text}</Typography>
-                    </Box>
-                  ))}
-                </Box>
-                <Button
-                  variant="contained"
-                  sx={{ mt: 3, width: "fit-content" }}
-                  endIcon={<ArrowForwardIcon />}
-                >
-                  Read full story
-                </Button>
-              </Box>
-
-              {/* الصورة */}
-              <Box
-                sx={{
-                  flex: 1,
-                  height: { xs: "300px", md: "100%" },
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <Box
-                  component="img"
-                  src={item.image}
-                  alt="Booz Allen Hamilton"
-                  sx={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                    borderRadius: 2,
-                  }}
-                />
-              </Box>
-            </Box>
-          ))}
-        </Slider>
+              {skill.name}
+            </Typography>
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ display: "block" }}
+            >
+              {skill.learners.toLocaleString()}
+            </Typography>
+          </Box>
+        ))}
       </Box>
+    </Grid>
+  ))}
+</Grid>
+
+      </Box>
+
+      {/* Bloz */}
+<Box sx={{ mb: 6 }}>
+  <Slider
+    dots={true}
+    arrows={false}
+    infinite={true}
+    speed={500}
+    slidesToShow={1}
+    slidesToScroll={1}
+  >
+    {boozData.map((item, index) => (
+      <Box
+        key={index}
+        sx={{
+          display: "flex",
+          flexDirection: { xs: "column", md: "row" },
+          alignItems: "center",
+          gap: { xs: 4, md: 8 }, // زودنا الـ gap على الكبيره
+          p: { xs: 2, md: 4 },   // padding داخلي محترم
+        }}
+      >
+        {/* النصوص */}
+        <Box
+          sx={{
+            flex: 1,
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: 'center',
+            textAlign: 'center',
+            mb:5,
+            order: { xs: 2, md: 1 }
+          }}
+        >
+          <img
+            src={item.logo}
+            alt="logo"
+            style={{ maxWidth: "100px", marginBottom: "16px" }}
+          />
+          <Typography variant="h6" fontWeight={700} gutterBottom>
+            {item.title}
+          </Typography>
+          <Box sx={{
+            display: "flex",
+            gap: 4,
+            flexWrap: "wrap",
+            mb: 2,
+            flexDirection: { xs: "column", sm: "row" }
+          }}>
+            {item.stats.map((stat, i) => (
+              <Box key={i}>
+                <Typography variant="h4" fontWeight={700}>
+                  {stat.percent}
+                </Typography>
+                <Typography variant="body2">{stat.text}</Typography>
+              </Box>
+            ))}
+          </Box>
+          <Button
+            variant="contained"
+            sx={{
+              mt: 3,
+              width: "fit-content",
+              backgroundColor: "#8000ff",
+              color: "white",
+              "&:hover": {
+                backgroundColor: "#6a00d6"
+              }
+            }}
+            endIcon={<ArrowForwardIcon />}
+          >
+            Read full story
+          </Button>
+        </Box>
+
+        {/* الصورة */}
+        <Box
+          sx={{
+            flex: 1,
+            height: { xs: "300px", md: "450px" }, // كبرنا ارتفاع الصورة
+            width: "100%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            order: { xs: 1, md: 2 }
+          }}
+        >
+          <Box
+            component="img"
+            src={item.image}
+            alt="Booz Allen Hamilton"
+            sx={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover", // خليها cover لو عايزاها تملى المكان
+              borderRadius: 2,
+              maxWidth: "700px", // كبرنا أقصى عرض للصورة
+              boxShadow: 3 // ظل خفيف لو حابة
+            }}
+          />
+        </Box>
+      </Box>
+    ))}
+  </Slider>
+</Box>
+
     </Box>
   );
 }

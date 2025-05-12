@@ -10,26 +10,96 @@ import {
     Typography,
   } from '@mui/material';
   import MailOutlineIcon from '@mui/icons-material/MailOutline';
-  import React from 'react';
-import { grey } from '@mui/material/colors';
-import { useForm } from "react-hook-form";
-
+  import React, { useState } from 'react';
+  import { green, grey } from '@mui/material/colors';
+  import { useForm } from "react-hook-form";
+  import { createUserWithEmailAndPassword } from "firebase/auth";
+  import { auth, db } from  "../../Firebase/firebase";
+  import { Link, useNavigate } from 'react-router-dom';
+  import { doc, setDoc } from "firebase/firestore";
+  import { fetchSignInMethodsForEmail } from "firebase/auth";
+  import { Snackbar } from "@mui/material";
   
   function Signup() {
-    const {register,  handleSubmit, formState: { errors }, } = useForm({
+    const [firebaseError, setFirebaseError] = useState("");
+    const [loading, setLoading] = useState(false);
+    const navigate = useNavigate();
+
+    const { register, handleSubmit, formState: { errors } } = useForm({
         defaultValues: {
           fullname: "",
           email: "",
+          password: ''
         },
-      });
-      
-      const onSubmit = (data) => {
-        console.log("Form data:", data);
-      };
-      
-    
+    });
+
+const onSubmit = async (data) => {
+  setLoading(true);
+  setFirebaseError(""); 
+
+  try {
+    const methods = await fetchSignInMethodsForEmail(auth, data.email);
+    if (methods.length > 0) {
+      setFirebaseError("This email is already registered.");
+      setLoading(false);
+      return;
+    }
+
+    const userCredential = await createUserWithEmailAndPassword(
+      auth,
+      data.email,
+      data.password  
+    );
+
+    const [first_name, last_name] = data.fullname.trim().split(" ");
+    const user = userCredential.user;
+
+    await setDoc(doc(db, "Users", user.uid), {
+      first_name,
+      last_name: last_name || "",  
+      email: data.email,
+      // password: data.password,
+      createdAt: new Date(),  
+      role: "student",
+    });
+
+    setSnackbarMessage("Registration successful! Redirecting...");
+    setOpenSnackbar(true);  
+
+    setTimeout(() => {
+      navigate("/Userprofile");  
+    }, 2000); 
+
+  } catch (error) {
+    console.error("Signup error:", error.message);
+    setFirebaseError(error.message);
+  }
+
+  setLoading(false);  
+};
+
+const [openSnackbar, setOpenSnackbar] = useState(false);
+const [snackbarMessage, setSnackbarMessage] = useState("");
+
+const handleCloseSnackbar = () => {
+  setOpenSnackbar(false);
+};
+
+
+
     return (
         <Box sx={{ flexGrow: 1, p: { xs: 2, md: 4 } }}>
+          <Snackbar
+  open={openSnackbar}
+  autoHideDuration={5000}  
+  onClose={handleCloseSnackbar}
+  message={snackbarMessage}
+  anchorOrigin={{
+    vertical: 'top',
+    horizontal: 'center',
+    color:green[500]
+  }}
+/>
         <Grid container spacing={4} alignItems="center" justifyContent={'space-around'}>
           
           <Grid item xs={12} lg={6} sx={{ textAlign: 'center' }}>
@@ -70,22 +140,40 @@ import { useForm } from "react-hook-form";
    <Typography color='error'>Fullname is required.</Typography>
     )}
 
-  <TextField
-       fullWidth
-       size="medium"
-       label="Email"
-       variant="outlined"
-       {...register("email", {
-         required: true,
-         pattern: /^[^@ ]+@[^@ ]+\.[^@ .]{2,}$/,
-       })}
-     />
-     {errors.email?.type === "required" && (
-       <Typography color='error'>Email is required.</Typography>
-     )}
-     {errors.email?.type === "pattern" && (
-       <Typography color='error'>Email is not valid.</Typography>
-     )}
+    <TextField
+      fullWidth
+      size="medium"
+      label="Email"
+      variant="outlined"
+      {...register("email", {
+        required: true,
+        pattern: /^[^@ ]+@[^@ ]+\.[^@ .]{2,}$/,
+      })}
+    />
+    {errors.email?.type === "required" && (
+      <Typography color='error'>Email is required.</Typography>
+    )}
+    {errors.email?.type === "pattern" && (
+      <Typography color='error'>Email is not valid.</Typography>
+    )}
+
+    <TextField
+      fullWidth
+      size="medium"
+      label="Password"
+      type="password"
+      variant="outlined"
+      {...register("password", { 
+        required: "Password is required", 
+        minLength: { value: 6, message: "Password must be at least 6 characters" }
+      })}
+    />
+    {errors.password?.type === "required" && (
+      <Typography color='error'>Password is required.</Typography>
+    )}
+    {errors.password?.type === "minLength" && (
+      <Typography color='error'>Password must be at least 6 characters.</Typography>
+    )}
 
     <FormGroup>
       <FormControlLabel
@@ -109,13 +197,18 @@ import { useForm } from "react-hook-form";
         mt: 1,
         '&:hover': { backgroundColor: '#6a1b9a' },
       }}
+      disabled={loading}
     >
-      Continue with email
+      {loading ? "Loading..." : "Continue with email"}
     </Button>
+    {firebaseError && (
+      <Typography color="error" textAlign="center">
+        {firebaseError}
+      </Typography>
+    )}
+
   </Stack>
 </form>
-
-
 
       <Typography
         variant="body1"
@@ -193,7 +286,6 @@ import { useForm } from "react-hook-form";
         </Button>
       </Stack>
 
-   
       <Typography
         variant="subtitle2"
         align="center"
@@ -220,9 +312,8 @@ import { useForm } from "react-hook-form";
       >
         <Typography variant="body2">
           Already have an account?{' '}
-          <a href="#" style={{ color: '#8000ff', fontWeight: 'bold' }}>
-            Login
-          </a>
+         <Link to="/Login" style={{ color: '#8000ff', fontWeight: 'bold' }}>Login</Link>
+
         </Typography>
       </Box>
     </Box>
@@ -232,6 +323,5 @@ import { useForm } from "react-hook-form";
       
     );
   }
-  
+
   export default Signup;
-  
