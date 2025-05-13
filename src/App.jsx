@@ -27,6 +27,9 @@ const router = createBrowserRouter([
   { path: "instructor", element: <InsMain />, 
     children:[
       { path: "", element: <Home /> },
+      { path: "courses", element: <Home /> },
+      { path: "communication", element: <Home /> },
+      { path: "performance", element: <Home /> },
       { path: "create", element: <CreateCourse /> },
       { path: "edit", element: <EditCourse /> },
 

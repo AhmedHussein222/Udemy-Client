@@ -65,7 +65,7 @@ function InsMain() {
       <List sx={{ flexGrow: 1 }}>
         {['Courses', 'Communication', 'Performance', 'Tools', 'Resources'].map((text) => (
           <ListItem key={text} disablePadding>
-            <ListItemButton>
+            <ListItemButton onClick={()=>{ nav(`/instructor/${text.toLowerCase()}`) }}>
               <ListItemIcon>{iconMap[text]}</ListItemIcon>
               <ListItemText primary={text} />
             </ListItemButton>
