@@ -10,6 +10,9 @@ import Login from "./Components/LoginUsers/Login";
 import Signup from "./Components/SignUpStudents/Signup";
 import InsMain from "./Components/Instructor Dashboard/components/Main/Main";
 import Home from "./Components/Instructor Dashboard/components/Home/home";
+import { useEffect } from "react";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "./Firebase/firebase";
 
 const router = createBrowserRouter([
   {
