@@ -9,27 +9,29 @@ import Welcomehome from "./Components/Instructor Dashboard/welcomehome";
 import Login from "./Components/LoginUsers/Login";
 import Signup from "./Components/SignUpStudents/Signup";
 import InsMain from "./Components/Instructor Dashboard/components/Main/Main";
-import Home from "./Components/Instructor Dashboard/components/Home/home";
+import InsHome from "./Components/Instructor Dashboard/components/Home/home";
 import EditCourse from "./Components/Instructor Dashboard/components/Edit Course/edit";
+import Home from "./Components/Home/Home";
+import { CourseProvider } from './context/CourseContext';
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: <Main />,
     children: [
+      { path: "", element: <Home /> },
       { path: "login", element: <Login /> },
       { path: "cart", element: <Cart /> },
       { path: "signup", element: <Signup /> },
       { path: "instructor-signup", element: <InsSignup /> },
-      { path: "", element: <Welcomehome /> },
     ],
   },
   { path: "instructor", element: <InsMain />, 
     children:[
-      { path: "", element: <Home /> },
-      { path: "courses", element: <Home /> },
-      { path: "communication", element: <Home /> },
-      { path: "performance", element: <Home /> },
+      { path: "", element: <InsHome /> },
+      { path: "courses", element: <InsHome /> },
+      { path: "communication", element: <InsHome /> },
+      { path: "performance", element: <InsHome /> },
       { path: "create", element: <CreateCourse /> },
       { path: "edit", element: <EditCourse /> },
 
@@ -53,9 +55,11 @@ function Main() {
 
 function App() {
   return (
-    <CssBaseline>
-      <RouterProvider router={router}></RouterProvider>
-    </CssBaseline>
+    <CourseProvider>
+      <CssBaseline>
+        <RouterProvider router={router}></RouterProvider>
+      </CssBaseline>
+    </CourseProvider>
   );
 }
 

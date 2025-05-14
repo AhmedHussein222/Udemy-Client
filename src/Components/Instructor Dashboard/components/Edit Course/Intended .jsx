@@ -9,38 +9,69 @@ import {
   Typography,
 } from "@mui/material";
 import { useState } from "react";
+import { useCourseContext } from "../../../../context/CourseContext";
 
 export default function IntendedLearnersForm() {
-  const [learningObjectives, setLearningObjectives] = useState([
-    {
-      text: "",
-      maxLength: 160,
-    },
-  
-  ]);
-
-  const [prerequisites, setPrerequisites] = useState([
-    {
-      text: "No programming experience needed. You will learn everything you need to know",
-    },
-  ]);
-
+  const { courseData, updateCourseData } = useCourseContext();
+  const [learningObjectives, setLearningObjectives] = useState(
+    courseData.what_will_learn || [{ text: "", maxLength: 160 }]
+  );
+  const [prerequisites, setPrerequisites] = useState(
+    courseData.requirements || [
+      {
+        text: "No programming experience needed. You will learn everything you need to know",
+      },
+    ]
+  );
   const [targetLearners, setTargetLearners] = useState([
     { text: "Beginner Python developers curious about data science" },
   ]);
 
-  const addEntry = (setState) => {
-    setState((prev) => [...prev, { text: "", maxLength: 160 }]);
+  const updateLearningObjectives = (newObjectives) => {
+    setLearningObjectives(newObjectives);
+    updateCourseData({
+      what_will_learn: newObjectives
+        .map((obj) => obj.text)
+        .filter((text) => text.trim() !== ""),
+    });
   };
 
-  const updateEntry = (setState, index, newValue) => {
-    setState((prev) =>
-      prev.map((item, i) => (i === index ? { ...item, text: newValue } : item))
-    );
+  const updatePrerequisites = (newPrerequisites) => {
+    setPrerequisites(newPrerequisites);
+    updateCourseData({
+      requirements: newPrerequisites
+        .map((pre) => pre.text)
+        .filter((text) => text.trim() !== ""),
+    });
   };
 
-  const removeEntry = (setState, index) => {
-    setState((prev) => prev.filter((_, i) => i !== index));
+  const addEntry = (setState, type) => {
+    setState((prev) => {
+      const newState = [...prev, { text: "", maxLength: 160 }];
+      if (type === "learning") updateLearningObjectives(newState);
+      if (type === "prerequisites") updatePrerequisites(newState);
+      return newState;
+    });
+  };
+
+  const updateEntry = (setState, index, newValue, type) => {
+    setState((prev) => {
+      const newState = prev.map((item, i) =>
+        i === index ? { ...item, text: newValue } : item
+      );
+      if (type === "learning") updateLearningObjectives(newState);
+      if (type === "prerequisites") updatePrerequisites(newState);
+      return newState;
+    });
+  };
+
+  const removeEntry = (setState, index, type) => {
+    setState((prev) => {
+      const newState = prev.filter((_, i) => i !== index);
+      if (type === "learning") updateLearningObjectives(newState);
+      if (type === "prerequisites") updatePrerequisites(newState);
+      return newState;
+    });
   };
 
   return (
@@ -75,14 +106,21 @@ export default function IntendedLearnersForm() {
                 fullWidth
                 value={obj.text}
                 onChange={(e) =>
-                  updateEntry(setLearningObjectives, index, e.target.value)
+                  updateEntry(
+                    setLearningObjectives,
+                    index,
+                    e.target.value,
+                    "learning"
+                  )
                 }
                 inputProps={{ maxLength: obj.maxLength }}
                 helperText={`${obj.text.length}/${obj.maxLength}`}
                 size="small"
               />
               <IconButton
-                onClick={() => removeEntry(setLearningObjectives, index)}
+                onClick={() =>
+                  removeEntry(setLearningObjectives, index, "learning")
+                }
                 sx={{ color: "error.main" }}
               >
                 <DeleteIcon />
@@ -91,7 +129,7 @@ export default function IntendedLearnersForm() {
           ))}
           <Button
             startIcon={<AddIcon />}
-            onClick={() => addEntry(setLearningObjectives)}
+            onClick={() => addEntry(setLearningObjectives, "learning")}
             sx={{ color: "primary.main", textTransform: "none" }}
           >
             Add more to your response
@@ -115,12 +153,19 @@ export default function IntendedLearnersForm() {
                 fullWidth
                 value={prereq.text}
                 onChange={(e) =>
-                  updateEntry(setPrerequisites, index, e.target.value)
+                  updateEntry(
+                    setPrerequisites,
+                    index,
+                    e.target.value,
+                    "prerequisites"
+                  )
                 }
                 size="small"
               />
               <IconButton
-                onClick={() => removeEntry(setPrerequisites, index)}
+                onClick={() =>
+                  removeEntry(setPrerequisites, index, "prerequisites")
+                }
                 sx={{ color: "error.main" }}
               >
                 <DeleteIcon />
@@ -129,7 +174,7 @@ export default function IntendedLearnersForm() {
           ))}
           <Button
             startIcon={<AddIcon />}
-            onClick={() => addEntry(setPrerequisites)}
+            onClick={() => addEntry(setPrerequisites, "prerequisites")}
             sx={{ color: "primary.main", textTransform: "none" }}
           >
             Add more to your response
