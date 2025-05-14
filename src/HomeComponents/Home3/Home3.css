@@ -34,7 +34,27 @@
     flex-direction: column;
     justify-content: flex-start;
   }
-  
+
+  .active-slide .title {
+  animation: fadeInUp 1s ease-in-out;
+}
+
+.content-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.text {
+  flex: 1;
+}
+
+img {
+  width: 300px;
+  height: auto;
+}
+
+/*   
   .booz-logo {
     max-width: 100px;
     margin-bottom: 16px;
@@ -54,7 +74,7 @@
   }
   
   .booz-btn {
-    background-color: #5624d0;
+    background-color: #7560ab;
     color: white;
     padding: 10px 16px;
     border: none;
@@ -79,4 +99,4 @@
     object-fit: cover;
     border-radius: 12px;
   }
-  
+   */

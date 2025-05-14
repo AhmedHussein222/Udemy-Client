@@ -13,6 +13,7 @@ import React from 'react';
 import { grey } from '@mui/material/colors';
 
 function Wishlist() {
+  
   const courses = [
     {
       title: 'The Web Developer Bootcamp',

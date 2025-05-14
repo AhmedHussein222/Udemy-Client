@@ -189,14 +189,14 @@ const linkStyle = {
   },
 };
 
-const iconBtnStyle = {
-  color: "#001a33",
-  borderRadius: "4px",
-  "&:hover": {
-    backgroundColor: "#e0ccff",
-    color: "#8000ff",
-  },
-};
+// const iconBtnStyle = {
+//   color: "#001a33",
+//   borderRadius: "4px",
+//   "&:hover": {
+//     backgroundColor: "#e0ccff",
+//     color: "#8000ff",
+//   },
+// };
 
 const loginBtnStyle = {
   color: "#8000ff",
