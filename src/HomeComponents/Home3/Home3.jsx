@@ -1,5 +1,6 @@
-import React from "react";
 import Ai from "../../assets/ai.png";
+// import React, { useState } from 'react';
+
 import {
   Box,
   Typography,
@@ -123,6 +124,8 @@ const boozData = [
   },
 ];
 
+
+
 export default function Home3() {
   return (
     <Box p={4}>
@@ -152,7 +155,7 @@ export default function Home3() {
         <div
           style={{
             display: "flex",
-            gap: "16px",
+            justifyContent:'space-around',
             overflowX: "auto",
             scrollbarWidth: "none", // Firefox
             msOverflowStyle: "none", // IE/Edge
@@ -204,7 +207,6 @@ export default function Home3() {
         alignItems="center"
         justifyContent="space-between"
         mb={6}
-        sx={{ display: "flex", flexDirection: { xs: "column", md: "row" } }}
       >
         <Grid item xs={12} md={6}>
           <Typography
@@ -228,8 +230,8 @@ export default function Home3() {
           <Box
             component="img"
             src={Ai}
-            width="80%" // أو أي عرض تفضليه للصورة
             alt="AI cards"
+            style={{maxWidth:'1000px'}}
           />
         </Grid>
       </Grid>
@@ -313,88 +315,76 @@ export default function Home3() {
       </Box>
       {/* Bloz */}
 
-      <Box sx={{ mb: 6 }}>
-        <Slider
-          dots={true}
-          arrows={false}
-          infinite={true}
-          speed={500}
-          slidesToShow={1}
-          slidesToScroll={1}
+     <Box sx={{ mb: 6 }}>
+  <Slider 
+    dots={true}
+    arrows={false}
+    infinite={true}
+    speed={500}
+    slidesToShow={1}
+    slidesToScroll={1}
+  >
+    {boozData.map((item, index) => (
+      <Box key={index} sx={{ px: 2 }}>
+        <Grid
+          container
+          spacing={4}
+          alignItems="center"
+          justifyContent="space-between"
+          direction={{ xs: "column", md: "row" }} // ✅ نضمن صف في الشاشات الكبيرة
+          sx={{ minHeight: "400px" }} // ✅ ارتفاع ثابت لكل Slide
         >
-          {boozData.map((item, index) => (
-            <Box
-              key={index}
-              sx={{
-                display: "flex",
-                flexDirection: "row", // تأكد من أن العناصر في نفس الصف
-                alignItems: "center", // محاذاة العناصر بشكل عمودي في المركز
-                justifyContent: "space-between",
-                gap: 4,
-              }}
-            >
-              {/* النصوص والزرار */}
-              <Box
-                sx={{
-                  flex: 1,
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "center",
-                }}
-              >
-                <img
-                  src={item.logo}
-                  alt="logo"
-                  style={{ maxWidth: "100px", marginBottom: "16px" }}
-                />
-                <Typography variant="h6" fontWeight={700} gutterBottom>
-                  {item.title}
-                </Typography>
-                <Box sx={{ display: "flex", gap: 4, flexWrap: "wrap", mb: 2 }}>
-                  {item.stats.map((stat, i) => (
-                    <Box key={i}>
-                      <Typography variant="h4" fontWeight={700}>
-                        {stat.percent}
-                      </Typography>
-                      <Typography variant="body2">{stat.text}</Typography>
-                    </Box>
-                  ))}
+          {/* النصوص */}
+          <Grid item xs={12} md={6}>
+            <img
+              src={item.logo}
+              alt="logo"
+              style={{ maxWidth: "100px", marginBottom: "16px" }}
+            />
+            <Typography variant="h6" fontWeight={700} gutterBottom>
+              {item.title}
+            </Typography>
+            <Box sx={{ display: "flex", gap: 4, flexWrap: "wrap", mb: 2 }}>
+              {item.stats.map((stat, i) => (
+                <Box key={i}>
+                  <Typography variant="h4" fontWeight={700}>
+                    {stat.percent}
+                  </Typography>
+                  <Typography variant="body2">{stat.text}</Typography>
                 </Box>
-                <Button
-                  variant="contained"
-                  sx={{ mt: 3, width: "fit-content" }}
-                  endIcon={<ArrowForwardIcon />}
-                >
-                  Read full story
-                </Button>
-              </Box>
-
-              {/* الصورة */}
-              <Box
-                sx={{
-                  flex: 1,
-                  height: { xs: "300px", md: "100%" },
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <Box
-                  component="img"
-                  src={item.image}
-                  alt="Booz Allen Hamilton"
-                  sx={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                    borderRadius: 2,
-                  }}
-                />
-              </Box>
+              ))}
             </Box>
-          ))}
-        </Slider>
+            <Button 
+              variant="contained"
+              sx={{ mt: 3, width: "fit-content", backgroundColor:"#7560ab" }}
+              endIcon={<ArrowForwardIcon />}
+            >
+              Read full story
+            </Button>
+          </Grid>
+
+          {/* الصورة */}
+          <Grid item xs={12} md={6}>
+            <Box
+              component="img"
+              src={item.image}
+              alt="Booz Allen Hamilton"
+              sx={{
+                width: "100%",
+                height: "auto",
+                objectFit: "cover",
+                borderRadius: 2,
+              }}
+            />
+          </Grid>
+        </Grid>
       </Box>
+    ))}
+  </Slider>
+</Box>
+
+
+
     </Box>
   );
 }

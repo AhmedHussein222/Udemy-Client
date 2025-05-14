@@ -6,20 +6,21 @@ import React from 'react'
 import StarBorderIcon from '@mui/icons-material/StarBorder';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import CloseIcon from '@mui/icons-material/Close';
+import { useTranslation } from 'react-i18next';
 
 function Cart() {
 
-
+   const { t } = useTranslation();
 
   return (
     <Box>
  //#region If card is empty
         <Box  sx={{ px: 3}}>
     <Typography variant="h4" sx={{ textAlign: "start", marginTop: "20px", fontWeight: "bold" }}>
-      Shopping Cart
+      {t('Shopping Cart')}
     </Typography>
     <Typography variant="h6" sx={{ textAlign: "start", marginTop: "20px", fontWeight: "bold" }}>
-      0 courses in cart
+      0 {t('courses in cart')}
     </Typography>
         </Box>
 
@@ -57,7 +58,7 @@ function Cart() {
           component="div"
           textAlign="center"
         >
-          Your cart is empty. Keep shopping to find a course!
+          {t('Your cart is empty. Keep shopping to find a course!')}
         </Typography>
 
         <Button
@@ -77,7 +78,7 @@ function Cart() {
           }}
           size='large'
         >
-          Keep shopping
+          {t('Keep shopping')}
         </Button>
       </CardContent>
     </CardActionArea>
@@ -90,10 +91,10 @@ function Cart() {
 
 <Box  sx={{ px: 3}}>
     <Typography variant="h4" sx={{ textAlign: "start", marginTop: "20px", fontWeight: "bold" }}>
-      Shopping Cart
+      {t('Shopping Cart')}
     </Typography>
     <Typography variant="h6" sx={{ textAlign: "start", marginTop: "20px", fontWeight: "bold" }}>
-      0 courses in cart
+      0 {t('courses in cart')}
     </Typography>
         </Box>
 
@@ -146,9 +147,9 @@ function Cart() {
 
   <Grid size={2}>
     <Stack direction={'column'} gap={2} >
-<Button variant="text" size='small' sx={{color:'#8000ff'}}>Remove</Button>
-<Button variant="text" size='small' sx={{color:'#8000ff'}}>Save for later</Button>
-<Button variant="text" size='small' sx={{color:'#8000ff'}}>Move to wishlist</Button>
+<Button variant="text" size='small' sx={{color:'#8000ff'}}>{t('Remove')}</Button>
+<Button variant="text" size='small' sx={{color:'#8000ff'}}>{t('Save for later')}</Button>
+<Button variant="text" size='small' sx={{color:'#8000ff'}}>{t('Move to wishlist')}</Button>
 </Stack>
   </Grid>
   <Grid size={2}>
@@ -167,7 +168,7 @@ sx={{ width: { xs: "100%", md: "27%" } }}
 >
   <CardContent>
     <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
-      Total
+      {t('Total')}
     </Typography>
 
     <Typography variant="h5" sx={{ fontWeight: "bold" }}>
@@ -181,7 +182,7 @@ sx={{ width: { xs: "100%", md: "27%" } }}
       $249
     </Typography>
 
-    <Typography variant="subtitle1">20% off</Typography>
+    <Typography variant="subtitle1">{t('20% off')}</Typography>
 
     <Button
       variant="contained"
@@ -202,18 +203,18 @@ sx={{ width: { xs: "100%", md: "27%" } }}
         },
       }}
     >
-      Proceed to Checkout <ArrowForwardIcon fontSize="small" />
+      {t('Proceed to Checkout')} <ArrowForwardIcon fontSize="small" />
     </Button>
 
     <Typography variant="subtitle2" sx={{ color: grey[500], mt: 1 ,borderBottom:'1px solid lightgray',paddingBottom:2}}>
-      You won't be charged yet
+      {t("You won't be charged yet")}
     </Typography>
 
     <Box   sx={{border:'1px dashed gray',borderRadius:'5px',padding:2,marginTop:2}}>
         <Stack direction={'row'} gap={5} >
             <Box>
-            <Typography variant='subtitle2' sx={{color:'gray',fontSize:14}}>ST8MT220425G3  is applied</Typography>
-            <Typography variant='subtitle2' sx={{color:'gray',fontSize:14}}>Udemy coupon</Typography>
+            <Typography variant='subtitle2' sx={{color:'gray',fontSize:14}}>{t('ST8MT220425G3 is applied')}</Typography>
+            <Typography variant='subtitle2' sx={{color:'gray',fontSize:14}}>{t('Udemy coupon')}</Typography>
             </Box>
             <Box>
                  <CloseIcon sx={{alignSelf:'center'}}/>
@@ -227,8 +228,8 @@ sx={{ width: { xs: "100%", md: "27%" } }}
     </Box>
 
     <Stack direction={'row'} gap={1} sx={{marginTop:2}}>
-    <TextField  label="Inter coupon" variant="outlined"  size='small'/>
-    <Button variant="contained" size='small' sx={{backgroundColor:'#8000ff',fontSize:10,fontWeight:'bold'}}>Apply</Button>
+    <TextField  label={t("Inter coupon")} variant="outlined"  size='small'/>
+    <Button variant="contained" size='small' sx={{backgroundColor:'#8000ff',fontSize:10,fontWeight:'bold'}}>{t('Apply')}</Button>
 
     </Stack>
   </CardContent>
