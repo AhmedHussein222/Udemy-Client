@@ -100,15 +100,15 @@ const boozData = [
   {
     logo: logo3,
     title:
-      "Eventbrite Navigates Change Through Skill-Building and Leadership Development",
+      "Eventbrite Navigates Change Through Skill-Building",
     stats: [
       {
         percent: "4,800+",
-        text: "increase in employee enrollments for professional development courses",
+        text: "increase in employee enrollments ",
       },
       {
         percent: "65%",
-        text: "boosted team efficiencyrevenue growth supported by a business model backed by learning",
+        text: "boosted team efficiencyrevenue growth ",
       },
     ],
     image: UB3,
@@ -158,7 +158,7 @@ export default function Home3() {
             justifyContent:'space-around',
             overflowX: "auto",
             scrollbarWidth: "none", // Firefox
-            msOverflowStyle: "none", // IE/Edge
+            msOverflowStyle: "none", 
             margin: "0 auto", // لضمان أن الكروت في منتصف الصفحة
             paddingBottom: "16px", // إذا أردت مساحة بين الكروت والفوتر
           }}
@@ -201,40 +201,62 @@ export default function Home3() {
       </div>
 
       {/* AI for Business Leaders */}
-      <Grid
-        container
-        spacing={4}
-        alignItems="center"
-        justifyContent="space-between"
-        mb={6}
-      >
-        <Grid item xs={12} md={6}>
-          <Typography
-            variant="h4"
-            fontWeight={700}
-            color="#15243f"
-            gutterBottom
-            fontFamily="initial"
-          >
-            AI for Business Leaders
-          </Typography>
-          <Typography variant="body1" paragraph>
-            Build an AI-habit for you and your team that builds hands-on skills
-            to help you lead effectively.
-          </Typography>
-          <Button variant="outlined" endIcon={<ArrowForwardIcon />}>
-            Start Learning
-          </Button>
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <Box
-            component="img"
-            src={Ai}
-            alt="AI cards"
-            style={{maxWidth:'1000px'}}
-          />
-        </Grid>
-      </Grid>
+    
+<Grid
+  container
+  alignItems="center"
+  justifyContent="space-between"
+  wrap="no-wrap"
+  mb={6}
+  spacing={2}
+  sx={{
+    flexDirection: { xs: 'column', md: 'row' }, 
+  }}
+>
+  <Grid item xs={12} md={6} >
+    <Typography
+      variant="h4"
+      fontWeight={700}
+      color="#15243f"
+      gutterBottom
+      fontFamily="initial"
+    >
+      AI for Business Leaders
+    </Typography>
+    <Typography variant="body1" paragraph>
+      Build an AI-habit for you and your<br />team that builds hands-on skills
+      to help you lead effectively.
+    </Typography>
+    <Button variant="outlined" endIcon={<ArrowForwardIcon />}>
+      Start Learning
+    </Button>
+  </Grid>
+
+  <Grid
+    item
+    xs={12}
+    md={6}
+    width= '90%'
+    sx={{
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      mt: { xs: 4, md: 0 }, 
+      
+    }}
+  >
+    <Box
+      component="img"
+      src={Ai}
+      alt="AI cards"
+      sx={{
+        maxWidth: '80%',
+        width: '80%',
+        height: 'auto',
+      }}
+    />
+  </Grid>
+</Grid>
 
       {/* Trending Now */}
       <Box mb={6} sx={{ backgroundColor: "#f5f5f5", p: 3, borderRadius: 1 }}>
@@ -244,6 +266,7 @@ export default function Home3() {
           color="#15243f"
           gutterBottom
           fontFamily="initial"
+          
         >
           Trending Now
         </Typography>
@@ -331,15 +354,15 @@ export default function Home3() {
           spacing={4}
           alignItems="center"
           justifyContent="space-between"
-          direction={{ xs: "column", md: "row" }} // ✅ نضمن صف في الشاشات الكبيرة
-          sx={{ minHeight: "400px" }} // ✅ ارتفاع ثابت لكل Slide
+          direction={{ xs: "column", md: "row" }}
+          // sx={{ minHeight: "auto" }} 
         >
           {/* النصوص */}
           <Grid item xs={12} md={6}>
             <img
               src={item.logo}
               alt="logo"
-              style={{ maxWidth: "100px", marginBottom: "16px" }}
+              style={{ maxWidth: "1 rem", marginBottom: "16px" }}
             />
             <Typography variant="h6" fontWeight={700} gutterBottom>
               {item.title}
@@ -371,7 +394,7 @@ export default function Home3() {
               alt="Booz Allen Hamilton"
               sx={{
                 width: "100%",
-                height: "auto",
+                height: "60vh",
                 objectFit: "cover",
                 borderRadius: 2,
               }}
