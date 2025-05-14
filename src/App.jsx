@@ -34,12 +34,13 @@ const router = createBrowserRouter([
 		children: [
 			{ path: "login", element: <Login /> },
 			{ path: "cart", element: <Cart /> },
+			{ path: "Userprofile", element: <Userprofile /> },
 			{ path: "signup", element: <Signup /> },
 			{ path: "instructor-signup", element: <InsSignup /> },
 			{ path: "", element: <Welcomehome /> },
 		],
 	},
-  { path: "category", element: <Category /> },
+	{ path: "category", element: <Category /> },
 	{
 		path: "instructor",
 		element: <InsMain />,
