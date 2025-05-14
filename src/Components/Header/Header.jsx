@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   AppBar,
   Typography,
@@ -19,6 +19,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import LanguageIcon from "@mui/icons-material/Language";
 import MenuIcon from "@mui/icons-material/Menu";
 import logo from "../../assets/logo-udemy.svg";
+  import { useTranslation } from 'react-i18next';
 
 const Header = () => {
   const [openBusiness, setOpenBusiness] = useState(false);
@@ -30,6 +31,21 @@ const Header = () => {
   const toggleDrawer = () => {
     setDrawerOpen(!drawerOpen);
   };
+
+  const { t, i18n } = useTranslation();
+  const toggleLanguage = () => {
+  const newLang = i18n.language === 'en' ? 'ar' : 'en';
+  i18n.changeLanguage(newLang);
+  localStorage.setItem('lang', newLang);
+};
+
+useEffect(() => {
+  const savedLang = localStorage.getItem('lang');
+  if (savedLang) {
+    i18n.changeLanguage(savedLang);
+  }
+}, []);
+
 
   return (
     <AppBar position="static" sx={{ backgroundColor: "#fff" }} elevation={1}>
@@ -63,8 +79,24 @@ const Header = () => {
             <>
               <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                 <img src={logo} style={{ width: 90 }} alt="logo" />
-                <Typography sx={linkStyle}>Explore</Typography>
+                <Typography sx={linkStyle}>{t('Explore')}</Typography>
               </Box>
+
+              {/* Search Bar */}
+              <Paper
+                component="form"
+                onSubmit={(e) => e.preventDefault()}
+                sx={{
+                  ...searchBarStyle,
+                  flexGrow: 1,
+                  maxWidth: 600,
+                }}
+              >
+                <IconButton type="submit" sx={searchBtnStyle}>
+                <SearchIcon sx={{ color: "gray" }} />
+                </IconButton>
+                <InputBase sx={{ flex: 1, fontSize: "16px" }} placeholder={t('Search for anything')} />
+              </Paper>
 
               <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                 <Box
@@ -72,14 +104,14 @@ const Header = () => {
                   onMouseLeave={() => setOpenBusiness(false)}
                   sx={{ position: "relative" }}
                 >
-                  <Typography sx={linkStyle}>Udemy Business</Typography>
+                  <Typography sx={linkStyle}>{t('Udemy Business')}</Typography>
                   {openBusiness && (
                     <Box sx={popoverStyle}>
                       <Typography variant="h6" fontWeight="bold" sx={{ color: "#001a33" }}>
-                        Get your team access to over 27,000 top Udemy courses, anytime, anywhere.
+                        {t('Get your team access to over 27,000 top Udemy courses, anytime, anywhere.')}
                       </Typography>
                       <Button variant="contained" size="small" sx={businessBtnStyle}>
-                        Try Udemy Business
+                        {t('Try Udemy Business')}
                       </Button>
                     </Box>
                   )}
@@ -90,13 +122,13 @@ const Header = () => {
                   onMouseLeave={() => setOpenTeach(false)}
                   sx={{ position: "relative" }}
                 >
-                  <Typography sx={linkStyle}>Teach on Udemy</Typography>
+                  <Typography sx={linkStyle}>{t('Teach on Udemy')}</Typography>
                   {openTeach && (
                     <Box sx={popoverStyle}>
                       <Typography variant="h6" fontWeight="bold" sx={{ color: "#001a33" }}>
-                        Turn what you know into an opportunity and reach millions around the world.
+                        {t('Turn what you know into an opportunity and reach millions around the world.')}
                       </Typography>
-                      <Button variant="contained" sx={teachBtnStyle}>Learn more</Button>
+                      <Button variant="contained" sx={teachBtnStyle}>{t('Learn more')}</Button>
                     </Box>
                   )}
                 </Box>
@@ -104,32 +136,19 @@ const Header = () => {
                 <IconButton sx={iconBtnStyle}>
                   <ShoppingCartOutlinedIcon />
                 </IconButton>
-                <Button variant="outlined" sx={loginBtnStyle}>Log in</Button>
-                <Button variant="contained" sx={signupBtnStyle}>Sign up</Button>
-                <Button variant="outlined" sx={langBtnStyle}>
-                  <LanguageIcon />
-                </Button>
+                <Button variant="outlined" sx={loginBtnStyle}>{t('Log in')}</Button>
+                <Button variant="contained" sx={signupBtnStyle}>{t('Sign up')}</Button>
+               <Button variant="outlined" sx={langBtnStyle} onClick={toggleLanguage}>
+  <LanguageIcon sx={{ mr: 1 }} />
+  {i18n.language === 'en' ? 'English' : 'عربي'}
+</Button>
+
               </Box>
             </>
           )}
         </Box>
 
-        {/* Search Bar - Desktop */}
-        {!isMobile && (
-          <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
-            <Paper
-              component="form"
-              onSubmit={(e) => e.preventDefault()}
-              sx={searchBarStyle}
-            >
-              <InputBase sx={{ flex: 1, fontSize: "18px" }} placeholder="  Search for anything" />
-              <IconButton type="submit" sx={searchBtnStyle}>
-                <SearchIcon sx={{ color: "#fff" }} />
-              </IconButton>
-            </Paper>
-          </Box>
-        )}
-
+      
         {/* Search Bar - Mobile */}
         {isMobile && showSearch && (
           <Box sx={{ mt: 2 }}>
@@ -138,7 +157,7 @@ const Header = () => {
               onSubmit={(e) => e.preventDefault()}
               sx={{ ...searchBarStyle, width: "100%" }}
             >
-              <InputBase sx={{ flex: 1, fontSize: "16px" }} placeholder="Search..." />
+              <InputBase sx={{ flex: 1, fontSize: "16px" }} placeholder={t("Search...")} />
               <IconButton type="submit" sx={searchBtnStyle}>
                 <SearchIcon sx={{ color: "#fff" }} />
               </IconButton>
@@ -153,11 +172,14 @@ const Header = () => {
               <ListItem><ListItemText primary="Explore" /></ListItem>
               <ListItem><ListItemText primary="Udemy Business" /></ListItem>
               <ListItem><ListItemText primary="Teach on Udemy" /></ListItem>
-              <ListItem><Button variant="outlined" sx={loginBtnStyle}>LOG IN</Button></ListItem>
-              <ListItem><Button variant="contained" sx={signupBtnStyle}>SIGN UP</Button></ListItem>
+              <ListItem><Button variant="outlined" sx={loginBtnStyle}>{t('LOG IN')}</Button></ListItem>
+              <ListItem><Button variant="contained" sx={signupBtnStyle}>{t('SIGN UP')}</Button></ListItem>
               <ListItem>
                 <ListItemIcon>
-                  <LanguageIcon />
+                 <Button variant="outlined" sx={langBtnStyle} onClick={toggleLanguage}>
+  <LanguageIcon sx={{ mr: 1 }} />
+  {i18n.language === 'en' ? 'English' : 'عربي'}
+</Button>
                 </ListItemIcon>
               </ListItem>
             </List>
@@ -254,31 +276,34 @@ const teachBtnStyle = {
 };
 
 const searchBarStyle = {
-  p: "6px 8px",
+  p: "0px 0px",
   display: "flex",
-  alignItems: "center",
-  width: "80%",
+  alignItems: "left",
   borderRadius: 999,
-  boxShadow: 1,
-  border: "1px solid #ccc",
-  transition: "0.2s",
+  border: "1px solid gray",
+  // transition: "0.2s",
   "&:focus-within": {
     borderColor: "#8000ff",
   },
 };
 
 const searchBtnStyle = {
-  backgroundColor: "#e0ccff",
+  backgroundColor: "transparent",
   borderRadius: "50%",
-  p: 1.5,
+  p: 2,
   ml: 1,
   transition: "0.2s",
   "&:hover": {
-    backgroundColor: "#8000ff",
+    backgroundColor: "transparent",
+  },
+  "& .MuiSvgIcon-root": {
+    color: "gray",
+    transition: "0.2s",
   },
   "&:hover .MuiSvgIcon-root": {
-    color: "#fff",
+    color: "black",
   },
 };
+
 
 export default Header;

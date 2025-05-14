@@ -15,6 +15,7 @@ import { useState } from "react";
 import { signInWithEmailAndPassword } from "firebase/auth"; 
 import { auth } from "../../Firebase/firebase"; 
 import { Link } from "react-router-dom";
+import { useTranslation } from 'react-i18next';
 
 function Login() {
   const [firebaseError, setFirebaseError] = useState("");
@@ -61,6 +62,9 @@ function Login() {
     setOpenSnackbar(false);
   };
 
+
+   const { t } = useTranslation();
+
   return (
     <Box sx={{ flexGrow: 1, p: { xs: 2, md: 4 } }}>
       <Grid container spacing={4} alignItems="center" justifyContent={'space-around'}>
@@ -81,14 +85,14 @@ function Login() {
         <Grid item xs={12} lg={6}>
           <Box sx={{ maxWidth: 500, mx: 'auto', px: 2 }}>
             <Typography variant="h4" gutterBottom fontWeight="bold" textAlign="center">
-              Log in to continue your learning journey
+             {t('Log in to continue your learning journey')}
             </Typography>
 
             <form onSubmit={handleSubmit(onSubmit)}>
               <Stack spacing={2}>
                 <TextField
                   fullWidth
-                  label="Email"
+               label={t("Email")}
                   variant="outlined"
                   error={!!errors.email}
                   helperText={
@@ -106,7 +110,7 @@ function Login() {
 
                 <TextField
                   fullWidth
-                  label="Password"
+                   label={t("Password")}
                   type="password"
                   variant="outlined"
                   error={!!errors.password}
@@ -135,7 +139,7 @@ function Login() {
                   }}
                   disabled={loading}
                 >
-                  {loading ? "Loading..." : "Continue with email"}
+               {loading ? t("Loading...") : t("Continue with email")}
                 </Button>
 
                 {firebaseError && (
@@ -162,7 +166,7 @@ function Login() {
               align="center"
               sx={{ mt: 4, fontWeight: 'bold' }}
             >
-              Other sign up options
+             {t('Other sign up options')}
             </Typography>
 
             <Stack
@@ -238,13 +242,13 @@ function Login() {
               align="center"
               sx={{ mb: 3 }}
             >
-              By signing up, you agree to our{' '}
+              {t('By signing up, you agree to our')}{' '}
               <a href="#" style={{ color: '#8000ff' }}>
-                Terms of Use
+                {t('Terms of Use')}
               </a>{' '}
-              and{' '}
+              {t('and')}{' '}
               <a href="#" style={{ color: '#8000ff' }}>
-                Privacy Policy
+                {t('Privacy Policy')}
               </a>
               .
             </Typography>
@@ -258,9 +262,9 @@ function Login() {
               }}
             >
               <Typography variant="body2">
-                Don’t have an account?{' '}
+                {t('Don’t have an account?')}{' '}
                 <Link to="/signup" style={{ color: '#8000ff', fontWeight: 'bold' }}>
-                  Sign up
+                  {t('Sign up')}
                 </Link>
               </Typography>
             </Box>
@@ -277,7 +281,7 @@ function Login() {
             >
               <Typography variant="body2">
                 <a href="#" style={{ color: '#8000ff', fontWeight: 'bold' }}>
-                  Log in with your organization
+                 {t('Log in with your organization')}
                 </a>
               </Typography>
             </Box>

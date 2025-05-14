@@ -19,6 +19,7 @@ import {
   import { doc, setDoc } from "firebase/firestore";
   import { fetchSignInMethodsForEmail } from "firebase/auth";
   import { Snackbar } from "@mui/material";
+  import { useTranslation } from 'react-i18next';
   
   function Signup() {
     const [firebaseError, setFirebaseError] = useState("");
@@ -85,6 +86,7 @@ const handleCloseSnackbar = () => {
   setOpenSnackbar(false);
 };
 
+   const { t } = useTranslation();
 
 
     return (
@@ -124,7 +126,7 @@ const handleCloseSnackbar = () => {
         fontWeight="bold"
         textAlign="center"
       >
-        Sign up with email
+        {t('Sign up with email')}
       </Typography>
 
       <form onSubmit={handleSubmit(onSubmit)}>
@@ -132,18 +134,18 @@ const handleCloseSnackbar = () => {
     <TextField
       fullWidth
       size="medium"
-      label="Fullname"
+      label={t("Fullname")}
       variant="outlined"
       {...register("fullname", { required: true, maxLength: 20 })}
     />
     {errors.fullname?.type === "required" && (
-   <Typography color='error'>Fullname is required.</Typography>
+   <Typography color='error'>{t('Fullname is required.')}</Typography>
     )}
 
     <TextField
       fullWidth
       size="medium"
-      label="Email"
+      label={t("Email")}
       variant="outlined"
       {...register("email", {
         required: true,
@@ -151,16 +153,16 @@ const handleCloseSnackbar = () => {
       })}
     />
     {errors.email?.type === "required" && (
-      <Typography color='error'>Email is required.</Typography>
+      <Typography color='error'>{t('Email is required.')}</Typography>
     )}
     {errors.email?.type === "pattern" && (
-      <Typography color='error'>Email is not valid.</Typography>
+      <Typography color='error'>{t('Email is not valid.')}</Typography>
     )}
 
     <TextField
       fullWidth
       size="medium"
-      label="Password"
+      label={t("Password")}
       type="password"
       variant="outlined"
       {...register("password", { 
@@ -169,16 +171,16 @@ const handleCloseSnackbar = () => {
       })}
     />
     {errors.password?.type === "required" && (
-      <Typography color='error'>Password is required.</Typography>
+      <Typography color='error'>{t('Password is required.')}</Typography>
     )}
     {errors.password?.type === "minLength" && (
-      <Typography color='error'>Password must be at least 6 characters.</Typography>
+      <Typography color='error'>{t('Password must be at least 6 characters.')}</Typography>
     )}
 
     <FormGroup>
       <FormControlLabel
         control={<Checkbox />}
-        label="Send me special offers, personalized recommendations, and learning tips."
+        label={t("Send me special offers, personalized recommendations, and learning tips.")}
       />
     </FormGroup>
 
@@ -199,7 +201,8 @@ const handleCloseSnackbar = () => {
       }}
       disabled={loading}
     >
-      {loading ? "Loading..." : "Continue with email"}
+ {loading ? t("Loading...") : t("Continue with email")}
+
     </Button>
     {firebaseError && (
       <Typography color="error" textAlign="center">
@@ -215,7 +218,7 @@ const handleCloseSnackbar = () => {
         align="center"
         sx={{ mt: 4, fontWeight: 'bold' }}
       >
-        Other sign up options
+        {t('Other sign up options')}
       </Typography>
 
       <Stack
@@ -291,13 +294,13 @@ const handleCloseSnackbar = () => {
         align="center"
         sx={{ mb: 3 }}
       >
-        By signing up, you agree to our{' '}
+        {t('By signing up, you agree to our')}{' '}
         <a href="#" style={{ color: '#8000ff' }}>
-          Terms of Use
+          {t('Terms of Use')}
         </a>{' '}
-        and{' '}
+        {t('and')}{' '}
         <a href="#" style={{ color: '#8000ff' }}>
-          Privacy Policy
+          {t('Privacy Policy')}
         </a>
         .
       </Typography>
@@ -311,8 +314,8 @@ const handleCloseSnackbar = () => {
         }}
       >
         <Typography variant="body2">
-          Already have an account?{' '}
-         <Link to="/Login" style={{ color: '#8000ff', fontWeight: 'bold' }}>Login</Link>
+          {t('Already have an account?')}{' '}
+         <Link to="/Login" style={{ color: '#8000ff', fontWeight: 'bold' }}>{t('Login')}</Link>
 
         </Typography>
       </Box>

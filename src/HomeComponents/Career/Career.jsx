@@ -224,7 +224,7 @@ const Career = () => {
                   borderRadius: 2,
                   width: "400px",
                   boxShadow: 2, // شادو خفيف
-                  borderRadius: 5,
+                  // borderRadius: 5,
                   height: "auto",
                   display: "flex",
                   flexDirection: "column",

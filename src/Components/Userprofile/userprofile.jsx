@@ -10,15 +10,16 @@ import { db, auth } from "../../Firebase/firebase";
 import { doc, setDoc, getDoc, deleteDoc } from "firebase/firestore";
 import { deleteUser, updatePassword, EmailAuthProvider, reauthenticateWithCredential } from "firebase/auth";
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 const drawerWidth = 250;
 
-const profileSections = [
-  { id: 'profile', label: 'Profile' },
-  { id: 'photo', label: 'Photo' },
-  { id: 'security', label: 'Account Security' },
-  { id: 'close', label: 'Close account' },
-];
+  const profileSections = [
+    { id: 'profile', label: 'profile' },
+    { id: 'photo', label: 'photo' },
+    { id: 'security', label: 'security' },
+    { id: 'close', label: 'close' },
+  ];
 
 const Userprofile = () => {
   const { user } = useContext(UserContext);
@@ -28,6 +29,7 @@ const Userprofile = () => {
   const [loading, setLoading] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [openSnackbar, setOpenSnackbar] = useState(false);
+    const { t } = useTranslation();
 
   const [formData, setFormData] = useState({
     first_name: "", last_name: "", headline: "", bio: "", language: "English",
@@ -180,23 +182,25 @@ useEffect(() => {
     }
   };
 
+
+
   const renderSectionContent = () => {
     switch (activeSection) {
       case 'profile':
         return (
           <>
-            <Typography variant="h4" gutterBottom>Public profile</Typography>
-            <TextField fullWidth label="First Name" margin="normal" name="first_name" value={formData.first_name} onChange={handleChange} />
-            <TextField fullWidth label="Last Name" margin="normal" name="last_name" value={formData.last_name} onChange={handleChange} />
-            <TextField fullWidth label="Biography" multiline rows={4} margin="normal" name="bio" value={formData.bio} onChange={handleChange} />
-            <TextField fullWidth label="Headline" margin="normal" name="headline" value={formData.headline} onChange={handleChange} />
+            <Typography variant="h4" gutterBottom>{t('Public profile')}</Typography>
+            <TextField fullWidth label={t("First Name")} margin="normal" name="first_name" value={formData.first_name} onChange={handleChange} />
+            <TextField fullWidth label={t("Last Name")} margin="normal" name="last_name" value={formData.last_name} onChange={handleChange} />
+            <TextField fullWidth label={t("Biography")} multiline rows={4} margin="normal" name="bio" value={formData.bio} onChange={handleChange} />
+            <TextField fullWidth label={t("Headline")} margin="normal" name="headline" value={formData.headline} onChange={handleChange} />
             <TextField select fullWidth name="language" value={formData.language} onChange={handleChange} margin="normal">
-              <MenuItem value="English">English</MenuItem>
-              <MenuItem value="عربي">عربي</MenuItem>
+              <MenuItem value="English">{t("English")}</MenuItem>
+              <MenuItem value="عربي">{t('عربي')}</MenuItem>
             </TextField>
 
             <Divider sx={{ my: 2 }} />
-            <Typography variant="subtitle1" gutterBottom>Links:</Typography>
+            <Typography variant="subtitle1" gutterBottom>{t('Links:')}</Typography>
             {['facebook', 'instagram', 'linkedin', 'youtube'].map((platform) => (
               <FormControl fullWidth margin="normal" key={platform}>
                 <InputLabel htmlFor={`${platform}-username`}>{platform}</InputLabel>
@@ -211,47 +215,47 @@ useEffect(() => {
             ))}
 
             <FormControl>
-              <FormLabel id="gender-radio-buttons-group-label" mt={2}>Gender</FormLabel>
+              <FormLabel id="gender-radio-buttons-group-label" mt={2}>{t('Gender')}</FormLabel>
               <RadioGroup
                 aria-labelledby="gender-radio-buttons-group-label"
                 name="gender"
                 value={formData.gender}
                 onChange={handleChange}
               >
-                <FormControlLabel value="female" control={<Radio />} label="Female" />
-                <FormControlLabel value="male" control={<Radio />} label="Male" />
+                <FormControlLabel value="female" control={<Radio />} label={t("Female")} />
+                <FormControlLabel value="male" control={<Radio />} label={t("Male")} />
               </RadioGroup>
             </FormControl>
 
             <Button variant="contained" sx={{ backgroundColor: "#8000ff", color: "#fff", mt: 2, mb: 3, mx: "auto", display: "block" }} onClick={saveProfileData} disabled={loading}>
-              {loading ? <CircularProgress size={24} sx={{ color: "#fff" }} /> : "Save"}
+              {loading ? <CircularProgress size={24} sx={{ color: "#fff" }} /> : t( "Save") }
             </Button>
           </>
         );
       case 'photo':
         return (
           <>
-            <Typography variant="h4" gutterBottom>Upload Photo</Typography>
+            <Typography variant="h4" gutterBottom>{t('Upload Photo')}</Typography>
             <TextField fullWidth label="Image URL" value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} margin="normal" />
-            <Button variant="contained" sx={{ backgroundColor: "#8000ff", color: "#fff", mt: 2 }} onClick={handleSavePhoto}>Save</Button>
+            <Button variant="contained" sx={{ backgroundColor: "#8000ff", color: "#fff", mt: 2 }} onClick={handleSavePhoto}>{t("Save")}</Button>
           </>
         );
       case 'security':
         return (
           <>
-            <Typography variant="h4" gutterBottom textAlign={'center'} fontWeight={'bold'}>Account</Typography>
-            <TextField fullWidth label="Current Password" type="password" margin="normal" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} />
-            <TextField fullWidth label="New Password" type="password" margin="normal" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
-            <TextField fullWidth label="Confirm New Password" type="password" margin="normal" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
-            <Button variant="contained" sx={{ backgroundColor: "#8000ff", color: "#fff", mt: 2 }} onClick={handlePasswordChange}>Change Password</Button>
+            <Typography variant="h4" gutterBottom textAlign={'center'} fontWeight={'bold'}>{t('Account')}</Typography>
+            <TextField fullWidth label={t("Current Password")} type="password" margin="normal" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} />
+            <TextField fullWidth label={t("New Password")} type="password" margin="normal" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
+            <TextField fullWidth label={t("Confirm New Password")} type="password" margin="normal" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
+            <Button variant="contained" sx={{ backgroundColor: "#8000ff", color: "#fff", mt: 2 }} onClick={handlePasswordChange}>{t('Change Password')}</Button>
           </>
         );
       case 'close':
         return (
           <>
-            <Typography variant="h4" gutterBottom>Close Account</Typography>
-            <Typography color="error" gutterBottom>Warning: This will permanently delete your account.</Typography>
-            <Button variant="contained" color="error" onClick={closeAccount}>Close My Account</Button>
+            <Typography variant="h4" gutterBottom>{t('Close Account')}</Typography>
+            <Typography color="error" gutterBottom>{t('Warning: This will permanently delete your account.')}</Typography>
+            <Button variant="contained" color="error" onClick={closeAccount}>{t('Close My Account')}</Button>
           </>
         );
       default:
@@ -272,7 +276,7 @@ useEffect(() => {
           <List>
             {profileSections.map((section) => (
               <ListItem button key={section.id} selected={activeSection === section.id} onClick={() => setActiveSection(section.id)}>
-                <ListItemText primary={section.label} />
+                <ListItemText primary={t(section.label)} />
               </ListItem>
             ))}
           </List>

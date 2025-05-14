@@ -39,7 +39,7 @@ const cardData = [
     topText: "Analytics and adoption reports",
     userText: "More than 20 people",
     title: "Contact sales for pricing",
-    description: "",
+    description: "Billed annually. Cancel anytime.",
     features: [
      " Access to 27,000+ top courses",
       "Certification prep",
@@ -55,9 +55,9 @@ const cardData = [
   }
 ];
 
-const AcceleratorSection = () => {
+function AcceleratorSection () {
   return (
-    <div style={{ padding: "40px", backgroundColor: "#fff" }}>
+    <div style={{ padding: "40px", backgroundColor: "#fff" ,marginLeft:"200px" }}>
       <Typography variant="h4" fontWeight="bold" color="#15243f" gutterBottom fontFamily="initial" >
         Accelerate growth — for you or your organization
       </Typography>
@@ -66,12 +66,12 @@ const AcceleratorSection = () => {
       </Typography>
 
 
-      <div style={{ display: "flex", gap: "20px", flexWrap: "wrap" }}>
+      <div style={{ display: "flex", gap: "20px", flexWrap: "wrap",alignItems:"center" }}>
         {cardData.map((card, idx) => (
           <Card
           key={idx}
           sx={{
-            width: 370,
+            width: 390,
             height:"auto",
             border: "1px solid #ccc",
             borderTop: "6px solid #6a1b9a",
@@ -96,7 +96,7 @@ const AcceleratorSection = () => {
             </div>
           </div>
         
-          <CardContent  sx={{ paddingTop: 0 }}>
+          <CardContent  sx={{ paddingTop: 3 ,height:'440px',display:'flex',flexDirection:'column',gap:'7px'}}>
             <Typography variant="h6" fontWeight="bold" gutterBottom>
               {card.title}
             </Typography>
