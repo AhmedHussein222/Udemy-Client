@@ -1,15 +1,11 @@
-import DescriptionIcon from "@mui/icons-material/Description";
 import OndemandVideoIcon from "@mui/icons-material/OndemandVideo";
 import {
   Card,
   CardActionArea,
   CardContent,
   FormControl,
-  FormControlLabel,
   InputLabel,
   MenuItem,
-  Radio,
-  RadioGroup,
   Select,
   Stack,
   TextField,
@@ -22,18 +18,46 @@ import Stepper from "@mui/material/Stepper";
 import Typography from "@mui/material/Typography";
 import * as React from "react";
 import { useNavigate } from "react-router-dom";
+import { useCourseContext } from "../../../../context/CourseContext";
 
 const steps = ["Step1", "Step2", "Step3", "Step4"];
 
 export default function CreateCourse() {
+  const { courseData, updateCourseData } = useCourseContext();
   const [activeStep, setActiveStep] = React.useState(0);
   const [completed, setCompleted] = React.useState({});
 
   const [courseType, setCourseType] = React.useState("");
   const [courseTitle, setCourseTitle] = React.useState("");
   const [category, setCategory] = React.useState("");
-  const [timeCommitment, setTimeCommitment] = React.useState("1");
+  const [subcategories, setSubcategories] = React.useState([]);
+  const [selectedSubcategory, setSelectedSubcategory] = React.useState("");
   const nav = useNavigate();
+
+  const categoryData = {
+    10: [
+      { id: 1, name: "Web Development" },
+      { id: 2, name: "Mobile Development" },
+      { id: 3, name: "Game Development" },
+    ],
+    20: [
+      { id: 4, name: "Data Science" },
+      { id: 5, name: "Machine Learning" },
+      { id: 6, name: "AI" },
+    ],
+    30: [
+      { id: 7, name: "Digital Marketing" },
+      { id: 8, name: "Social Media" },
+      { id: 9, name: "Content Marketing" },
+    ],
+  };
+
+  React.useEffect(() => {
+    if (category) {
+      setSubcategories(categoryData[category] || []);
+      setSelectedSubcategory("");
+    }
+  }, [category, categoryData]);
 
   const totalSteps = () => {
     return steps.length;
@@ -52,14 +76,29 @@ export default function CreateCourse() {
   };
 
   const handleNext = () => {
+    const stepData = {
+      0: { course_type: courseType },
+      1: { title: courseTitle },
+      2: { category_id: category },
+      3: { subcategory_id: selectedSubcategory },
+    }[activeStep];
+
+    if (stepData) {
+      updateCourseData(stepData);
+    }
+
+    if (isLastStep()) {
+      nav("/instructor/edit", {
+        state: { courseData: courseData },
+      });
+      return;
+    }
+
     const newActiveStep =
       isLastStep() && !allStepsCompleted()
         ? steps.findIndex((step, i) => !(i in completed))
         : activeStep + 1;
-        
-        isLastStep() && nav("/instructor/edit") ;
 
-    // Add completion for current step
     setCompleted({
       ...completed,
       [activeStep]: true,
@@ -85,7 +124,7 @@ export default function CreateCourse() {
       case 2:
         return category !== "";
       case 3:
-        return timeCommitment !== "";
+        return selectedSubcategory !== "";
       default:
         return true;
     }
@@ -136,48 +175,6 @@ export default function CreateCourse() {
               <Typography variant="subtitle1" sx={{ color: "text.secondary" }}>
                 Create rich learning experiences with the help of video
                 lectures, quizzes, coding exercises, etc.
-              </Typography>
-            </CardContent>
-          </CardActionArea>
-        </Card>
-
-        <Card
-          onClick={() => setCourseType("practice")}
-          sx={{
-            maxWidth: 345,
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            flexDirection: "column",
-            transition: "all 0.3s ease",
-            border: courseType === "practice" ? "2px solid #A435F0" : "none",
-            "&:hover": {
-              backgroundColor: "#d8e0fb",
-              border: "2px solid black",
-            },
-          }}
-        >
-          <CardActionArea
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <DescriptionIcon sx={{ fontSize: 40, marginBottom: 2, mt: 5 }} />
-            <CardContent sx={{ textAlign: "center" }}>
-              <Typography
-                gutterBottom
-                variant="body1"
-                component="div"
-                fontWeight={"bold"}
-              >
-                Practice Test
-              </Typography>
-              <Typography variant="subtitle1" sx={{ color: "text.secondary" }}>
-                Help students prepare for certification exams by providing
-                practice questions.
               </Typography>
             </CardContent>
           </CardActionArea>
@@ -251,7 +248,6 @@ export default function CreateCourse() {
             },
           }}
         >
-          
           <MenuItem value={10}>Ten</MenuItem>
           <MenuItem value={20}>Twenty</MenuItem>
           <MenuItem value={30}>Thirty</MenuItem>
@@ -263,90 +259,33 @@ export default function CreateCourse() {
       sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}
     >
       <Typography variant="h5" fontWeight={"bold"} textAlign={"center"} my={4}>
-        How much time can you spend creating your course per week?
+        Select a subcategory
       </Typography>
       <Typography variant="body1" textAlign={"center"} my={3}>
-        There's no wrong answer. We can help you achieve your goals even if you
-        don't have much time.
+        Choose the specific area that best matches your course content
       </Typography>
 
-      <FormControl>
-        <RadioGroup
-          value={timeCommitment}
-          onChange={(e) => setTimeCommitment(e.target.value)}
-          aria-labelledby="demo-radio-buttons-group-label"
-          defaultValue="1"
-          name="radio-buttons-group"
+      <FormControl sx={{ width: "100%", maxWidth: 400 }}>
+        <InputLabel>Select Subcategory</InputLabel>
+        <Select
+          value={selectedSubcategory}
+          onChange={(e) => setSelectedSubcategory(e.target.value)}
+          label="Select Subcategory"
+          sx={{
+            borderRadius: "8px",
+            padding: "8px",
+            boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)",
+            "& .MuiSelect-icon": {
+              color: "#1976d2",
+            },
+          }}
         >
-          <FormControlLabel
-            value="1"
-            control={<Radio />}
-            label="I’m very busy right now (0-2 hours)"
-            sx={{
-              border: "1px solid #ccc",
-              borderRadius: "8px",
-              padding: "10px",
-              marginBottom: "8px",
-              "&:hover": {
-                backgroundColor: "#f0f0f0",
-              },
-              "&.Mui-selected": {
-                backgroundColor: "#e0f7fa",
-              },
-            }}
-          />
-          <FormControlLabel
-            value="2"
-            control={<Radio />}
-            label="I’ll work on this on the side (2-4 hours)"
-            sx={{
-              border: "1px solid #ccc",
-              borderRadius: "8px",
-              padding: "10px",
-              marginBottom: "8px",
-              "&:hover": {
-                backgroundColor: "#f0f0f0",
-              },
-              "&.Mui-selected": {
-                backgroundColor: "#e0f7fa",
-              },
-            }}
-          />
-          <FormControlLabel
-            value="3"
-            control={<Radio />}
-            label="I have lots of flexibility (5+ hours)"
-            sx={{
-              border: "1px solid #ccc",
-              borderRadius: "8px",
-              padding: "10px",
-              marginBottom: "8px",
-              "&:hover": {
-                backgroundColor: "#f0f0f0",
-              },
-              "&.Mui-selected": {
-                backgroundColor: "#e0f7fa",
-              },
-            }}
-          />
-          <FormControlLabel
-            value="4"
-            control={<Radio />}
-            label="I haven’t yet decided if I have time"
-            sx={{
-              border: "1px solid #ccc",
-              borderRadius: "8px",
-              padding: "10px",
-              marginBottom: "8px",
-              "&:hover": {
-                backgroundColor: "#f0f0f0",
-              },
-              "&.Mui-selected": {
-                backgroundColor: "#e0f7fa",
-              },
-            }}
-          />
-        </RadioGroup>
+          {subcategories.map((sub) => (
+            <MenuItem key={sub.id} value={sub.id}>
+              {sub.name}
+            </MenuItem>
+          ))}
+        </Select>
       </FormControl>
     </Box>,
   ];
@@ -364,15 +303,6 @@ export default function CreateCourse() {
       </Stepper>
       <div>
         {allStepsCompleted() ? (
-          // <React.Fragment>
-          //   <Typography sx={{ mt: 2, mb: 1 }}>
-          //     All steps completed - you&apos;re finished
-          //   </Typography>
-          //   <Box sx={{ display: "flex", flexDirection: "row", pt: 2 }}>
-          //     <Box sx={{ flex: "1 1 auto" }} />
-          //     <Button onClick={handleReset}>Reset</Button>
-          //   </Box>
-          // </React.Fragment>
           nav({ to: "instuctor" })
         ) : (
           <React.Fragment>

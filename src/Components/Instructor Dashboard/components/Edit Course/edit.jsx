@@ -8,11 +8,14 @@ import {
   Paper,
   Typography,
 } from "@mui/material";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import CurriculumBuilder from "./Curriculum";
 import IntendedLearnersForm from "./Intended ";
 import PricingForm from "./price";
 import CourseMessages from "./courseMessage";
+import LandingPage from "./LandingPage";
+import Captions from "./Captions";
+import { useCourseContext } from "../../../../context/CourseContext";
 
 const StepContent = ({ step }) => {
   switch (step) {
@@ -21,21 +24,53 @@ const StepContent = ({ step }) => {
     case 1:
       return <CurriculumBuilder />;
     case 2:
-      return ;
+      return <Captions />;
     case 3:
-      return ;
+      return <LandingPage />;
     case 4:
       return <PricingForm />;
     case 5:
       return <CourseMessages />;
-    // أضف باقي الحالات حسب الحاجة
     default:
       return <Typography>Select a step</Typography>;
   }
 };
 
 const EditCourse = () => {
+  const { courseData } = useCourseContext();
   const [selectedStep, setSelectedStep] = useState(0);
+  const [isFormValid, setIsFormValid] = useState(false);
+
+  useEffect(() => {
+    const validateForm = () => {
+      const requiredFields = {
+        intended_learners: courseData.what_will_learn?.length > 0,
+        curriculum: courseData.curriculum?.length > 0,
+        landing_page: courseData.description && courseData.thumbnail,
+        pricing: courseData.price !== undefined,
+      };
+
+      setIsFormValid(Object.values(requiredFields).every(Boolean));
+    };
+
+    validateForm();
+  }, [courseData]);
+
+  const handleSubmitCourse = async () => {
+    if (isFormValid) return;
+
+    const finalCourseData = {
+      ...courseData,
+      is_published: false,
+      created_at: new Date().toISOString(),
+    };
+
+    try {
+      console.log("Submitting course:", finalCourseData);
+    } catch (error) {
+      console.error("Error submitting course:", error);
+    }
+  };
 
   return (
     <Box
@@ -60,8 +95,7 @@ const EditCourse = () => {
           overflowY: "auto",
         }}
       >
-        <List sx={{ flex: 1 ,  }}>
-          {/* Plan your course section */}
+        <List sx={{ flex: 1 }}>
           <Typography
             sx={{ px: 2, py: 1, fontWeight: "bold", color: "#1c1d1f" }}
           >
@@ -82,7 +116,6 @@ const EditCourse = () => {
             </Box>
           </ListItem>
 
-          {/* Create your content section */}
           <Typography
             sx={{ px: 2, py: 1, fontWeight: "bold", color: "#1c1d1f" }}
           >
@@ -117,7 +150,6 @@ const EditCourse = () => {
             </Box>
           </ListItem>
 
-          {/* Publish your course section */}
           <Typography
             sx={{ px: 2, py: 1, fontWeight: "bold", color: "#1c1d1f" }}
           >
@@ -176,9 +208,31 @@ const EditCourse = () => {
           <Button
             variant="contained"
             fullWidth
+            onClick={handleSubmitCourse}
+            disabled={!isFormValid}
             sx={{
               backgroundColor: "#a435f0",
               "&:hover": { backgroundColor: "#8710d8" },
+              "&.Mui-disabled": {
+                backgroundColor: "#e7e7e7",
+                color: "#a6a6a6",
+              },
+            }}
+          >
+            Submit for Review
+          </Button>
+          <Button
+            variant="contained"
+            fullWidth
+            onClick={handleSubmitCourse}
+            disabled={isFormValid}
+            sx={{
+              backgroundColor: "#a435f0",
+              "&:hover": { backgroundColor: "#8710d8" },
+              "&.Mui-disabled": {
+                backgroundColor: "#e7e7e7",
+                color: "#a6a6a6",
+              },
             }}
           >
             Submit for Review
@@ -186,13 +240,11 @@ const EditCourse = () => {
         </Box>
       </Box>
 
-      {/* Main content with offset for fixed sidebar */}
       <Box
         component="main"
         sx={{
           flexGrow: 1,
           p: 3,
-          // marginLeft: "280px", // Add margin to prevent content from hiding under sidebar
         }}
       >
         <Paper elevation={3} sx={{ mx: 5, pt: 2 }}>
