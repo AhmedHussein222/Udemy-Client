@@ -1,6 +1,7 @@
 import { CssBaseline } from "@mui/material";
 import { createBrowserRouter, Outlet, RouterProvider } from "react-router-dom";
 import Cart from "./Components/Cart/Cart";
+import Category from "./Components/Category/Category";
 import Footer from "./Components/Footer/Footer";
 import Header from "./Components/Header/Header";
 import CreateCourse from "./Components/Instructor Dashboard/components/CreateCourse/createcourse";
@@ -12,24 +13,26 @@ import InsMain from "./Components/Instructor Dashboard/components/Main/Main";
 import Home from "./Components/Instructor Dashboard/components/Home/home";
 
 const router = createBrowserRouter([
-  {
-    path: "/",
-    element: <Main />,
-    children: [
-      { path: "login", element: <Login /> },
-      { path: "cart", element: <Cart /> },
-      { path: "signup", element: <Signup /> },
-      { path: "instructor-signup", element: <InsSignup /> },
-      { path: "", element: <Welcomehome /> },
-    ],
-  },
-  { path: "instructor", element: <InsMain />, 
-    children:[
-      { path: "", element: <Home /> },
-      { path: "create", element: <CreateCourse /> },
-
-    ]
-  },
+	{
+		path: "/",
+		element: <Main />,
+		children: [
+			{ path: "login", element: <Login /> },
+			{ path: "cart", element: <Cart /> },
+			{ path: "signup", element: <Signup /> },
+			{ path: "instructor-signup", element: <InsSignup /> },
+			{ path: "", element: <Welcomehome /> },
+		],
+	},
+  { path: "category", element: <Category /> },
+	{
+		path: "instructor",
+		element: <InsMain />,
+		children: [
+			{ path: "", element: <Home /> },
+			{ path: "create", element: <CreateCourse /> },
+		],
+	},
 ]);
 
 function Main() {
