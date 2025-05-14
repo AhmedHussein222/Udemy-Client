@@ -1,4 +1,4 @@
-import { CssBaseline } from "@mui/material";
+import { CssBaseline, } from "@mui/material";
 import { createBrowserRouter, Outlet, RouterProvider } from "react-router-dom";
 import Cart from "./Components/Cart/Cart";
 import Footer from "./Components/Footer/Footer";
@@ -9,7 +9,6 @@ import Welcomehome from "./Components/Instructor Dashboard/welcomehome";
 import Login from "./Components/LoginUsers/Login";
 import Signup from "./Components/SignUpStudents/Signup";
 import InsMain from "./Components/Instructor Dashboard/components/Main/Main";
-// import Home from "./Components/Instructor Dashboard/components/Home/home";
 import { useEffect, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "./Firebase/firebase";
@@ -23,6 +22,8 @@ import Userprofile from "./Components/Userprofile/userprofile";
 import { UserContext } from "./context/UserContext";
  import Home from "./Components//Home/Home";
 
+import InsHome from "./Components/Instructor Dashboard/components/Home/home";
+import EditCourse from "./Components/Instructor Dashboard/components/Edit Course/edit";
 
 const router = createBrowserRouter([
   {
@@ -39,7 +40,11 @@ const router = createBrowserRouter([
   { path: "instructor", element: <InsMain />, 
     children:[
       { path: "", element: <Home /> },
+      { path: "courses", element: <Home /> },
+      { path: "communication", element: <Home /> },
+      { path: "performance", element: <Home /> },
       { path: "create", element: <CreateCourse /> },
+      { path: "edit", element: <EditCourse /> },
 
     ]
   },
@@ -48,9 +53,11 @@ const router = createBrowserRouter([
 function Main() {
   return (
     <>
+    <CssBaseline>
       <Header />
-      {/* <Outlet /> */}
+      <Outlet />
       <Footer />
+    </CssBaseline>
     </>
   );
 }
