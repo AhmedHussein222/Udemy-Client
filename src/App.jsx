@@ -47,6 +47,7 @@ const router = createBrowserRouter([
 		children: [
 			{ path: "", element: <InsHome /> },
 			{ path: "create", element: <CreateCourse /> },
+			{ path: "edit", element: <EditCourse /> },
 		],
 	},
 ]);
@@ -66,6 +67,7 @@ function Main() {
 
 
 const App = () => {
+  
   const { i18n } = useTranslation();
   const direction = i18n.language === 'ar' ? 'rtl' : 'ltr';
   const [user, setUser] = useState(null);

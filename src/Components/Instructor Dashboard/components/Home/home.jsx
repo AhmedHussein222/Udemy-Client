@@ -26,7 +26,7 @@ function Home() {
                 type="submit"
                 fullWidth
                 variant="contained"
-                onClick={() => navigate('/instructor/create')}
+                onClick={() => navigate('/instructor/edit')}
                 sx={{
                   backgroundColor: '#8000ff',
                   color: '#fff',
