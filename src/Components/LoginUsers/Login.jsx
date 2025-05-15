@@ -46,7 +46,7 @@ function Login() {
       const userCredential = await signInWithEmailAndPassword(auth, data.email, data.password);
 
       console.log("User logged in: ", userCredential.user);
-      navigate("/Userprofile", { state: { email: data.email } });
+      navigate("/", { state: { email: data.email } });
 
     } catch (error) {
       setSnackbarMessage("Error logging in. Please check your credentials.");
