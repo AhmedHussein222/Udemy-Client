@@ -1,293 +1,549 @@
-import React, { useState } from "react";
+/** @format */
+
+import React, { useEffect, useState, useContext } from "react";
 import {
-  AppBar,
-  Typography,
-  Button,
-  IconButton,
-  Box,
-  InputBase,
-  Paper,
-  Drawer,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemIcon,
-  useMediaQuery,
+	AppBar,
+	Typography,
+	Button,
+	IconButton,
+	Box,
+	InputBase,
+	Paper,
+	Drawer,
+	List,
+	ListItem,
+	ListItemText,
+	ListItemIcon,
+	useMediaQuery,
+	Menu,
+	MenuItem,
+	Avatar,
 } from "@mui/material";
+import { useLocation, useNavigate } from "react-router-dom";
+import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
+import NotificationsOutlinedIcon from "@mui/icons-material/NotificationsOutlined";
+import { UserContext } from "../../context/UserContext";
+import { auth, db } from "../../Firebase/firebase";
+import { doc, getDoc } from "firebase/firestore";
 import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
 import SearchIcon from "@mui/icons-material/Search";
 import LanguageIcon from "@mui/icons-material/Language";
 import MenuIcon from "@mui/icons-material/Menu";
 import logo from "../../assets/logo-udemy.svg";
-import { useNavigate } from 'react-router-dom';
-
+import { useTranslation } from "react-i18next";
 
 const Header = () => {
-  const [openBusiness, setOpenBusiness] = useState(false);
-  const [openTeach, setOpenTeach] = useState(false);
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const [showSearch, setShowSearch] = useState(false);
-  const isMobile = useMediaQuery("(max-width:768px)");
-  const navigate = useNavigate();
+	const [openBusiness, setOpenBusiness] = useState(false);
+	const [openTeach, setOpenTeach] = useState(false);
+	const [drawerOpen, setDrawerOpen] = useState(false);
+	const [showSearch, setShowSearch] = useState(false);
+	const [anchorEl, setAnchorEl] = useState(null);
+	const [userData, setUserData] = useState(null);
+	const isMobile = useMediaQuery("(max-width:768px)");
+	const location = useLocation();
+	const navigate = useNavigate();
+	const { user } = useContext(UserContext);
 
+	useEffect(() => {
+		const fetchUserData = async () => {
+			if (user) {
+				try {
+					const userDocRef = doc(db, "Users", user.uid);
+					const docSnap = await getDoc(userDocRef);
+					if (docSnap.exists()) {
+						setUserData(docSnap.data());
+					}
+				} catch (error) {
+					console.error("Error fetching user data:", error);
+				}
+			}
+		};
+		fetchUserData();
+	}, [user]);
+	const toggleDrawer = () => {
+		setDrawerOpen(!drawerOpen);
+	};
 
-  const toggleDrawer = () => {
-    setDrawerOpen(!drawerOpen);
-  };
+	const handleMenuOpen = (event) => {
+		setAnchorEl(event.currentTarget);
+	};
 
-  return (
-    <AppBar position="static" sx={{ backgroundColor: "#fff" }} elevation={1}>
-      <Box sx={{ px: 2, py: 1 }}>
-        {/* Header */}
-        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          {isMobile ? (
-            <>
-              {/* Menu Icon */}
-              <IconButton onClick={toggleDrawer}>
-                <MenuIcon />
-              </IconButton>
+	const handleMenuClose = () => {
+		setAnchorEl(null);
+	};
 
-              {/* Logo Centered */}
-              <Box sx={{ position: "absolute", left: "50%", transform: "translateX(-50%)" }}>
-                <img src={logo} style={{ width: 90 }} alt="logo" />
-              </Box>
+	const handleLogout = async () => {
+		try {
+			await auth.signOut();
+			navigate("/");
+		} catch (error) {
+			console.error("Error logging out:", error);
+		}
+		handleMenuClose();
+	};
 
-              {/* Icons on Right */}
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <IconButton onClick={() => setShowSearch(!showSearch)}>
-                  <SearchIcon />
-                </IconButton>
+	const { t, i18n } = useTranslation();
+	const toggleLanguage = () => {
+		const newLang = i18n.language === "en" ? "ar" : "en";
+		i18n.changeLanguage(newLang);
+		localStorage.setItem("lang", newLang);
+	};
+	useEffect(() => {
+		const savedLang = localStorage.getItem("lang");
+		if (savedLang) {
+			i18n.changeLanguage(savedLang);
+		}
+	}, [i18n]);
 
-                <IconButton>
-                  <ShoppingCartOutlinedIcon />
-                </IconButton>
-              </Box>
-            </>
-          ) : (
-            <Box sx={{ display: "flex", alignItems: "center", gap: 2, width: "100%" }}>
-              {/* Logo */}
-              <img src={logo} style={{ width: 90 }} alt="logo" />
+	return (
+		<AppBar position="static" sx={{ backgroundColor: "#fff" }} elevation={1}>
+			<Box sx={{ px: 2, py: 1 }}>
+				{/* Header */}
+				<Box
+					sx={{
+						display: "flex",
+						justifyContent: "space-between",
+						alignItems: "center",
+					}}>
+					{isMobile ? (
+						<>
+							{/* Menu Icon */}
+							<IconButton onClick={toggleDrawer}>
+								<MenuIcon />
+							</IconButton>
+							{/* Logo Centered */}{" "}
+							<Box
+								sx={{
+									position: "absolute",
+									left: "50%",
+									transform: "translateX(-50%)",
+									cursor: "pointer",
+								}}
+								onClick={() => navigate("/")}>
+								<img src={logo} style={{ width: 90 }} alt="logo" />
+							</Box>
+							{/* Icons on Right */}
+							<Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+								<IconButton onClick={() => setShowSearch(!showSearch)}>
+									<SearchIcon />
+								</IconButton>{" "}
+								<IconButton onClick={() => navigate("/cart")}>
+									<ShoppingCartOutlinedIcon />
+								</IconButton>
+							</Box>
+						</>
+					) : (
+						<>
+							{" "}
+							<Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+								<Box sx={{ cursor: "pointer" }} onClick={() => navigate("/")}>
+									<img src={logo} style={{ width: 90 }} alt="logo" />
+								</Box>
+								<Typography sx={linkStyle}>{t("Explore")}</Typography>
+							</Box>
+							{/* Search Bar */}
+							<Paper
+								component="form"
+								onSubmit={(e) => e.preventDefault()}
+								sx={{
+									...searchBarStyle,
+									flexGrow: 1,
+									maxWidth: 600,
+								}}>
+								<IconButton type="submit" sx={searchBtnStyle}>
+									<SearchIcon sx={{ color: "gray" }} />
+								</IconButton>
+								<InputBase
+									sx={{ flex: 1, fontSize: "16px" }}
+									placeholder={t("Search for anything")}
+								/>
+							</Paper>
+							<Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+								<Box
+									onMouseEnter={() => setOpenBusiness(true)}
+									onMouseLeave={() => setOpenBusiness(false)}
+									sx={{ position: "relative" }}>
+									<Typography sx={linkStyle}>{t("Udemy Business")}</Typography>
+									{openBusiness && (
+										<Box sx={popoverStyle}>
+											<Typography
+												variant="h6"
+												fontWeight="bold"
+												sx={{ color: "#001a33" }}>
+												{t(
+													"Get your team access to over 27,000 top Udemy courses, anytime, anywhere."
+												)}
+											</Typography>
+											<Button
+												variant="contained"
+												size="small"
+												sx={businessBtnStyle}>
+												{t("Try Udemy Business")}
+											</Button>
+										</Box>
+									)}
+								</Box>
 
-              {/* Explore */}
-              <Typography sx={linkStyle}>Explore</Typography>
-
-              {/* Search Bar */}
-              <Paper
-                component="form"
-                onSubmit={(e) => e.preventDefault()}
-                sx={{
-                  ...searchBarStyle,
-                  flexGrow: 1,
-                  maxWidth: 600,
-                }}
-              >
-                <IconButton type="submit" sx={searchBtnStyle}>
-                <SearchIcon sx={{ color: "gray" }} />
-                </IconButton>
-                <InputBase sx={{ flex: 1, fontSize: "16px" }} placeholder="Search for anything" />
-              </Paper>
-
-              {/* Udemy Business */}
-              <Box
-                onMouseEnter={() => setOpenBusiness(true)}
-                onMouseLeave={() => setOpenBusiness(false)}
-                sx={{ position: "relative" }}
-              >
-                <Typography sx={linkStyle}>Udemy Business</Typography>
-                {openBusiness && (
-                  <Box sx={popoverStyle}>
-                    <Typography variant="h6" fontWeight="bold" sx={{ color: "#001a33" }}>
-                      Get your team access to over 27,000 top Udemy courses, anytime, anywhere.
-                    </Typography>
-                    <Button variant="contained" size="small" sx={businessBtnStyle} >
-                      Try Udemy Business
-                    </Button>
-                  </Box>
-                )}
-              </Box>
-
-              {/* Teach on Udemy */}
-              <Box
-                onMouseEnter={() => setOpenTeach(true)}
-                onMouseLeave={() => setOpenTeach(false)}
-                sx={{ position: "relative" }}
-              >
-                <Typography sx={linkStyle}>Teach on Udemy</Typography>
-                {openTeach && (
-                  <Box sx={popoverStyle}>
-                    <Typography variant="h6" fontWeight="bold" sx={{ color: "#001a33" }}>
-                      Turn what you know into an opportunity and reach millions around the world.
-                    </Typography>
-                    <Button variant="contained" sx={teachBtnStyle}>Learn more</Button>
-                  </Box>
-                )}
-              </Box>
-
-              {/* Icons and Buttons */}
-              <IconButton onClick={() => navigate('/cart')}>
-                  <ShoppingCartOutlinedIcon />
-                </IconButton>
-
-              <Button variant="outlined" sx={loginBtnStyle} onClick={() => navigate('/login')}>Log in</Button>
-              <Button variant="contained" sx={signupBtnStyle} onClick={() => navigate('/signup')}> Sign up</Button>
-              <Button variant="outlined" sx={langBtnStyle}>
-                <LanguageIcon />
-              </Button>
-            </Box>
-          )}
-        </Box>
-
-        {/* Search Bar - Mobile */}
-        {isMobile && showSearch && (
-          <Box sx={{ mt: 2 }}>
-            <Paper
-              component="form"
-              onSubmit={(e) => e.preventDefault()}
-              sx={{ ...searchBarStyle, width: "100%" }}
-            >
-              <InputBase sx={{ flex: 1, fontSize: "16px" }} placeholder="Search..." />
-              <IconButton type="submit" sx={searchBtnStyle}>
-                <SearchIcon sx={{ color: "#fff" }} />
-              </IconButton>
-            </Paper>
-          </Box>
-        )}
-
-        {/* Drawer */}
-        <Drawer anchor="left" open={drawerOpen} onClose={toggleDrawer}>
-          <Box sx={{ width: 250 }}>
-            <List>
-              <ListItem><ListItemText primary="Explore" /></ListItem>
-              <ListItem><ListItemText primary="Udemy Business" /></ListItem>
-              <ListItem><ListItemText primary="Teach on Udemy" /></ListItem>
-              <ListItem><Button variant="outlined" sx={loginBtnStyle}>LOG IN</Button></ListItem>
-              <ListItem><Button variant="contained" sx={signupBtnStyle}>SIGN UP</Button></ListItem>
-              <ListItem>
-                <ListItemIcon>
-                  <LanguageIcon />
-                </ListItemIcon>
-              </ListItem>
-            </List>
-          </Box>
-        </Drawer>
-      </Box>
-    </AppBar>
-  );
+								<Box
+									onMouseEnter={() => setOpenTeach(true)}
+									onMouseLeave={() => setOpenTeach(false)}
+									sx={{ position: "relative" }}>
+									<Typography sx={linkStyle}>{t("Teach on Udemy")}</Typography>
+									{openTeach && (
+										<Box sx={popoverStyle}>
+											<Typography
+												variant="h6"
+												fontWeight="bold"
+												sx={{ color: "#001a33" }}>
+												{t(
+													"Turn what you know into an opportunity and reach millions around the world."
+												)}
+											</Typography>
+											<Button variant="contained" sx={teachBtnStyle}>
+												{t("Learn more")}
+											</Button>
+										</Box>
+									)}
+								</Box>
+								{user ? (
+									<>
+										<IconButton
+											sx={outlinedIconStyle}
+											onClick={() => navigate("/wishlist")}>
+											<FavoriteBorderIcon />
+										</IconButton>
+										<IconButton sx={outlinedIconStyle}>
+											<NotificationsOutlinedIcon />
+										</IconButton>
+										<IconButton
+											sx={iconBtnStyle}
+											onClick={() => navigate("/cart")}>
+											<ShoppingCartOutlinedIcon />
+										</IconButton>
+										<IconButton onClick={handleMenuOpen}>
+											<Avatar
+												src={userData?.profile_picture}
+												sx={{ width: 32, height: 32, bgcolor: "#8000ff" }}>
+												{user.email?.[0].toUpperCase()}
+											</Avatar>
+										</IconButton>
+										<Menu
+											anchorEl={anchorEl}
+											open={Boolean(anchorEl)}
+											onClose={handleMenuClose}
+											anchorOrigin={{
+												vertical: "bottom",
+												horizontal: "right",
+											}}
+											transformOrigin={{
+												vertical: "top",
+												horizontal: "right",
+											}}>
+											<MenuItem
+												onClick={() => {
+													handleMenuClose();
+													navigate("/userprofile");
+												}}>
+												{t("Profile")}
+											</MenuItem>
+											<MenuItem onClick={handleLogout}>{t("Log out")}</MenuItem>
+										</Menu>
+									</>
+								) : (
+									<>
+										<IconButton
+											sx={iconBtnStyle}
+											onClick={() => navigate("/cart")}>
+											<ShoppingCartOutlinedIcon />
+										</IconButton>
+										{location.pathname !== "/login" && (
+											<Button
+												variant="outlined"
+												sx={loginBtnStyle}
+												onClick={() => navigate("/login")}>
+												{t("Log in")}
+											</Button>
+										)}
+										{location.pathname !== "/signup" && (
+											<Button
+												variant="contained"
+												sx={signupBtnStyle}
+												onClick={() => navigate("/signup")}>
+												{t("Sign up")}
+											</Button>
+										)}
+									</>
+								)}
+								<Button
+									variant="outlined"
+									sx={langBtnStyle}
+									onClick={toggleLanguage}>
+									<LanguageIcon sx={{ mr: 1 }} />
+									{i18n.language === "en" ? "عربي" : "English"}
+								</Button>
+							</Box>
+						</>
+					)}
+				</Box>
+				{/* Search Bar - Mobile */}
+				{isMobile && showSearch && (
+					<Box sx={{ mt: 2 }}>
+						<Paper
+							component="form"
+							onSubmit={(e) => e.preventDefault()}
+							sx={{ ...searchBarStyle, width: "100%" }}>
+							<InputBase
+								sx={{ flex: 1, fontSize: "16px" }}
+								placeholder={t("Search...")}
+							/>
+							<IconButton type="submit" sx={searchBtnStyle}>
+								<SearchIcon sx={{ color: "#fff" }} />
+							</IconButton>
+						</Paper>
+					</Box>
+				)}{" "}
+				{/* Drawer */}
+				<Drawer anchor="left" open={drawerOpen} onClose={toggleDrawer}>
+					<Box sx={{ width: 250 }}>
+						<List>
+							<ListItem>
+								<ListItemText primary={t("Explore")} />
+							</ListItem>
+							<ListItem>
+								<ListItemText primary={t("Udemy Business")} />
+							</ListItem>
+							<ListItem>
+								<ListItemText primary={t("Teach on Udemy")} />
+							</ListItem>
+							{user ? (
+								<>
+									<ListItem>
+										<ListItemIcon>
+											<Avatar
+												src={userData?.profile_picture}
+												sx={{ bgcolor: "#8000ff" }}>
+												{user.email?.[0].toUpperCase()}
+											</Avatar>
+										</ListItemIcon>
+										<ListItemText
+											primary={t("Profile")}
+											onClick={() => {
+												navigate("/userprofile");
+												toggleDrawer();
+											}}
+										/>
+									</ListItem>{" "}
+									<ListItem
+										button
+										onClick={() => {
+											navigate("/wishlist");
+											toggleDrawer();
+										}}>
+										<ListItemIcon>
+											<FavoriteBorderIcon />
+										</ListItemIcon>
+										<ListItemText primary={t("Wishlist")} />
+									</ListItem>
+									<ListItem>
+										<ListItemIcon>
+											<NotificationsOutlinedIcon />
+										</ListItemIcon>
+										<ListItemText primary={t("Notifications")} />
+									</ListItem>
+									<ListItem
+										button
+										onClick={() => {
+											navigate("/cart");
+											toggleDrawer();
+										}}>
+										<ListItemIcon>
+											<ShoppingCartOutlinedIcon />
+										</ListItemIcon>
+										<ListItemText primary={t("Shopping Cart")} />
+									</ListItem>
+									<ListItem>
+										<Button
+											variant="outlined"
+											sx={loginBtnStyle}
+											onClick={handleLogout}>
+											{t("LOG OUT")}
+										</Button>
+									</ListItem>
+								</>
+							) : (
+								<>
+									<ListItem>
+										<ListItemIcon>
+											<ShoppingCartOutlinedIcon />
+										</ListItemIcon>
+										<ListItemText primary={t("Shopping Cart")} />
+									</ListItem>
+									{location.pathname !== "/login" && (
+										<ListItem>
+											<Button
+												variant="outlined"
+												sx={loginBtnStyle}
+												onClick={() => {
+													navigate("/login");
+													toggleDrawer();
+												}}>
+												{t("LOG IN")}
+											</Button>
+										</ListItem>
+									)}
+									{location.pathname !== "/signup" && (
+										<ListItem>
+											<Button
+												variant="contained"
+												sx={signupBtnStyle}
+												onClick={() => {
+													navigate("/signup");
+													toggleDrawer();
+												}}>
+												{t("SIGN UP")}
+											</Button>
+										</ListItem>
+									)}
+								</>
+							)}
+							<ListItem>
+								<Button
+									variant="outlined"
+									sx={langBtnStyle}
+									onClick={toggleLanguage}>
+									<LanguageIcon sx={{ mr: 1 }} />
+									{i18n.language === "en" ? "عربي" : "English"}
+								</Button>
+							</ListItem>
+						</List>
+					</Box>
+				</Drawer>
+			</Box>
+		</AppBar>
+	);
 };
 
 // Styles
 const linkStyle = {
-  cursor: "pointer",
-  px: 1,
-  py: 1,
-  borderRadius: "4px",
-  transition: "0.2s",
-  color: "#001a33",
-  "&:hover": {
-    color: "#8000ff",
-    backgroundColor: "#e0ccff",
-  },
+	cursor: "pointer",
+	px: 1,
+	py: 1,
+	borderRadius: "4px",
+	transition: "0.2s",
+	color: "#001a33",
+	"&:hover": {
+		color: "#8000ff",
+		backgroundColor: "#e0ccff",
+	},
 };
 
 const iconBtnStyle = {
-  color: "#001a33",
-  borderRadius: "4px",
-  "&:hover": {
-    backgroundColor: "#e0ccff",
-    color: "#8000ff",
-  },
+	color: "#001a33",
+	borderRadius: "4px",
+	"&:hover": {
+		backgroundColor: "#e0ccff",
+		color: "#8000ff",
+	},
+};
+
+const outlinedIconStyle = {
+	...iconBtnStyle,
+	"& .MuiSvgIcon-root": {
+		stroke: "currentColor",
+		strokeWidth: 1,
+	},
 };
 
 const loginBtnStyle = {
-  color: "#8000ff",
-  borderColor: "#8000ff",
-  textTransform: "none",
-  fontWeight: "bold",
-  borderRadius: "4px",
-  py: 1,
-  "&:hover": {
-    backgroundColor: "#e0ccff",
-    borderColor: "#8000ff",
-  },
+	color: "#8000ff",
+	borderColor: "#8000ff",
+	textTransform: "none",
+	fontWeight: "bold",
+	borderRadius: "4px",
+	py: 1,
+	"&:hover": {
+		backgroundColor: "#e0ccff",
+		borderColor: "#8000ff",
+	},
 };
 
 const signupBtnStyle = {
-  backgroundColor: "#8000ff",
-  color: "#fff",
-  textTransform: "none",
-  fontWeight: "bold",
-  borderRadius: "4px",
-  py: 1,
-  "&:hover": {
-    backgroundColor: "#6a1b9a",
-  },
+	backgroundColor: "#8000ff",
+	color: "#fff",
+	textTransform: "none",
+	fontWeight: "bold",
+	borderRadius: "4px",
+	py: 1,
+	"&:hover": {
+		backgroundColor: "#6a1b9a",
+	},
 };
 
 const langBtnStyle = {
-  color: "rgb(37, 36, 36)",
-  borderColor: "#8000ff",
-  textTransform: "none",
-  borderRadius: "4px",
-  py: 1,
-  "&:hover": {
-    backgroundColor: "#e0ccff",
-    borderColor: "#8000ff",
-  },
+	color: "rgb(37, 36, 36)",
+	borderColor: "#8000ff",
+	textTransform: "none",
+	borderRadius: "4px",
+	py: 1,
+	"&:hover": {
+		backgroundColor: "#e0ccff",
+		borderColor: "#8000ff",
+	},
 };
 
 const popoverStyle = {
-  position: "absolute",
-  top: "100%",
-  left: 0,
-  bgcolor: "#fff",
-  boxShadow: 3,
-  p: 2,
-  mt: 1,
-  borderRadius: 2,
-  zIndex: 10,
-  minWidth: 250,
+	position: "absolute",
+	top: "100%",
+	left: 0,
+	bgcolor: "#fff",
+	boxShadow: 3,
+	p: 2,
+	mt: 1,
+	borderRadius: 2,
+	zIndex: 10,
+	minWidth: 250,
 };
 
 const businessBtnStyle = {
-  backgroundColor: "#8000ff",
-  fontWeight: "bold",
-  width: "100%",
+	backgroundColor: "#8000ff",
+	fontWeight: "bold",
+	width: "100%",
 };
 
 const teachBtnStyle = {
-  backgroundColor: "#8000ff",
-  fontWeight: "bold",
-  width: "100%",
+	backgroundColor: "#8000ff",
+	fontWeight: "bold",
+	width: "100%",
 };
 
 const searchBarStyle = {
-  p: "0px 0px",
-  display: "flex",
-  alignItems: "left",
-  borderRadius: 999,
-  border: "1px solid gray",
-  // transition: "0.2s",
-  "&:focus-within": {
-    borderColor: "#8000ff",
-  },
+	p: "0px 0px",
+	display: "flex",
+	alignItems: "left",
+	borderRadius: 999,
+	border: "1px solid gray",
+	// transition: "0.2s",
+	"&:focus-within": {
+		borderColor: "#8000ff",
+	},
 };
 
 const searchBtnStyle = {
-  backgroundColor: "transparent",
-  borderRadius: "50%",
-  p: 2,
-  ml: 1,
-  transition: "0.2s",
-  "&:hover": {
-    backgroundColor: "transparent",
-  },
-  "& .MuiSvgIcon-root": {
-    color: "gray",
-    transition: "0.2s",
-  },
-  "&:hover .MuiSvgIcon-root": {
-    color: "black",
-  },
+	backgroundColor: "transparent",
+	borderRadius: "50%",
+	p: 2,
+	ml: 1,
+	transition: "0.2s",
+	"&:hover": {
+		backgroundColor: "transparent",
+	},
+	"& .MuiSvgIcon-root": {
+		color: "gray",
+		transition: "0.2s",
+	},
+	"&:hover .MuiSvgIcon-root": {
+		color: "black",
+	},
 };
 
 

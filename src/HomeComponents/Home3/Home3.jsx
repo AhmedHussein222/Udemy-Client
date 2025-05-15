@@ -1,5 +1,6 @@
-import React from "react";
 import Ai from "../../assets/ai.png";
+// import React, { useState } from 'react';
+
 import {
   Box,
   Typography,
@@ -99,15 +100,15 @@ const boozData = [
   {
     logo: logo3,
     title:
-      "Eventbrite Navigates Change Through Skill-Building and Leadership Development",
+      "Eventbrite Navigates Change Through Skill-Building",
     stats: [
       {
         percent: "4,800+",
-        text: "increase in employee enrollments for professional development courses",
+        text: "increase in employee enrollments ",
       },
       {
         percent: "65%",
-        text: "boosted team efficiencyrevenue growth supported by a business model backed by learning",
+        text: "boosted team efficiencyrevenue growth ",
       },
     ],
     image: UB3,
@@ -122,6 +123,8 @@ const boozData = [
     image: UB4,
   },
 ];
+
+
 
 export default function Home3() {
   return (
@@ -152,10 +155,10 @@ export default function Home3() {
         <div
           style={{
             display: "flex",
-            gap: "16px",
+            justifyContent:'space-around',
             overflowX: "auto",
             scrollbarWidth: "none", // Firefox
-            msOverflowStyle: "none", // IE/Edge
+            msOverflowStyle: "none", 
             margin: "0 auto", // لضمان أن الكروت في منتصف الصفحة
             paddingBottom: "16px", // إذا أردت مساحة بين الكروت والفوتر
           }}
@@ -198,41 +201,62 @@ export default function Home3() {
       </div>
 
       {/* AI for Business Leaders */}
-      <Grid
-        container
-        spacing={4}
-        alignItems="center"
-        justifyContent="space-between"
-        mb={6}
-        sx={{ display: "flex", flexDirection: { xs: "column", md: "row" } }}
-      >
-        <Grid item xs={12} md={6}>
-          <Typography
-            variant="h4"
-            fontWeight={700}
-            color="#15243f"
-            gutterBottom
-            fontFamily="initial"
-          >
-            AI for Business Leaders
-          </Typography>
-          <Typography variant="body1" paragraph>
-            Build an AI-habit for you and your team that builds hands-on skills
-            to help you lead effectively.
-          </Typography>
-          <Button variant="outlined" endIcon={<ArrowForwardIcon />}>
-            Start Learning
-          </Button>
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <Box
-            component="img"
-            src={Ai}
-            width="80%" // أو أي عرض تفضليه للصورة
-            alt="AI cards"
-          />
-        </Grid>
-      </Grid>
+    
+<Grid
+  container
+  alignItems="center"
+  justifyContent="space-between"
+  wrap="no-wrap"
+  mb={6}
+  spacing={2}
+  sx={{
+    flexDirection: { xs: 'column', md: 'row' }, 
+  }}
+>
+  <Grid item xs={12} md={6} >
+    <Typography
+      variant="h4"
+      fontWeight={700}
+      color="#15243f"
+      gutterBottom
+      fontFamily="initial"
+    >
+      AI for Business Leaders
+    </Typography>
+    <Typography variant="body1" paragraph>
+      Build an AI-habit for you and your<br />team that builds hands-on skills
+      to help you lead effectively.
+    </Typography>
+    <Button variant="outlined" endIcon={<ArrowForwardIcon />}>
+      Start Learning
+    </Button>
+  </Grid>
+
+  <Grid
+    item
+    xs={12}
+    md={6}
+    width= '90%'
+    sx={{
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      mt: { xs: 4, md: 0 }, 
+      
+    }}
+  >
+    <Box
+      component="img"
+      src={Ai}
+      alt="AI cards"
+      sx={{
+        maxWidth: '80%',
+        width: '80%',
+        height: 'auto',
+      }}
+    />
+  </Grid>
+</Grid>
 
       {/* Trending Now */}
       <Box mb={6} sx={{ backgroundColor: "#f5f5f5", p: 3, borderRadius: 1 }}>
@@ -242,6 +266,7 @@ export default function Home3() {
           color="#15243f"
           gutterBottom
           fontFamily="initial"
+          
         >
           Trending Now
         </Typography>
@@ -313,88 +338,76 @@ export default function Home3() {
       </Box>
       {/* Bloz */}
 
-      <Box sx={{ mb: 6 }}>
-        <Slider
-          dots={true}
-          arrows={false}
-          infinite={true}
-          speed={500}
-          slidesToShow={1}
-          slidesToScroll={1}
+     <Box sx={{ mb: 6 }}>
+  <Slider 
+    dots={true}
+    arrows={false}
+    infinite={true}
+    speed={500}
+    slidesToShow={1}
+    slidesToScroll={1}
+  >
+    {boozData.map((item, index) => (
+      <Box key={index} sx={{ px: 2 }}>
+        <Grid
+          container
+          spacing={4}
+          alignItems="center"
+          justifyContent="space-between"
+          direction={{ xs: "column", md: "row" }}
+          // sx={{ minHeight: "auto" }} 
         >
-          {boozData.map((item, index) => (
-            <Box
-              key={index}
-              sx={{
-                display: "flex",
-                flexDirection: "row", // تأكد من أن العناصر في نفس الصف
-                alignItems: "center", // محاذاة العناصر بشكل عمودي في المركز
-                justifyContent: "space-between",
-                gap: 4,
-              }}
-            >
-              {/* النصوص والزرار */}
-              <Box
-                sx={{
-                  flex: 1,
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "center",
-                }}
-              >
-                <img
-                  src={item.logo}
-                  alt="logo"
-                  style={{ maxWidth: "100px", marginBottom: "16px" }}
-                />
-                <Typography variant="h6" fontWeight={700} gutterBottom>
-                  {item.title}
-                </Typography>
-                <Box sx={{ display: "flex", gap: 4, flexWrap: "wrap", mb: 2 }}>
-                  {item.stats.map((stat, i) => (
-                    <Box key={i}>
-                      <Typography variant="h4" fontWeight={700}>
-                        {stat.percent}
-                      </Typography>
-                      <Typography variant="body2">{stat.text}</Typography>
-                    </Box>
-                  ))}
+          {/* النصوص */}
+          <Grid item xs={12} md={6}>
+            <img
+              src={item.logo}
+              alt="logo"
+              style={{ maxWidth: "1 rem", marginBottom: "16px" }}
+            />
+            <Typography variant="h6" fontWeight={700} gutterBottom>
+              {item.title}
+            </Typography>
+            <Box sx={{ display: "flex", gap: 4, flexWrap: "wrap", mb: 2 }}>
+              {item.stats.map((stat, i) => (
+                <Box key={i}>
+                  <Typography variant="h4" fontWeight={700}>
+                    {stat.percent}
+                  </Typography>
+                  <Typography variant="body2">{stat.text}</Typography>
                 </Box>
-                <Button
-                  variant="contained"
-                  sx={{ mt: 3, width: "fit-content" }}
-                  endIcon={<ArrowForwardIcon />}
-                >
-                  Read full story
-                </Button>
-              </Box>
-
-              {/* الصورة */}
-              <Box
-                sx={{
-                  flex: 1,
-                  height: { xs: "300px", md: "100%" },
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <Box
-                  component="img"
-                  src={item.image}
-                  alt="Booz Allen Hamilton"
-                  sx={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                    borderRadius: 2,
-                  }}
-                />
-              </Box>
+              ))}
             </Box>
-          ))}
-        </Slider>
+            <Button 
+              variant="contained"
+              sx={{ mt: 3, width: "fit-content", backgroundColor:"#7560ab" }}
+              endIcon={<ArrowForwardIcon />}
+            >
+              Read full story
+            </Button>
+          </Grid>
+
+          {/* الصورة */}
+          <Grid item xs={12} md={6}>
+            <Box
+              component="img"
+              src={item.image}
+              alt="Booz Allen Hamilton"
+              sx={{
+                width: "100%",
+                height: "60vh",
+                objectFit: "cover",
+                borderRadius: 2,
+              }}
+            />
+          </Grid>
+        </Grid>
       </Box>
+    ))}
+  </Slider>
+</Box>
+
+
+
     </Box>
   );
 }

@@ -1,7 +1,9 @@
 import { Box, Button, Card, CardActions, CardContent, Grid, Link, Stack, Typography } from '@mui/material'
 import React from 'react'
+import { useNavigate } from 'react-router-dom';
 
 function Home() {
+  const navigate = useNavigate();
   return (
     <Box>
 <Box sx={{ mb: 6}}>
@@ -24,6 +26,7 @@ function Home() {
                 type="submit"
                 fullWidth
                 variant="contained"
+                onClick={() => navigate('/instructor/create')}
                 sx={{
                   backgroundColor: '#8000ff',
                   color: '#fff',
