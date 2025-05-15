@@ -9,7 +9,10 @@ import Welcomehome from "./Components/Instructor Dashboard/welcomehome";
 import Login from "./Components/LoginUsers/Login";
 import Signup from "./Components/SignUpStudents/Signup";
 import InsMain from "./Components/Instructor Dashboard/components/Main/Main";
-import Home from "./Components/Instructor Dashboard/components/Home/home";
+// import Home from "./Components/Instructor Dashboard/components/Home/home";
+import Home from "./Components/Home/Home";
+import HomeLogin from "./Components/HomeAfterLogin/HomeAfterLogin";
+
 
 const router = createBrowserRouter([
   {
@@ -21,11 +24,13 @@ const router = createBrowserRouter([
       { path: "signup", element: <Signup /> },
       { path: "instructor-signup", element: <InsSignup /> },
       { path: "", element: <Welcomehome /> },
+      { path: "/home", element: <Home /> },
+      { path: "/home2", element: <HomeLogin /> },
     ],
   },
   { path: "instructor", element: <InsMain />, 
     children:[
-      { path: "", element: <Home /> },
+      // { path: "", element: <Home /> },
       { path: "create", element: <CreateCourse /> },
 
     ]
