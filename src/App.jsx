@@ -23,7 +23,11 @@ import { prefixer } from "stylis";
 import { ThemeProvider, createTheme } from "@mui/material";
 import Userprofile from "./Components/Userprofile/userprofile";
 import { UserContext } from "./context/UserContext";
-import Home from "./Components//Home/Home";
+import Home from "./Components/Home/Home";
+import HomeAfterLogin from "./Components/HomeAfterLogin/HomeLogin";
+import CatCourses from "./Components/Courses/CatCourses";
+import SubCourses from "./Components/Courses/SubCourses";
+
 
 import InsHome from "./Components/Instructor Dashboard/components/Home/home";
 import EditCourse from "./Components/Instructor Dashboard/components/Edit Course/edit";
@@ -42,6 +46,9 @@ const router = createBrowserRouter([
 			{ path: "signup", element: <Signup /> },
 			{ path: "instructor-signup", element: <InsSignup /> },
 			{ path: "", element: <Home /> },
+			{ path: "/home2", element: <HomeAfterLogin /> },
+			{ path: "/category/:categoryId", element: <CatCourses /> },
+			{ path: "/subcategory/:subcategoryId", element: <SubCourses /> },
 		],
 	},
 	{ path: "category", element: <Category /> },
