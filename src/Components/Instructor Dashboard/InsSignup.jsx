@@ -50,7 +50,7 @@ import { useForm } from "react-hook-form";
            <Box sx={{ maxWidth: 500, mx: 'auto', px: 2 }}>
            <Typography
   variant="h4"
-  gutterBottom
+  gutterbottom
   fontWeight="bold"
   textAlign="center"
 >
@@ -59,7 +59,7 @@ import { useForm } from "react-hook-form";
 
       <Typography
         variant="body1"
-        gutterBottom
+        gutterbottom
       >
      Discover a supportive community of online instructors. Get instant access to all course creation resources.
       </Typography>

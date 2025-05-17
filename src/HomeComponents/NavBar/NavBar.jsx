@@ -3,7 +3,7 @@ import Skeleton from "@mui/material/Skeleton";
 import { db } from "../../Firebase/firebase";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import Card from "@mui/material/Card";
-import { Button } from "@mui/material";
+import { Accordion, AccordionDetails, AccordionSummary, Button } from "@mui/material";
 import Box from "@mui/material/Box";
 import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
@@ -93,26 +93,60 @@ const NavBar = () => {
   return (
     <div style={{ padding: "20px" }}>
       {/* Categories Tabs */}
-      <div className="navbar-container">
-        <ul className="navbar">
-          {categories.map((category) => (
-            <li
-              key={category.id}
-              className={`nav-item ${
-                selectedCategory?.id === category.id ? "selected" : ""
-              }`}
-              onClick={() => {
-                setSelectedCategory(category);
-                setSelectedSubcategory(null);
-                setCourses([]);
-                fetchSubcategories(category.id, true);
-              }}
-            >
-              {category.name}
-            </li>
-          ))}
-        </ul>
-      </div>
+     {/* Categories - Desktop */}
+<div className="navbar-container desktop-only">
+  <ul className="navbar">
+    {categories.map((category) => (
+      <li
+        key={category.id}
+        className={`nav-item ${
+          selectedCategory?.id === category.id ? "selected" : ""
+        }`}
+        onClick={() => {
+          setSelectedCategory(category);
+          setSelectedSubcategory(null);
+          setCourses([]);
+          fetchSubcategories(category.id, true);
+        }}
+      >
+        {category.name}
+      </li>
+    ))}
+  </ul>
+</div>
+
+{/* Categories - Mobile Accordion */}
+<div className="mobile-only">
+  <Accordion>
+    <AccordionSummary expandIcon={<span>▼</span>}>
+      <Typography>
+        {selectedCategory?.name || "Select Category"}
+      </Typography>
+    </AccordionSummary>
+    <AccordionDetails>
+      {categories.map((category) => (
+        <div
+          key={category.id}
+          onClick={() => {
+            setSelectedCategory(category);
+            setSelectedSubcategory(null);
+            setCourses([]);
+            fetchSubcategories(category.id, true);
+          }}
+          style={{
+            padding: "10px 0",
+            fontWeight: selectedCategory?.id === category.id ? "bold" : "normal",
+            color: selectedCategory?.id === category.id ? "#1f365d" : "gray",
+            cursor: "pointer",
+          }}
+        >
+          {category.name}
+        </div>
+      ))}
+    </AccordionDetails>
+  </Accordion>
+</div>
+
 
       {/* Subcategories */}
       {subcategories.length > 0 && (
@@ -122,6 +156,7 @@ const NavBar = () => {
             gap: "12px",
             margin: "30px 0",
             flexWrap: "wrap",
+
           }}
         >
           {subcategories.map((subcategory) => (
@@ -175,7 +210,7 @@ const NavBar = () => {
 
       {/* Courses */}
       {!loading && selectedSubcategory && (
-        <div className="hide-scrollbar" style={{ display: "flex", gap: "20px", paddingBottom: "10px" }}>
+        <div className="hide-scrollbar" style={{ display: "flex", paddingBottom: "10px"  ,gap:12}}>
 
           {courses.map((course, index) => (
             <Card key={index} sx={{ width: 250, flex: "0 0 auto" }}>

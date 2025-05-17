@@ -5,11 +5,31 @@
   padding: 10px 20px;
     
   }
-  
+  /* إظهار في الديسكتوب فقط */
+.desktop-only {
+  display: block;
+}
+.mobile-only {
+  display: none;
+}
+
+/* في الشاشات الصغيرة (موبايل) */
+@media (max-width: 768px) {
+  .desktop-only {
+    display: none;
+  }
+
+  .mobile-only {
+    display: block;
+    margin-bottom: 20px;
+  }
+}
+
   
   /* Basic styling for navbar */
   .navbar {
     display: flex;
+    justify-content: space-between;
   gap: 20px;
   list-style: none;
   padding: 0;
