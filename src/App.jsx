@@ -24,10 +24,10 @@ import { ThemeProvider, createTheme } from "@mui/material";
 import Userprofile from "./Components/Userprofile/userprofile";
 import { UserContext } from "./context/UserContext";
 import Home from "./Components//Home/Home";
-
 import InsHome from "./Components/Instructor Dashboard/components/Home/home";
 import EditCourse from "./Components/Instructor Dashboard/components/Edit Course/edit";
 import { CourseProvider } from "./context/CourseContext";
+import { CartProvider } from "./context/CartContext";
 import CourseDetails from "./Components/Coursedetails/CourseDetails"
 import Wishlist from "./Components/Wishlist/wishlist";
 import  Reviews from "./Components/Instructor Dashboard/components/Reviews";
@@ -115,10 +115,12 @@ const App = () => {
 	return (
 		<CacheProvider value={cache}>
 			<ThemeProvider theme={theme}>
-				<CssBaseline />
+				<CssBaseline />{" "}
 				<UserContext.Provider value={{ user }}>
 					<CourseProvider>
-						<RouterProvider router={router} />
+						<CartProvider>
+							<RouterProvider router={router} />
+						</CartProvider>
 					</CourseProvider>
 				</UserContext.Provider>
 			</ThemeProvider>
