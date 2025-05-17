@@ -157,20 +157,10 @@ const CourseCard = ({ course }) => {
 					</div>
 					<div style={{ marginTop: "auto" }}>
 						{course.price === 0 ? (
-							<span
-								style={{
-									fontWeight: "bold",
-									fontSize: "16px",
-								}}>
-								Free
-							</span>
+							<span style={{ fontWeight: "bold", fontSize: "16px" }}>Free</span>
 						) : (
 							<div>
-								<span
-									style={{
-										fontWeight: "bold",
-										fontSize: "16px",
-									}}>
+								<span style={{ fontWeight: "bold", fontSize: "16px" }}>
 									{Number(course.price).toFixed(2)} EGP
 								</span>
 								{course.discount > 0 && (

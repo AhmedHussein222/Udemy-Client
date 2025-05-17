@@ -1,74 +1,120 @@
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import { Box, Button, Paper } from "@mui/material";
+import { useContext, useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { v4 } from "uuid";
+import { UserContext } from "../../../../context/UserContext";
 import {
-  Box,
-  Button,
-  List,
-  ListItem,
-  ListItemText,
-  Paper,
-  Typography,
-} from "@mui/material";
-import { useState, useEffect } from "react";
-import CurriculumBuilder from "./Curriculum";
-import IntendedLearnersForm from "./Intended ";
-import PricingForm from "./price";
-import CourseMessages from "./courseMessage";
-import LandingPage from "./LandingPage";
-import Captions from "./Captions";
-import { useCourseContext } from "../../../../context/CourseContext";
-
-const StepContent = ({ step }) => {
-  switch (step) {
-    case 0:
-      return <IntendedLearnersForm />;
-    case 1:
-      return <CurriculumBuilder />;
-    case 2:
-      return <Captions />;
-    case 3:
-      return <LandingPage />;
-    case 4:
-      return <PricingForm />;
-    case 5:
-      return <CourseMessages />;
-    default:
-      return <Typography>Select a step</Typography>;
-  }
-};
+  addCourse,
+  addLessons,
+  geCourseLessons,
+  getCategories,
+  getSubcategories,
+  updateCourse,
+} from "../../../../Firebase/courses";
+import { errorModal, successModal } from "../alerts";
+import CourseForm from "./CourseForm";
+import CurriculumForm from "./CurriculumForm";
 
 const EditCourse = () => {
-  const { courseData } = useCourseContext();
-  const [selectedStep, setSelectedStep] = useState(0);
+  const navigate = useNavigate();
+  const { user } = useContext(UserContext);
+  user;
+  const location = useLocation();
+  const course = location.state?.course || null;
+
+  const [lessons, setLessons] = useState([]);
   const [isFormValid, setIsFormValid] = useState(false);
+  const [categories, setCats] = useState([]);
+  const [subCategories, setSubCats] = useState([]);
+  const [courseData, setCourseData] = useState(null);
+  const [curriculumData, setCurriculumData] = useState(null);
 
   useEffect(() => {
-    const validateForm = () => {
-      const requiredFields = {
-        intended_learners: courseData.what_will_learn?.length > 0,
-        curriculum: courseData.curriculum?.length > 0,
-        landing_page: courseData.description && courseData.thumbnail,
-        pricing: courseData.price !== undefined,
-      };
+    if (course?.course_id) {
+      geCourseLessons(course.course_id)
+        .then((lessons) => {
+          setLessons(lessons || []);
+        })
+        .catch((error) => {
+          console.error("Error fetching lessons:", error);
+          setLessons([]);
+        });
+    }
+  }, [course]);
 
-      setIsFormValid(Object.values(requiredFields).every(Boolean));
-    };
+  useEffect(() => {
+    getCategories()
+      .then((data) => {
+        setCats(data || []);
+      })
+      .catch((error) => {
+        console.error("Error fetching categories:", error);
+        setCats([]);
+      });
+  }, []);
 
-    validateForm();
+  useEffect(() => {
+    if (courseData?.category_id) {
+      getSubcategories(courseData.category_id)
+        .then((data) => {
+          setSubCats(data || []);
+        })
+        .catch((error) => {
+          console.error("Error fetching subcategories:", error);
+          setSubCats([]);
+        });
+    }
+  }, [courseData?.category_id]);
+
+  const checkFormsValidity = () => {
+    if (!courseData & !curriculumData) return false;
+
+    const hasRequiredFields =
+      courseData.title &&
+      courseData.category_id &&
+      courseData.subcategory_id &&
+      courseData.language &&
+      courseData.thumbnail &&
+      courseData.description &&
+      courseData.duration &&
+      courseData.level &&
+      courseData.what_will_learn?.[0]?.trim() !== "" &&
+      curriculumData?.lessons?.length > 0;
+
+    setIsFormValid(hasRequiredFields);
+  };
+
+  useEffect(() => {
+    checkFormsValidity();
   }, [courseData]);
 
-  const handleSubmitCourse = async () => {
-    if (isFormValid) return;
-
-    const finalCourseData = {
-      ...courseData,
-      is_published: false,
-      created_at: new Date().toISOString(),
-    };
+  const handleSubmitCourse = async (e) => {
+    e.preventDefault();
+    if (!isFormValid) return;
 
     try {
-      console.log("Submitting course:", finalCourseData);
-    } catch (error) {
-      console.error("Error submitting course:", error);
+      if (course) {
+        updateCourse(course.course_id, courseData)
+          .then(()=>{successModal()
+            navigate("/instructor/dashboard/courses");
+          })
+          .catch((err) => {
+            errorModal(
+              "Error",
+              err.message || "Something went wrong while updating the course!"
+            );
+          });
+      } else {
+        const course_id = v4();
+        await addCourse({ ...courseData, course_id, instructor_id: "2" });
+        await addLessons(curriculumData, course_id);
+        successModal( "Course created successfully");
+      }
+    } catch (err) {
+      errorModal(
+        "Error",
+        err.message || "Something went wrong while creating the course!"
+      );
     }
   };
 
@@ -76,179 +122,77 @@ const EditCourse = () => {
     <Box
       sx={{
         display: "flex",
-        backgroundColor: "#f7f9ff",
-        paddingTop: 2,
-        paddingLeft: 5,
+        background: "linear-gradient(135deg, #f7f9ff 60%, #e3e0f7 100%)",
+        minHeight: "100vh",
+        paddingTop: 4,
+        justifyContent: "center",
+        alignItems: "flex-start",
       }}
     >
-      <Box
-        sx={{
-          width: "280px",
-          minWidth: "280px",
-          left: 0,
-          top: 70,
-          bgcolor: "#fff",
-
-          display: "flex",
-          flexDirection: "column",
-          borderRight: "1px solid #e6e6e6",
-          overflowY: "auto",
-        }}
-      >
-        <List sx={{ flex: 1 }}>
-          <Typography
-            sx={{ px: 2, py: 1, fontWeight: "bold", color: "#1c1d1f" }}
-          >
-            Plan your course
-          </Typography>
-          <ListItem
-            button
-            selected={selectedStep === 0}
-            onClick={() => setSelectedStep(0)}
-            sx={{ "&.Mui-selected": { backgroundColor: "#f7f9fa" } }}
-          >
-            <Box sx={{ display: "flex", alignItems: "center", width: "100%" }}>
-              <ListItemText primary="Intended learners" />
-              <CheckCircleIcon
-                sx={{ ml: 1, color: "#a7a1ad" }}
-                fontSize="small"
-              />
-            </Box>
-          </ListItem>
-
-          <Typography
-            sx={{ px: 2, py: 1, fontWeight: "bold", color: "#1c1d1f" }}
-          >
-            Create your content
-          </Typography>
-          <ListItem
-            button
-            selected={selectedStep === 1}
-            onClick={() => setSelectedStep(1)}
-            sx={{ "&.Mui-selected": { backgroundColor: "#f7f9fa" } }}
-          >
-            <Box sx={{ display: "flex", alignItems: "center", width: "100%" }}>
-              <ListItemText primary="Curriculum" />
-              <CheckCircleIcon
-                sx={{ ml: 1, color: "#a7a1ad" }}
-                fontSize="small"
-              />
-            </Box>
-          </ListItem>
-          <ListItem
-            button
-            selected={selectedStep === 2}
-            onClick={() => setSelectedStep(2)}
-            sx={{ "&.Mui-selected": { backgroundColor: "#f7f9fa" } }}
-          >
-            <Box sx={{ display: "flex", alignItems: "center", width: "100%" }}>
-              <ListItemText primary="Captions (optional)" />
-              <CheckCircleIcon
-                sx={{ ml: 1, color: "#9542f5" }}
-                fontSize="small"
-              />
-            </Box>
-          </ListItem>
-
-          <Typography
-            sx={{ px: 2, py: 1, fontWeight: "bold", color: "#1c1d1f" }}
-          >
-            Publish your course
-          </Typography>
-          <ListItem
-            button
-            selected={selectedStep === 3}
-            onClick={() => setSelectedStep(3)}
-            sx={{ "&.Mui-selected": { backgroundColor: "#f7f9fa" } }}
-          >
-            <Box sx={{ display: "flex", alignItems: "center", width: "100%" }}>
-              <ListItemText primary="Course landing page" />
-              <CheckCircleIcon
-                sx={{ ml: 1, color: "#a7a1ad" }}
-                fontSize="small"
-              />
-            </Box>
-          </ListItem>
-          <ListItem
-            button
-            selected={selectedStep === 4}
-            bgcolor={"#9542f5"}
-            onClick={() => setSelectedStep(4)}
-            sx={{
-              "&.Mui-selected": {
-                backgroundColor: selectedStep === 4 ? "#f7f9fa" : "#9542f5",
-              },
-            }}
-          >
-            <Box sx={{ display: "flex", alignItems: "center", width: "100%" }}>
-              <ListItemText primary="Pricing" />
-              <CheckCircleIcon
-                sx={{ ml: 1, color: "#a7a1ad" }}
-                fontSize="small"
-              />
-            </Box>
-          </ListItem>
-          <ListItem
-            button
-            selected={selectedStep === 5}
-            onClick={() => setSelectedStep(5)}
-            sx={{ "&.Mui-selected": { backgroundColor: "#f7f9fa" } }}
-          >
-            <Box sx={{ display: "flex", alignItems: "center", width: "100%" }}>
-              <ListItemText primary="Course messages" />
-              <CheckCircleIcon
-                sx={{ ml: 1, color: "#a7a1ad" }}
-                fontSize="small"
-              />
-            </Box>
-          </ListItem>
-        </List>
-
-        <Box>
-          <Button
-            variant="contained"
-            fullWidth
-            onClick={handleSubmitCourse}
-            disabled={!isFormValid}
-            sx={{
-              backgroundColor: "#a435f0",
-              "&:hover": { backgroundColor: "#8710d8" },
-              "&.Mui-disabled": {
-                backgroundColor: "#e7e7e7",
-                color: "#a6a6a6",
-              },
-            }}
-          >
-            Submit for Review
-          </Button>
-          <Button
-            variant="contained"
-            fullWidth
-            onClick={handleSubmitCourse}
-            disabled={isFormValid}
-            sx={{
-              backgroundColor: "#a435f0",
-              "&:hover": { backgroundColor: "#8710d8" },
-              "&.Mui-disabled": {
-                backgroundColor: "#e7e7e7",
-                color: "#a6a6a6",
-              },
-            }}
-          >
-            Submit for Review
-          </Button>
-        </Box>
-      </Box>
-
       <Box
         component="main"
         sx={{
           flexGrow: 1,
-          p: 3,
+          p: { xs: 1, md: 4 },
+          maxWidth: 900,
+          width: "100%",
         }}
       >
-        <Paper elevation={3} sx={{ mx: 5, pt: 2 }}>
-          <StepContent step={selectedStep} />
+        <Paper
+          elevation={6}
+          sx={{
+            mx: { xs: 0, md: 5 },
+            pt: 4,
+            pb: 4,
+            px: { xs: 2, md: 6 },
+            borderRadius: 4,
+            boxShadow: "0 8px 32px 0 rgba(60,60,120,0.10)",
+          }}
+        >
+          <form onSubmit={handleSubmitCourse}>
+            <CourseForm
+              defaultValues={{
+                ...course,
+              }}
+              subCategories={subCategories}
+              categories={categories}
+              onChange={setCourseData}
+            />
+
+            <CurriculumForm
+              course_id={course?.course_id}
+              defaultlessons={lessons}
+              onChange={setCurriculumData}
+            />
+
+            <Box sx={{ mt: 5, display: "flex", justifyContent: "center" }}>
+              <Button
+                type="submit"
+                variant="contained"
+                size="large"
+                disabled={!isFormValid}
+                sx={{
+                  background:
+                    "linear-gradient(90deg,rgb(105, 25, 159) 60%, #8710d8 100%)",
+                  fontWeight: 600,
+                  fontSize: 18,
+                  py: 1.5,
+                  borderRadius: 2,
+                  boxShadow: "0 2px 8px 0 rgba(164,53,240,0.10)",
+                  "&:hover": {
+                    background:
+                      "linear-gradient(90deg, #8710d8 60%, #a435f0 100%)",
+                  },
+                  "&.Mui-disabled": {
+                    backgroundColor: "#e7e7e7",
+                    color: "#a6a6a6",
+                  },
+                }}
+              >
+                {course ?"Update" : "Create"} Course
+              </Button>
+            </Box>
+          </form>
         </Paper>
       </Box>
     </Box>

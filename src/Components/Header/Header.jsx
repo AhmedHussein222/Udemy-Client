@@ -55,6 +55,7 @@ const Header = () => {
 					const docSnap = await getDoc(userDocRef);
 					if (docSnap.exists()) {
 						setUserData(docSnap.data());
+						
 					}
 				} catch (error) {
 					console.error("Error fetching user data:", error);
@@ -62,7 +63,9 @@ const Header = () => {
 			}
 		};
 		fetchUserData();
+		
 	}, [user]);
+
 	const toggleDrawer = () => {
 		setDrawerOpen(!drawerOpen);
 	};
@@ -193,7 +196,7 @@ const Header = () => {
 									onMouseEnter={() => setOpenTeach(true)}
 									onMouseLeave={() => setOpenTeach(false)}
 									sx={{ position: "relative" }}>
-									<Typography sx={linkStyle}>{t("Teach on Udemy")}</Typography>
+									<Typography onClick={() => navigate("/Welcomehome")} sx={linkStyle}>{t("Teach on Udemy")}</Typography>
 									{openTeach && (
 										<Box sx={popoverStyle}>
 											<Typography
