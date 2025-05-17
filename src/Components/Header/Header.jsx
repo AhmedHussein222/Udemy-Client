@@ -19,6 +19,7 @@ import {
 	MenuItem,
 	Avatar,
 	Badge,
+	Divider,
 } from "@mui/material";
 import { useLocation, useNavigate } from "react-router-dom";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
@@ -55,7 +56,6 @@ const Header = () => {
 					const docSnap = await getDoc(userDocRef);
 					if (docSnap.exists()) {
 						setUserData(docSnap.data());
-						
 					}
 				} catch (error) {
 					console.error("Error fetching user data:", error);
@@ -63,7 +63,6 @@ const Header = () => {
 			}
 		};
 		fetchUserData();
-		
 	}, [user]);
 
 	const toggleDrawer = () => {
@@ -196,7 +195,11 @@ const Header = () => {
 									onMouseEnter={() => setOpenTeach(true)}
 									onMouseLeave={() => setOpenTeach(false)}
 									sx={{ position: "relative" }}>
-									<Typography onClick={() => navigate("/Welcomehome")} sx={linkStyle}>{t("Teach on Udemy")}</Typography>
+									<Typography
+										onClick={() => navigate("/Welcomehome")}
+										sx={linkStyle}>
+										{t("Teach on Udemy")}
+									</Typography>
 									{openTeach && (
 										<Box sx={popoverStyle}>
 											<Typography
@@ -248,15 +251,217 @@ const Header = () => {
 											transformOrigin={{
 												vertical: "top",
 												horizontal: "right",
+											}}
+											PaperProps={{
+												elevation: 0,
+												sx: {
+													overflow: "visible",
+													filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
+													mt: 1.5,
+													minWidth: 300,
+													maxHeight: "calc(100vh - 64px)",
+													"& .MuiMenu-list": {
+														padding: 0,
+														maxHeight: "calc(100vh - 64px)",
+														overflowY: "auto",
+														overflowX: "hidden",
+														"&::-webkit-scrollbar": {
+															width: "6px",
+														},
+														"&::-webkit-scrollbar-track": {
+															background: "transparent",
+														},
+														"&::-webkit-scrollbar-thumb": {
+															background: "#8000ff20",
+															borderRadius: "3px",
+															"&:hover": {
+																background: "#8000ff40",
+															},
+														},
+													},
+													"& .MuiMenuItem-root": {
+														px: 2,
+														py: 1.5,
+														"&:hover": {
+															backgroundColor: "#e0ccff",
+															color: "#8000ff",
+															"& .MuiTypography-root": {
+																color: "#8000ff",
+															},
+															"& .MuiSvgIcon-root": {
+																color: "#8000ff",
+															},
+														},
+													},													"& .MuiDivider-root": {
+														margin: "4px 0",
+														borderColor: "#d1d2e0",
+													},
+												},
 											}}>
 											<MenuItem
 												onClick={() => {
 													handleMenuClose();
 													navigate("/userprofile");
+												}}
+												sx={{
+													p: 2,
+													"&:hover": {
+														backgroundColor: "#e0ccff",
+														"& .MuiTypography-root": {
+															color: "#8000ff",
+														},
+													},
 												}}>
-												{t("Profile")}
+												<Box
+													sx={{
+														display: "flex",
+														alignItems: "center",
+														width: "100%",
+													}}>
+													<Avatar
+														src={userData?.profile_picture}
+														sx={{
+															width: 40,
+															height: 40,
+															mr: 2,
+															bgcolor: "#8000ff",
+														}}>
+														{user?.email?.[0].toUpperCase()}
+													</Avatar>
+													<Box>
+														<Typography
+															variant="subtitle1"
+															sx={{ fontWeight: "bold" }}>
+															{userData?.first_name} {userData?.last_name}
+														</Typography>
+														<Typography variant="body2" color="text.secondary">
+															{user?.email}
+														</Typography>
+													</Box>
+												</Box>
 											</MenuItem>
-											<MenuItem onClick={handleLogout}>{t("Log out")}</MenuItem>
+											<Divider sx={{ borderColor: "#d1d2e0", my: 1 }} />
+											<MenuItem
+												onClick={() => {
+													handleMenuClose();
+													navigate("/userprofile");
+												}}>
+												{t("My Learning")}
+											</MenuItem>
+											<MenuItem
+												onClick={() => {
+													handleMenuClose();
+													navigate("/cart");
+												}}>
+												{t("My Cart")}
+											</MenuItem>
+											<MenuItem
+												onClick={() => {
+													handleMenuClose();
+													navigate("/wishlist");
+												}}>
+												{t("Wishlist")}
+											</MenuItem>
+											<MenuItem
+												onClick={() => {
+													handleMenuClose();
+													navigate("/Welcomehome");
+												}}>
+												{t("Teach on Udemy")}
+											</MenuItem>
+											<Divider sx={{ borderColor: "#d1d2e0", my: 1 }} />
+											<MenuItem
+												onClick={() => {
+													handleMenuClose();
+													navigate("/notifications");
+												}}>
+												{t("Notifications")}
+											</MenuItem>
+											<MenuItem
+												onClick={() => {
+													handleMenuClose();
+													navigate("/messages");
+												}}>
+												{t("Messages")}
+											</MenuItem>
+											<Divider sx={{ borderColor: "#d1d2e0", my: 1 }} />
+											<MenuItem
+												onClick={() => {
+													handleMenuClose();
+													navigate("/userprofile");
+												}}>
+												{t("Account Settings")}
+											</MenuItem>
+											<MenuItem
+												onClick={() => {
+													handleMenuClose();
+													navigate("/payment");
+												}}>
+												{t("Payment Methods")}
+											</MenuItem>
+											<MenuItem
+												onClick={() => {
+													handleMenuClose();
+													navigate("/subscriptions");
+												}}>
+												{t("Subscriptions")}
+											</MenuItem>
+											<MenuItem
+												onClick={() => {
+													handleMenuClose();
+													navigate("/credits");
+												}}>
+												{t("Udemy Credits")}
+											</MenuItem>
+											<MenuItem
+												onClick={() => {
+													handleMenuClose();
+													navigate("/purchase-history");
+												}}>
+												{t("Purchase History")}
+											</MenuItem>
+											<MenuItem
+												onClick={() => {
+													handleMenuClose();
+													navigate("/userprofile");
+												}}>
+												{t("Public Profile")}
+											</MenuItem>
+											<MenuItem
+												onClick={() => {
+													handleMenuClose();
+													navigate("/userprofile");
+												}}>
+												{t("Edit Profile")}
+											</MenuItem>
+											<Divider sx={{ borderColor: "#d1d2e0", my: 1 }} />
+											<MenuItem
+												onClick={() => {
+													handleMenuClose();
+													navigate("/help");
+												}}>
+												{t("Help and Support")}
+											</MenuItem>												<MenuItem
+												onClick={() => {
+													handleMenuClose();
+													toggleLanguage();
+												}}
+												sx={{
+													display: "flex",
+													alignItems: "center",
+													justifyContent: "space-between",
+													width: "100%",
+												}}>
+												<Box sx={{ display: "flex", alignItems: "center" }}>
+													<LanguageIcon sx={{ mr: 1 }} />
+													{i18n.language === "en" ? "عربي" : "English"}
+												</Box>
+
+											</MenuItem>
+											<Divider sx={{ borderColor: "#d1d2e0", my: 1 }} />
+											<MenuItem onClick={handleLogout} sx={{ color: "#d32f2f" }}>
+												{t("Log Out")}
+											</MenuItem>
 										</Menu>
 									</>
 								) : (

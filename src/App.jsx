@@ -24,7 +24,6 @@ import { ThemeProvider, createTheme } from "@mui/material";
 import Userprofile from "./Components/Userprofile/userprofile";
 import { UserContext } from "./context/UserContext";
 import Home from "./Components//Home/Home";
-
 import InsHome from "./Components/Instructor Dashboard/components/Home/home";
 import EditCourse from "./Components/Instructor Dashboard/components/Edit Course/edit";
 import { CourseProvider } from "./context/CourseContext";
