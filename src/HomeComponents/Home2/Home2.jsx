@@ -105,7 +105,6 @@ const Home2 = () => {
           id: doc.id,
           ...doc.data(),
         }));
-        console.log("Courses data:", coursesData); // هنا 👈
         setCourses(coursesData);
       } catch (error) {
         console.error("Error fetching courses:", error);

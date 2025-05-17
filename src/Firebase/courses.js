@@ -82,9 +82,25 @@ export async function deleteCourse(courseId) {
     const coursesCollection = collection(db, "Courses");
     const lessonsCollection = collection(db, "Lessons");
 
-    const courseRef = doc(coursesCollection, courseId);
+    // البحث عن الكورس باستخدام course_id
+    const coursesSnapshot = await getDocs(coursesCollection);
+    let courseDocId = null;
+    
+    coursesSnapshot.forEach((doc) => {
+      if (doc.data().course_id === courseId) {
+        courseDocId = doc.id;
+      }
+    });
+
+    if (!courseDocId) {
+      throw new Error("Course not found");
+    }
+
+    // حذف الكورس باستخدام معرف المستند
+    const courseRef = doc(coursesCollection, courseDocId);
     batch.delete(courseRef);
 
+    // حذف الدروس المرتبطة
     const lessonsSnapshot = await getDocs(lessonsCollection);
     lessonsSnapshot.forEach((doc) => {
       if (doc.data().course_id === courseId) {
@@ -93,7 +109,7 @@ export async function deleteCourse(courseId) {
     });
 
     await batch.commit();
-    alert("Course and associated lessons deleted successfully!");
+    return true;
   } catch (error) {
     console.error("Error deleting course:", error);
     throw error;
@@ -178,3 +194,23 @@ export async function getInstructorReviews(instructorId) {
   }
   
 }
+export async function updateLessons(lessonsData) {
+  try {
+    const batch = writeBatch(db);
+    const lessonsCollection = collection(db, "Lessons");
+    
+    for (const lesson of lessonsData) {
+      const lessonRef = doc(lessonsCollection, lesson.id);
+      const {...lessonData } = lesson; 
+      batch.update(lessonRef, lessonData);
+    }
+
+    await batch.commit();
+    return true;
+  } catch (error) {
+    return error.message
+  }
+}
+
+
+
