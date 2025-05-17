@@ -30,7 +30,9 @@ import EditCourse from "./Components/Instructor Dashboard/components/Edit Course
 import { CourseProvider } from "./context/CourseContext";
 import CourseDetails from "./Components/Coursedetails/CourseDetails"
 import Wishlist from "./Components/Wishlist/wishlist";
-
+import  Reviews from "./Components/Instructor Dashboard/components/Reviews";
+import Revenue from "./Components/Instructor Dashboard/components/Revenue";
+import PaymentPage from "./Components/payment/test";
 
 const router = createBrowserRouter([
 	{
@@ -45,16 +47,23 @@ const router = createBrowserRouter([
 			{ path: "instructor-signup", element: <InsSignup /> },
 			{ path: "coursedetails/:id", element: <CourseDetails /> },
 			{ path: "", element: <Home /> },
+			{ path: "Welcomehome", element: <Welcomehome /> },
+
 		],
 	},
 	{ path: "category", element: <Category /> },
+	{ path: "pay", element: <PaymentPage /> },
+
 	{
 		path: "instructor",
 		element: <InsMain />,
 		children: [
 			{ path: "", element: <InsHome /> },
+			{ path: "courses" , element: <InsHome /> },
 			{ path: "create", element: <CreateCourse /> },
 			{ path: "edit", element: <EditCourse /> },
+			{ path: "reviews", element: <Reviews /> },
+			{ path: "revenue", element: <Revenue /> },
 		],
 	},
 ]);
