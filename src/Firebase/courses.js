@@ -1,4 +1,4 @@
-import { addDoc, collection, doc, getDocs, writeBatch } from "firebase/firestore";
+import { addDoc, collection, doc, getDocs, updateDoc, writeBatch } from "firebase/firestore";
 import { db } from "./firebase";
 
 export async function getCategories() {
@@ -38,32 +38,26 @@ export async function addCourse(courseData) {
   try {
     const coursesCollection = collection(db, "Courses");
     const newCourseRef = await addDoc(coursesCollection, courseData);
-    alert("Course added successfully!");
     return newCourseRef.id;
   } catch (error) {
     console.error("Error adding course:", error);
     throw error;
   }
 }
-export async function addLessons(lessonsData) {
-  try {
+export async function addLessons(lessonsData , courseId) {
     const batch = writeBatch(db);
     const lessonsCollection = collection(db, "Lessons");
     
     const lessonIds = [];
     lessonsData.lessons.forEach((lessonData) => {
       const newLessonRef = doc(lessonsCollection);
-      batch.set(newLessonRef, lessonData);
+      batch.set(newLessonRef, {...lessonData, course_id: courseId});
       lessonIds.push(newLessonRef.id);
     });
 
     await batch.commit();
-    alert("Lessons added successfully!");
     return lessonIds;
-  } catch (error) {
-    console.error("Error adding lessons:", error);
-    throw error;
-  }
+
 }
 export async function deleteLessons(lessonIds) {
   try {
@@ -105,26 +99,51 @@ export async function deleteCourse(courseId) {
     throw error;
   }
 }
-export async function deleteCoursed(courseId) {
+export async function geCourseLessons(courseId) {
   try {
-    const batch = writeBatch(db);
-    const coursesCollection = collection(db, "Courses");
-    const lessonsCollection = collection(db, "Lessons");
+    const allLessons = collection(db, "Lessons");
 
-    const courseRef = doc(coursesCollection, courseId);
-    batch.delete(courseRef);
-
-    const lessonsSnapshot = await getDocs(lessonsCollection);
-    lessonsSnapshot.forEach((doc) => {
+    let lessons =  []
+    const snapshot = await getDocs(allLessons);
+    snapshot.forEach((doc) => {
       if (doc.data().course_id === courseId) {
-        batch.delete(doc.ref);
+        lessons.push({ ...doc.data() });
       }
     });
+    return lessons;
 
-    await batch.commit();
-    alert("Course and associated lessons deleted successfully!");
   } catch (error) {
-    console.error("Error deleting course:", error);
+    console.error("Error  :", error.message);
+    throw error;
+  }
+}
+export async function getInsCourses(instructor) {
+  try {
+    const allcourses = collection(db, "Courses");
+
+    let courses =  []
+    const snapshot = await getDocs(allcourses);
+    snapshot.forEach((doc) => {
+      if (doc.data().instructor_id === instructor) {
+        courses.push({ ...doc.data() });
+      }
+    });
+    return courses;
+
+  } catch (error) {
+    console.error("Error  :", error.message);
+    throw error;
+  }
+}
+export async function updateCourse(courseId, courseData) {
+  try {
+    const coursesCollection = collection(db, "Courses");
+    const courseRef = doc(coursesCollection, courseId);
+    await updateDoc(courseRef, courseData);
+    alert("Course updated successfully!");
+    return true;
+  } catch (error) {
+    console.error("Error updating course:", error);
     throw error;
   }
 }

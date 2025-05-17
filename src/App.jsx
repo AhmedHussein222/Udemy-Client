@@ -29,7 +29,8 @@ import InsHome from "./Components/Instructor Dashboard/components/Home/home";
 import EditCourse from "./Components/Instructor Dashboard/components/Edit Course/edit";
 import { CourseProvider } from "./context/CourseContext";
 import Wishlist from "./Components/Wishlist/wishlist";
-
+import  Reviews from "./Components/Instructor Dashboard/components/Reviews";
+import Revenue from "./Components/Instructor Dashboard/components/Revenue";
 const router = createBrowserRouter([
 	{
 		path: "/",
@@ -42,6 +43,8 @@ const router = createBrowserRouter([
 			{ path: "signup", element: <Signup /> },
 			{ path: "instructor-signup", element: <InsSignup /> },
 			{ path: "", element: <Home /> },
+			{ path: "Welcomehome", element: <Welcomehome /> },
+
 		],
 	},
 	{ path: "category", element: <Category /> },
@@ -50,8 +53,11 @@ const router = createBrowserRouter([
 		element: <InsMain />,
 		children: [
 			{ path: "", element: <InsHome /> },
+			{ path: "courses" , element: <InsHome /> },
 			{ path: "create", element: <CreateCourse /> },
 			{ path: "edit", element: <EditCourse /> },
+			{ path: "reviews", element: <Reviews /> },
+			{ path: "revenue", element: <Revenue /> },
 		],
 	},
 ]);

@@ -1,54 +1,105 @@
-import React, { Children, useState } from 'react';
-import { Box, Drawer, Button, List, Divider, ListItem, ListItemButton, ListItemIcon, ListItemText, Grid, Stack } from '@mui/material';
-import OndemandVideoIcon from '@mui/icons-material/OndemandVideo';
-import CommentOutlinedIcon from '@mui/icons-material/CommentOutlined';
-import BuildOutlinedIcon from '@mui/icons-material/BuildOutlined';
-import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined';
+import AccountCircle from '@mui/icons-material/AccountCircle';
 import BarChartOutlinedIcon from '@mui/icons-material/BarChartOutlined';
+import BuildOutlinedIcon from '@mui/icons-material/BuildOutlined';
+import CommentOutlinedIcon from '@mui/icons-material/CommentOutlined';
+import ExpandLess from '@mui/icons-material/ExpandLess';
+import ExpandMore from '@mui/icons-material/ExpandMore';
+import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined';
+import MenuIcon from '@mui/icons-material/Menu';
+import OndemandVideoIcon from '@mui/icons-material/OndemandVideo';
+import { Box, Collapse, Drawer, Grid, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Stack } from '@mui/material';
 import AppBar from '@mui/material/AppBar';
+import IconButton from '@mui/material/IconButton';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
-import IconButton from '@mui/material/IconButton';
-import MenuIcon from '@mui/icons-material/Menu';
-import AccountCircle from '@mui/icons-material/AccountCircle';
-import MenuItem from '@mui/material/MenuItem';
-import Menu from '@mui/material/Menu';
 import { grey } from '@mui/material/colors';
-import Home from '../Home/home';
-import CreateCourse from '../CreateCourse/createcourse';
+import React, { useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 
+const menuItems = [
+  {
+    title: 'Courses',
+    icon: <OndemandVideoIcon sx={{ color: 'white' }} />,
+    subItems: [
+      { title: 'All Courses', path: '/instructor/courses' },
+      { title: 'Create Course', path: '/instructor/create' },
+    ]
+  },
+  {
+    title: 'Communication',
+    icon: <CommentOutlinedIcon sx={{ color: 'white' }} />,
+    subItems: [
+      { title: 'Messages', path: '/instructor/messages' },
+      { title: 'Announcements', path: '/instructor/announcements' }
+    ]
+  },
+  {
+    title: 'Performance',
+    icon: <BarChartOutlinedIcon sx={{ color: 'white' }} />,
+    subItems: [
+      { title: 'Reviews', path: '/instructor/reviews' },
+      { title: 'Revenue', path: '/instructor/revenue' }
+    ]
+  },
+  {
+    title: 'Tools',
+    icon: <BuildOutlinedIcon sx={{ color: 'white' }} />,
+    subItems: [
+      { title: 'Settings', path: '/instructor/settings' },
+      { title: 'Resources', path: '/instructor/resources' }
+    ]
+  },
+  {
+    title: 'Resources',
+    icon: <HelpOutlineOutlinedIcon sx={{ color: 'white' }} />,
+    subItems: [
+      { title: 'Help Center', path: '/instructor/help' },
+      { title: 'Community', path: '/instructor/community' }
+    ]
+  }
+];
 
-const iconMap = {
-  Courses: <OndemandVideoIcon sx={{ color: 'white' }} />,
-  Communication: <CommentOutlinedIcon sx={{ color: 'white' }} />,
-  Performance: <BarChartOutlinedIcon sx={{ color: 'white' }} />,
-  Tools: <BuildOutlinedIcon sx={{ color: 'white' }} />,
-  Resources: <HelpOutlineOutlinedIcon sx={{ color: 'white' }} />,
-};
 function InsMain() {
-  let nav = useNavigate()
-  const [open, setOpen] = useState(false); 
-//   const [auth, setAuth] = React.useState(true);
-  const [anchorEl, setAnchorEl] = React.useState(null); 
+  let nav = useNavigate();
+  const [open, setOpen] = useState(false);
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const [expandedItems, setExpandedItems] = useState({});
 
   const toggleDrawer = (newOpen) => () => {
     setOpen(newOpen);
   };
 
+  const handleMenu = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleItemClick = (title) => {
+    setExpandedItems(prev => ({
+      ...prev,
+      [title]: !prev[title]
+    }));
+  };
+
+  const handleSubItemClick = (path) => {
+    nav(path);
+    setOpen(false);
+  };
+
   const DrawerList = (
-    <Box
-      sx={{
-        width: 250,
-        color: 'white',
-        backgroundColor: 'black',
-        display: 'flex',
-        flexDirection: 'column',
-        height: '100%',
-      }}
-      role="presentation"
-      onClick={toggleDrawer(false)}
-    >
+    <Box sx={{ 
+      width: 250,
+      color: 'white',
+      backgroundColor: 'black',
+      display: 'flex',
+      flexDirection: 'column',
+      height: '100%',
+    }} role="presentation">
       <Grid container justifyContent="center" sx={{ margin: 2 }}>
         <Grid item>
           <img
@@ -61,29 +112,46 @@ function InsMain() {
           />
         </Grid>
       </Grid>
-
-      <List sx={{ flexGrow: 1 }}>
-        {['Courses', 'Communication', 'Performance', 'Tools', 'Resources'].map((text) => (
-          <ListItem key={text} disablePadding>
-            <ListItemButton onClick={()=>{ nav(`/instructor/${text.toLowerCase()}`) }}>
-              <ListItemIcon>{iconMap[text]}</ListItemIcon>
-              <ListItemText primary={text} />
-            </ListItemButton>
-          </ListItem>
+      <List>
+        {menuItems.map((item) => (
+          <React.Fragment key={item.title}>
+            <ListItem disablePadding>
+              <ListItemButton 
+                onClick={() => handleItemClick(item.title)}
+                sx={{
+                  '&:hover': {
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  },
+                }}
+              >
+                <ListItemIcon>{item.icon}</ListItemIcon>
+                <ListItemText primary={item.title} />
+                {expandedItems[item.title] ? <ExpandLess /> : <ExpandMore />}
+              </ListItemButton>
+            </ListItem>
+            <Collapse in={expandedItems[item.title]} timeout="auto" unmountOnExit>
+              <List component="div" disablePadding>
+                {item.subItems.map((subItem) => (
+                  <ListItemButton
+                    key={subItem.title}
+                    onClick={() => handleSubItemClick(subItem.path)}
+                    sx={{
+                      pl: 4,
+                      '&:hover': {
+                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                      },
+                    }}
+                  >
+                    <ListItemText primary={subItem.title} />
+                  </ListItemButton>
+                ))}
+              </List>
+            </Collapse>
+          </React.Fragment>
         ))}
       </List>
     </Box>
   );
-
-  
-  const handleMenu = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
 
   return (
     <Box sx={{ flexGrow: 1 }}>
@@ -102,39 +170,39 @@ function InsMain() {
                 <MenuIcon sx={{ color: 'black' }} />
               </IconButton>
             </Box>
-              <Box display="flex" alignItems="center">
-                <Typography variant="body1" onClick={() => nav("/")} color={grey[700]} sx={{ fontWeight: 'bold' }}>
-                  Student
-                </Typography>
-                <IconButton
-                  size="large"
-                  aria-label="account of current user"
-                  aria-controls="menu-appbar"
-                  aria-haspopup="true"
-                  onClick={handleMenu}
-                  color="inherit"
-                >
-                  <AccountCircle sx={{ color: 'black' }} />
-                </IconButton>
-                <Menu
-                  id="menu-appbar"
-                  anchorEl={anchorEl}
-                  anchorOrigin={{
-                    vertical: 'top',
-                    horizontal: 'right',
-                  }}
-                  keepMounted
-                  transformOrigin={{
-                    vertical: 'top',
-                    horizontal: 'right',
-                  }}
-                  open={Boolean(anchorEl)}
-                  onClose={handleClose}
-                >
-                  <MenuItem onClick={handleClose}>Profile</MenuItem>
-                  <MenuItem onClick={handleClose}>My account</MenuItem>
-                </Menu>
-              </Box>
+            <Box display="flex" alignItems="center">
+              <Typography variant="body1" onClick={() => nav("/")} color={grey[700]} sx={{ fontWeight: 'bold' }}>
+                Student
+              </Typography>
+              <IconButton
+                size="large"
+                aria-label="account of current user"
+                aria-controls="menu-appbar"
+                aria-haspopup="true"
+                onClick={handleMenu}
+                color="inherit"
+              >
+                <AccountCircle sx={{ color: 'black' }} />
+              </IconButton>
+              <Menu
+                id="menu-appbar"
+                anchorEl={anchorEl}
+                anchorOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right',
+                }}
+                keepMounted
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right',
+                }}
+                open={Boolean(anchorEl)}
+                onClose={handleClose}
+              >
+                <MenuItem onClick={handleClose}>Profile</MenuItem>
+                <MenuItem onClick={handleClose}>My account</MenuItem>
+              </Menu>
+            </Box>
           </Stack>
         </Toolbar>
       </AppBar>
@@ -151,12 +219,8 @@ function InsMain() {
       >
         {DrawerList}
       </Drawer>
-    <Outlet />
-    
-    
+      <Outlet />
     </Box>
-
-
   );
 }
 

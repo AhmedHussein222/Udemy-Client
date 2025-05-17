@@ -27,6 +27,7 @@
     "react-toastify": "^11.0.5",
     "slick-carousel": "^1.8.1",
     "stylis-plugin-rtl": "^2.1.1",
+    "sweetalert2": "^11.21.1",
     "uuid": "^11.1.0"
   },
   "devDependencies": {
