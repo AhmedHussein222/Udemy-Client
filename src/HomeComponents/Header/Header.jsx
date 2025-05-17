@@ -29,6 +29,7 @@ import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import logo from "../../assets/logo-udemy.svg";
 import { useNavigate, useLocation } from "react-router-dom";
 import { UserContext } from "../../context/UserContext";
+import { CartContext } from "../../context/cart-context";
 import { signOut } from "firebase/auth";
 import { auth } from "../../Firebase/firebase";
 
@@ -42,6 +43,7 @@ const Header = () => {
 	const navigate = useNavigate();
 	const location = useLocation();
 	const { user } = useContext(UserContext);
+	const { cartItems } = useContext(CartContext);
 
 	const handleMenu = (event) => {
 		setAnchorEl(event.currentTarget);
@@ -98,8 +100,10 @@ const Header = () => {
 									<SearchIcon />
 								</IconButton>
 
-								<IconButton>
-									<ShoppingCartOutlinedIcon />
+								<IconButton onClick={() => navigate("/cart")}>
+									<Badge badgeContent={cartItems.length} color="error">
+										<ShoppingCartOutlinedIcon />
+									</Badge>
 								</IconButton>
 							</Box>
 						</>
@@ -189,7 +193,9 @@ const Header = () => {
 										</Badge>
 									</IconButton>
 									<IconButton onClick={() => navigate("/cart")}>
-										<ShoppingCartOutlinedIcon />
+										<Badge badgeContent={cartItems.length} color="error">
+											<ShoppingCartOutlinedIcon />
+										</Badge>
 									</IconButton>
 									<IconButton onClick={handleMenu}>
 										<Avatar src={user?.photoURL} sx={{ width: 32, height: 32 }}>
@@ -224,7 +230,9 @@ const Header = () => {
 								location.pathname !== "/signup" && (
 									<>
 										<IconButton onClick={() => navigate("/cart")}>
-											<ShoppingCartOutlinedIcon />
+											<Badge badgeContent={cartItems.length} color="error">
+												<ShoppingCartOutlinedIcon />
+											</Badge>
 										</IconButton>
 										<Button
 											variant="outlined"

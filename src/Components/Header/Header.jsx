@@ -18,11 +18,13 @@ import {
 	Menu,
 	MenuItem,
 	Avatar,
+	Badge,
 } from "@mui/material";
 import { useLocation, useNavigate } from "react-router-dom";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import NotificationsOutlinedIcon from "@mui/icons-material/NotificationsOutlined";
 import { UserContext } from "../../context/UserContext";
+import { CartContext } from "../../context/cart-context";
 import { auth, db } from "../../Firebase/firebase";
 import { doc, getDoc } from "firebase/firestore";
 import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
@@ -43,6 +45,7 @@ const Header = () => {
 	const location = useLocation();
 	const navigate = useNavigate();
 	const { user } = useContext(UserContext);
+	const { cartItems } = useContext(CartContext);
 
 	useEffect(() => {
 		const fetchUserData = async () => {
@@ -128,7 +131,9 @@ const Header = () => {
 									<SearchIcon />
 								</IconButton>{" "}
 								<IconButton onClick={() => navigate("/cart")}>
-									<ShoppingCartOutlinedIcon />
+									<Badge badgeContent={cartItems.length} color="error">
+										<ShoppingCartOutlinedIcon />
+									</Badge>
 								</IconButton>
 							</Box>
 						</>
@@ -218,7 +223,9 @@ const Header = () => {
 										<IconButton
 											sx={iconBtnStyle}
 											onClick={() => navigate("/cart")}>
-											<ShoppingCartOutlinedIcon />
+											<Badge badgeContent={cartItems.length} color="error">
+												<ShoppingCartOutlinedIcon />
+											</Badge>
 										</IconButton>
 										<IconButton onClick={handleMenuOpen}>
 											<Avatar
@@ -254,7 +261,9 @@ const Header = () => {
 										<IconButton
 											sx={iconBtnStyle}
 											onClick={() => navigate("/cart")}>
-											<ShoppingCartOutlinedIcon />
+											<Badge badgeContent={cartItems.length} color="error">
+												<ShoppingCartOutlinedIcon />
+											</Badge>
 										</IconButton>
 										{location.pathname !== "/login" && (
 											<Button
