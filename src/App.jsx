@@ -28,10 +28,12 @@ import Home from "./Components//Home/Home";
 import InsHome from "./Components/Instructor Dashboard/components/Home/home";
 import EditCourse from "./Components/Instructor Dashboard/components/Edit Course/edit";
 import { CourseProvider } from "./context/CourseContext";
+import CourseDetails from "./Components/Coursedetails/CourseDetails"
 import Wishlist from "./Components/Wishlist/wishlist";
 import  Reviews from "./Components/Instructor Dashboard/components/Reviews";
 import Revenue from "./Components/Instructor Dashboard/components/Revenue";
 import PaymentPage from "./Components/payment/test";
+
 const router = createBrowserRouter([
 	{
 		path: "/",
@@ -43,6 +45,7 @@ const router = createBrowserRouter([
 			{ path: "wishlist", element: <Wishlist /> },
 			{ path: "signup", element: <Signup /> },
 			{ path: "instructor-signup", element: <InsSignup /> },
+			{ path: "coursedetails/:id", element: <CourseDetails /> },
 			{ path: "", element: <Home /> },
 			{ path: "Welcomehome", element: <Welcomehome /> },
 
