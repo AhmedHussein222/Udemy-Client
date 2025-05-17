@@ -72,7 +72,7 @@ const CourseCard = ({ course }) => {
               <span className="price free">Free</span>
               {course.discount > 0 && (
                 <span className="old-price">
-                  {(course.price + course.discount).toFixed(2)} EGP
+                  {(Number(course.price) + Number(course.discount)).toFixed(2)} EGP
                 </span>
               )}
             </>
@@ -81,8 +81,7 @@ const CourseCard = ({ course }) => {
               <span className="price">{course.price} EGP</span>
               {course.discount > 0 && (
                 <span className="old-price">
-                  {(course.price + course.discount).toFixed(2)} EGP
-                </span>
+{(Number(course.price) + Number(course.discount)).toFixed(2)} EGP                </span>
               )}
             </>
           )}
