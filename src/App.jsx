@@ -28,7 +28,9 @@ import Home from "./Components//Home/Home";
 import InsHome from "./Components/Instructor Dashboard/components/Home/home";
 import EditCourse from "./Components/Instructor Dashboard/components/Edit Course/edit";
 import { CourseProvider } from "./context/CourseContext";
+import CourseDetails from "./Components/Coursedetails/CourseDetails"
 import Wishlist from "./Components/Wishlist/wishlist";
+
 
 const router = createBrowserRouter([
 	{
@@ -41,6 +43,7 @@ const router = createBrowserRouter([
 			{ path: "wishlist", element: <Wishlist /> },
 			{ path: "signup", element: <Signup /> },
 			{ path: "instructor-signup", element: <InsSignup /> },
+			{ path: "coursedetails/:id", element: <CourseDetails /> },
 			{ path: "", element: <Home /> },
 		],
 	},
