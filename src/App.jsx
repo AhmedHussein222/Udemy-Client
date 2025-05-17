@@ -31,6 +31,7 @@ import { CourseProvider } from "./context/CourseContext";
 import Wishlist from "./Components/Wishlist/wishlist";
 import  Reviews from "./Components/Instructor Dashboard/components/Reviews";
 import Revenue from "./Components/Instructor Dashboard/components/Revenue";
+import PaymentPage from "./Components/payment/test";
 const router = createBrowserRouter([
 	{
 		path: "/",
@@ -48,6 +49,8 @@ const router = createBrowserRouter([
 		],
 	},
 	{ path: "category", element: <Category /> },
+	{ path: "pay", element: <PaymentPage /> },
+
 	{
 		path: "instructor",
 		element: <InsMain />,

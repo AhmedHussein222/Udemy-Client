@@ -13,10 +13,10 @@ import {
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  // deleteCourse,
+  deleteCourse,
   getInsCourses,
 } from "../../../../Firebase/courses";
-import { deleteModal } from "../alerts";
+import Swal from "sweetalert2";
 
 function Home() {
   const navigate = useNavigate();
@@ -25,6 +25,7 @@ function Home() {
     getInsCourses("2")
       .then((res) => {
         setCourses(res);
+        
       })
       .catch((error) => {
         Alert(error.message);
@@ -80,7 +81,7 @@ function Home() {
         {courses?.length > 0 ? (
           <Grid container spacing={3} justifyContent="center">
             {courses.map((course) => (
-              <Grid item xs={12} md={10} key={course.id}>
+              <Grid item xs={12} md={10} key={course.course_id}>
                 <Card
                   sx={{
                     p: 2,
@@ -144,9 +145,27 @@ function Home() {
                           variant="outlined"
                           color="error"
                           onClick={() => {
-                            if (deleteModal()) {
-                              // deleteCourse(course.course_id).then().catch()
-                            }
+                            Swal.fire({
+                              title: "Are you sure?",
+                              text: "You won't be able to revert this!",
+                              icon: "warning",
+                              showCancelButton: true,
+                              confirmButtonColor: "#3085d6",
+                              cancelButtonColor: "#d33",
+                              confirmButtonText: "Yes, delete it!",
+                            }).then((result) => {
+                              if (result.isConfirmed) {
+                                deleteCourse(course.course_id).then(()=>{
+                                  Swal.fire({
+                                    title: "Deleted!",
+                                    text: "Your file has been deleted.",
+                                    icon: "success",
+                                  });
+
+                                })
+
+                              } 
+                            });
                           }}
                         >
                           Delete

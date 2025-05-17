@@ -27,14 +27,14 @@ const menuItems = [
       { title: 'Create Course', path: '/instructor/create' },
     ]
   },
-  {
-    title: 'Communication',
-    icon: <CommentOutlinedIcon sx={{ color: 'white' }} />,
-    subItems: [
-      { title: 'Messages', path: '/instructor/messages' },
-      { title: 'Announcements', path: '/instructor/announcements' }
-    ]
-  },
+  // {
+  //   title: 'Communication',
+  //   icon: <CommentOutlinedIcon sx={{ color: 'white' }} />,
+  //   subItems: [
+  //     { title: 'Messages', path: '/instructor/messages' },
+  //     { title: 'Announcements', path: '/instructor/announcements' }
+  //   ]
+  // },
   {
     title: 'Performance',
     icon: <BarChartOutlinedIcon sx={{ color: 'white' }} />,
@@ -43,22 +43,22 @@ const menuItems = [
       { title: 'Revenue', path: '/instructor/revenue' }
     ]
   },
-  {
-    title: 'Tools',
-    icon: <BuildOutlinedIcon sx={{ color: 'white' }} />,
-    subItems: [
-      { title: 'Settings', path: '/instructor/settings' },
-      { title: 'Resources', path: '/instructor/resources' }
-    ]
-  },
-  {
-    title: 'Resources',
-    icon: <HelpOutlineOutlinedIcon sx={{ color: 'white' }} />,
-    subItems: [
-      { title: 'Help Center', path: '/instructor/help' },
-      { title: 'Community', path: '/instructor/community' }
-    ]
-  }
+  // {
+  //   title: 'Tools',
+  //   icon: <BuildOutlinedIcon sx={{ color: 'white' }} />,
+  //   subItems: [
+  //     { title: 'Settings', path: '/instructor/settings' },
+  //     { title: 'Resources', path: '/instructor/resources' }
+  //   ]
+  // },
+  // {
+  //   title: 'Resources',
+  //   icon: <HelpOutlineOutlinedIcon sx={{ color: 'white' }} />,
+  //   subItems: [
+  //     { title: 'Help Center', path: '/instructor/help' },
+  //     { title: 'Community', path: '/instructor/community' }
+  //   ]
+  // }
 ];
 
 function InsMain() {

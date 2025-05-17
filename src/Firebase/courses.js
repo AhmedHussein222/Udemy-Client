@@ -147,3 +147,34 @@ export async function updateCourse(courseId, courseData) {
     throw error;
   }
 }
+export async function getInstructorReviews(instructorId) {
+  try {
+    const coursesCollection = collection(db, "Courses");
+    const reviewsCollection = collection(db, "Reviews");
+
+    const coursesSnapshot = await getDocs(coursesCollection);
+    const reviewsSnapshot = await getDocs(reviewsCollection);
+
+    let courses = [];
+    let reviews = [];
+
+    coursesSnapshot.forEach((doc) => {
+      if (doc.data().instructor_id === instructorId) {
+        courses.push( doc.data().course_id);
+      }
+    });
+
+    reviewsSnapshot.forEach((doc) => {
+      if (courses.includes( doc.data().course_id) ) {
+        reviews.push({ ...doc.data() });
+      }
+      
+    });
+
+    return {  reviews };
+  } catch (error) {
+    console.error("Error fetching instructor reviews:", error);
+    throw error;
+  }
+  
+}
