@@ -12,10 +12,14 @@ import {
   ListItemText,
   Chip,
   Link,
+  Modal,
+  IconButton,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
 import LockIcon from '@mui/icons-material/Lock';
+import CloseIcon from '@mui/icons-material/Close';
+import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import { db, collection, query, where, getDocs } from '../../Firebase/firebase';
 
 const CourseContent = ({ course }) => {
@@ -25,12 +29,13 @@ const CourseContent = ({ course }) => {
   const [totalLectures, setTotalLectures] = useState(0);
   const [totalDuration, setTotalDuration] = useState(0);
   const [watchedVideos, setWatchedVideos] = useState(() => {
-    // جلب الحالة من localStorage لو موجودة
     const saved = localStorage.getItem(`watchedVideos_${course?.id}`);
     return saved ? JSON.parse(saved) : {};
   });
+  const [openModal, setOpenModal] = useState(false);
+  const [selectedVideo, setSelectedVideo] = useState(null);
+  const [videoError, setVideoError] = useState(null);
 
-  // تحويل المدة من دقايق لساعات ودقايق
   const formatDuration = (minutes) => {
     if (!minutes) return '0 min';
     const hours = Math.floor(minutes / 60);
@@ -39,37 +44,120 @@ const CourseContent = ({ course }) => {
     return `${hours} hr ${mins} min`;
   };
 
-  // تسجيل إن الفيديو اتشاف
   const markAsWatched = (lessonId) => {
     const updatedWatched = { ...watchedVideos, [lessonId]: true };
     setWatchedVideos(updatedWatched);
     localStorage.setItem(`watchedVideos_${course?.id}`, JSON.stringify(updatedWatched));
   };
 
+  const isYouTubeUrl = (url) => {
+    return url && (url.includes('youtube.com') || url.includes('youtu.be'));
+  };
+
+  const getYouTubeEmbedUrl = (url) => {
+    try {
+      const urlObj = new URL(url);
+      let videoId = urlObj.searchParams.get('v');
+      if (!videoId && url.includes('youtu.be')) {
+        videoId = url.split('/').pop().split('?')[0];
+      }
+      return videoId ? `https://www.youtube.com/embed/${videoId}?controls=1` : null;
+    } catch {
+      return null;
+    }
+  };
+
+  const validateVideoUrl = async (url) => {
+    if (isYouTubeUrl(url)) {
+      return true; // YouTube URLs are handled via iframe
+    }
+    try {
+      const response = await fetch(url, { method: 'HEAD', mode: 'cors' });
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('video')) {
+        throw new Error('URL does not point to a valid video file');
+      }
+      return true;
+    } catch (error) {
+      console.error('Video URL validation failed:', error);
+      return false;
+    }
+  };
+
+  const handleOpenModal = async (videoUrl, lessonId) => {
+    console.log('Attempting to open modal with video URL:', videoUrl);
+    if (!videoUrl) {
+      setVideoError('No video URL provided for this lesson.');
+      setOpenModal(true);
+      return;
+    }
+    const isValid = await validateVideoUrl(videoUrl);
+    if (!isValid && !isYouTubeUrl(videoUrl)) {
+      setVideoError('Invalid or inaccessible video URL. Try opening the video directly.');
+      setSelectedVideo(videoUrl);
+      setOpenModal(true);
+      return;
+    }
+    setSelectedVideo(videoUrl);
+    setVideoError(null);
+    setOpenModal(true);
+    markAsWatched(lessonId);
+  };
+
+  const handleCloseModal = () => {
+    setOpenModal(false);
+    setSelectedVideo(null);
+    setVideoError(null);
+  };
+
+  const handleVideoError = (e) => {
+    console.error('Video error details:', {
+      code: e.target.error?.code,
+      message: e.target.error?.message,
+      src: e.target.src,
+    });
+    let errorMessage = 'Failed to load or play the video.';
+    switch (e.target.error?.code) {
+      case MediaError.MEDIA_ERR_ABORTED:
+        errorMessage += ' Playback was aborted.';
+        break;
+      case MediaError.MEDIA_ERR_NETWORK:
+        errorMessage += ' A network error occurred.';
+        break;
+      case MediaError.MEDIA_ERR_DECODE:
+        errorMessage += ' The video format is not supported.';
+        break;
+      case MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED:
+        errorMessage += ' The video source is not supported or inaccessible (likely a CORS issue).';
+        break;
+      default:
+        errorMessage += ' An unknown error occurred.';
+    }
+    setVideoError(errorMessage);
+  };
+
   useEffect(() => {
     const fetchLessons = async () => {
       try {
-        // جلب الدروس من Lessons collection بناءً على course_id
         const lessonsQuery = query(
           collection(db, 'Lessons'),
           where('course_id', '==', course.id)
         );
         const lessonsSnap = await getDocs(lessonsQuery);
 
-        // تجميع الدروس
         const lessons = lessonsSnap.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         }));
 
-        // ترتيب الدروس حسب حقل order
         lessons.sort((a, b) => a.order - b.order);
 
-        // حساب إجمالي عدد الدروس وإجمالي المدة
         const lecturesCount = lessons.length;
         const totalMins = lessons.reduce((sum, lesson) => sum + (lesson.duration || 0), 0);
 
-        // افتراض section واحدة لو مافيش تقسيم واضح
         const defaultSection = {
           id: 'section1',
           title: 'Course Lessons',
@@ -107,7 +195,7 @@ const CourseContent = ({ course }) => {
   }
 
   return (
-    <Box sx={{ mb: 4,width: '100%' }}>
+    <Box sx={{ mb: 4, width: '100%' }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
         <Typography variant="h5" fontWeight="bold">
           Course Content
@@ -170,18 +258,17 @@ const CourseContent = ({ course }) => {
                       primary={
                         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            {idx === 0 ? (
+                            {lecture.preview ? (
                               <Link
-                                href={lecture.video_url}
-                                target="_blank"
-                                rel="noopener noreferrer"
+                                component="button"
+                                onClick={() => handleOpenModal(lecture.video_url, lecture.id)}
                                 underline="hover"
                                 sx={{
                                   color: watchedVideos[lecture.id] ? '#ce93d8' : 'text.primary',
                                   fontSize: '0.875rem',
                                   '&:hover': { color: '#ce93d8' },
+                                  textAlign: 'left',
                                 }}
-                                onClick={() => markAsWatched(lecture.id)}
                               >
                                 {lecture.title}
                               </Link>
@@ -196,17 +283,14 @@ const CourseContent = ({ course }) => {
                               <Chip
                                 label="Preview"
                                 size="small"
-                                component={idx === 0 ? Link : 'span'}
-                                href={idx === 0 ? lecture.video_url : undefined}
-                                target={idx === 0 ? '_blank' : undefined}
-                                rel={idx === 0 ? 'noopener noreferrer' : undefined}
+                                component="button"
+                                onClick={() => handleOpenModal(lecture.video_url, lecture.id)}
                                 sx={{
-                                  bgcolor: idx === 0 && watchedVideos[lecture.id] ? '#ce93d8' : 'grey.200',
-                                  color: idx === 0 && watchedVideos[lecture.id] ? 'white' : 'grey.700',
-                                  '&:hover': idx === 0 ? { bgcolor: '#ce93d8', color: 'white' } : {},
-                                  cursor: idx === 0 ? 'pointer' : 'default',
+                                  bgcolor: watchedVideos[lecture.id] ? '#ce93d8' : 'grey.200',
+                                  color: watchedVideos[lecture.id] ? 'white' : 'grey.700',
+                                  '&:hover': { bgcolor: '#ce93d8', color: 'white' },
+                                  cursor: 'pointer',
                                 }}
-                                onClick={idx === 0 ? () => markAsWatched(lecture.id) : undefined}
                               />
                             )}
                             <Typography variant="caption" color="text.secondary">
@@ -223,6 +307,91 @@ const CourseContent = ({ course }) => {
           </Accordion>
         ))}
       </Box>
+
+      <Modal
+        open={openModal}
+        onClose={handleCloseModal}
+        aria-labelledby="video-modal-title"
+        sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+      >
+        <Box
+          sx={{
+            position: 'relative',
+            width: { xs: '90%', sm: '70%', md: '50%' },
+            bgcolor: 'background.paper',
+            boxShadow: 24,
+            borderRadius: 2,
+            p: 2,
+            outline: 'none',
+            maxHeight: '90vh',
+            overflowY: 'auto',
+          }}
+        >
+          <IconButton
+            onClick={handleCloseModal}
+            sx={{ position: 'absolute', top: 8, right: 8, zIndex: 1 }}
+          >
+            <CloseIcon />
+          </IconButton>
+          {selectedVideo && !videoError ? (
+            <Box sx={{ position: 'relative', paddingTop: '56.25%' /* 16:9 aspect ratio */ }}>
+              {isYouTubeUrl(selectedVideo) ? (
+                <iframe
+                  src={getYouTubeEmbedUrl(selectedVideo)}
+                  title="YouTube video player"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    borderRadius: '8px',
+                  }}
+                />
+              ) : (
+                <video
+                  key={selectedVideo}
+                  controls
+                  src={selectedVideo}
+                  onError={handleVideoError}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    borderRadius: '8px',
+                  }}
+                >
+                  <source src={selectedVideo} type="video/mp4" />
+                  Your browser does not support the video tag.
+                </video>
+              )}
+            </Box>
+          ) : (
+            <Box sx={{ p: 2, textAlign: 'center' }}>
+              <Typography color="error" sx={{ mb: 2 }}>
+                {videoError || 'No video selected.'}
+              </Typography>
+              {selectedVideo && (
+                <Button
+                  variant="outlined"
+                  startIcon={<OpenInNewIcon />}
+                  href={selectedVideo}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  sx={{ mt: 1 }}
+                >
+                  Open Video in New Tab
+                </Button>
+              )}
+            </Box>
+          )}
+        </Box>
+      </Modal>
     </Box>
   );
 };
