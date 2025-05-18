@@ -33,6 +33,7 @@ import Wishlist from "./Components/Wishlist/wishlist";
 import  Reviews from "./Components/Instructor Dashboard/components/Reviews";
 import Revenue from "./Components/Instructor Dashboard/components/Revenue";
 import PaymentPage from "./Components/payment/test";
+import Checkout from "./Components/checkout/checkout";
 
 const router = createBrowserRouter([
 	{
@@ -48,6 +49,7 @@ const router = createBrowserRouter([
 			{ path: "coursedetails/:id", element: <CourseDetails /> },
 			{ path: "", element: <Home /> },
 			{ path: "Welcomehome", element: <Welcomehome /> },
+			{ path: "checkout", element: <Checkout /> },
 
 		],
 	},
