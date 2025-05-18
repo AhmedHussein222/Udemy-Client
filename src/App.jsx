@@ -6,6 +6,7 @@ import Cart from "./Components/Cart/Cart";
 import Category from "./Components/Category/Category";
 import Footer from "./Components/Footer/Footer";
 import Header from "./Components/Header/Header";
+import SearchResults from "./Components/Search/SearchResults";
 import CreateCourse from "./Components/Instructor Dashboard/components/CreateCourse/createcourse";
 import InsSignup from "./Components/Instructor Dashboard/InsSignup";
 import Welcomehome from "./Components/Instructor Dashboard/welcomehome";
@@ -28,9 +29,9 @@ import InsHome from "./Components/Instructor Dashboard/components/Home/home";
 import EditCourse from "./Components/Instructor Dashboard/components/Edit Course/edit";
 import { CourseProvider } from "./context/CourseContext";
 import { CartProvider } from "./context/CartContext";
-import CourseDetails from "./Components/Coursedetails/CourseDetails"
+import CourseDetails from "./Components/Coursedetails/CourseDetails";
 import Wishlist from "./Components/Wishlist/wishlist";
-import  Reviews from "./Components/Instructor Dashboard/components/Reviews";
+import Reviews from "./Components/Instructor Dashboard/components/Reviews";
 import Revenue from "./Components/Instructor Dashboard/components/Revenue";
 import PaymentPage from "./Components/payment/test";
 import Checkout from "./Components/checkout/checkout";
@@ -50,6 +51,7 @@ const router = createBrowserRouter([
 			{ path: "signup", element: <Signup /> },
 			{ path: "instructor-signup", element: <InsSignup /> },
 			{ path: "coursedetails/:id", element: <CourseDetails /> },
+			{ path: "search", element: <SearchResults /> },
 			{ path: "", element: <Home /> },
 			{ path: "Welcomehome", element: <Welcomehome /> },
 			{ path: "checkout", element: <Checkout /> },
@@ -67,7 +69,7 @@ const router = createBrowserRouter([
 		</AuthGuard> ,
 		children: [
 			{ path: "", element: <InsHome /> },
-			{ path: "courses" , element: <InsHome /> },
+			{ path: "courses", element: <InsHome /> },
 			{ path: "create", element: <CreateCourse /> },
 			{ path: "edit", element: <EditCourse /> },
 			{ path: "reviews", element: <Reviews /> },
@@ -91,10 +93,9 @@ function Main() {
 }
 
 const App = () => {
-  
-  const { i18n } = useTranslation();
-  const direction = i18n.language === 'ar' ? 'rtl' : 'ltr';
-  const [user, setUser] = useState(null);
+	const { i18n } = useTranslation();
+	const direction = i18n.language === "ar" ? "rtl" : "ltr";
+	const [user, setUser] = useState(null);
 
 	useEffect(() => {
 		const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
