@@ -1,37 +1,39 @@
 /** @format */
 
-import createCache from "@emotion/cache";
-import { CacheProvider } from "@emotion/react";
-import { createTheme, CssBaseline, ThemeProvider } from "@mui/material";
-import { useEffect } from "react";
-import { useTranslation } from "react-i18next";
+import { CssBaseline } from "@mui/material";
 import { createBrowserRouter, Outlet, RouterProvider } from "react-router-dom";
-import { prefixer } from "stylis";
-import rtlPlugin from "stylis-plugin-rtl";
-import Home from "./Components//Home/Home";
 import Cart from "./Components/Cart/Cart";
 import Category from "./Components/Category/Category";
 import Footer from "./Components/Footer/Footer";
 import Header from "./Components/Header/Header";
 import CreateCourse from "./Components/Instructor Dashboard/components/CreateCourse/createcourse";
-import InsMain from "./Components/Instructor Dashboard/components/Main/Main";
 import InsSignup from "./Components/Instructor Dashboard/InsSignup";
 import Welcomehome from "./Components/Instructor Dashboard/welcomehome";
 import Login from "./Components/LoginUsers/Login";
 import Signup from "./Components/SignUpStudents/Signup";
+import InsMain from "./Components/Instructor Dashboard/components/Main/Main";
+import { useEffect, useState } from "react";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "./Firebase/firebase";
+import { useTranslation } from "react-i18next";
+import { CacheProvider } from "@emotion/react";
+import createCache from "@emotion/cache";
+import rtlPlugin from "stylis-plugin-rtl";
+import { prefixer } from "stylis";
+import { ThemeProvider, createTheme } from "@mui/material";
 import Userprofile from "./Components/Userprofile/userprofile";
-import { UserProvider } from "./context/UserContext";
-
-import CourseDetails from "./Components/Coursedetails/CourseDetails";
-import EditCourse from "./Components/Instructor Dashboard/components/Edit Course/edit";
+import { UserContext } from "./context/UserContext";
+import Home from "./Components//Home/Home";
 import InsHome from "./Components/Instructor Dashboard/components/Home/home";
-import Revenue from "./Components/Instructor Dashboard/components/Revenue";
-import Reviews from "./Components/Instructor Dashboard/components/Reviews";
-import PaymentPage from "./Components/payment/test";
-import Wishlist from "./Components/Wishlist/wishlist";
+import EditCourse from "./Components/Instructor Dashboard/components/Edit Course/edit";
 import { CourseProvider } from "./context/CourseContext";
-import AuthGuard from "./Guards/AuthGuard";
-import Unauthorized from "./Pages/Unauthorized.jsx";
+import { CartProvider } from "./context/CartContext";
+import CourseDetails from "./Components/Coursedetails/CourseDetails"
+import Wishlist from "./Components/Wishlist/wishlist";
+import  Reviews from "./Components/Instructor Dashboard/components/Reviews";
+import Revenue from "./Components/Instructor Dashboard/components/Revenue";
+import PaymentPage from "./Components/payment/test";
+import Checkout from "./Components/checkout/checkout";
 
 const router = createBrowserRouter([
 	{
@@ -47,19 +49,16 @@ const router = createBrowserRouter([
 			{ path: "coursedetails/:id", element: <CourseDetails /> },
 			{ path: "", element: <Home /> },
 			{ path: "Welcomehome", element: <Welcomehome /> },
+			{ path: "checkout", element: <Checkout /> },
 
 		],
 	},
 	{ path: "category", element: <Category /> },
 	{ path: "pay", element: <PaymentPage /> },
-	{ path: "unauthorized", element: <Unauthorized /> },
-    
+
 	{
 		path: "instructor",
-		element:  <AuthGuard allowedRoles={['instructor']} > 
-			
-			<InsMain />
-		</AuthGuard>,
+		element: <InsMain />,
 		children: [
 			{ path: "", element: <InsHome /> },
 			{ path: "courses" , element: <InsHome /> },
@@ -87,9 +86,19 @@ const App = () => {
   
   const { i18n } = useTranslation();
   const direction = i18n.language === 'ar' ? 'rtl' : 'ltr';
+  const [user, setUser] = useState(null);
 
 	useEffect(() => {
+		const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+			if (firebaseUser) {
+				setUser(firebaseUser);
+			} else {
+				setUser(null);
+			}
+		});
 		document.body.dir = direction;
+
+		return () => unsubscribe();
 	}, [direction]);
 
 	const cache = createCache({
@@ -108,12 +117,14 @@ const App = () => {
 	return (
 		<CacheProvider value={cache}>
 			<ThemeProvider theme={theme}>
-				<CssBaseline />
-				<UserProvider>
+				<CssBaseline />{" "}
+				<UserContext.Provider value={{ user }}>
 					<CourseProvider>
-						<RouterProvider router={router} />
+						<CartProvider>
+							<RouterProvider router={router} />
+						</CartProvider>
 					</CourseProvider>
-				</UserProvider>
+				</UserContext.Provider>
 			</ThemeProvider>
 		</CacheProvider>
 	);
