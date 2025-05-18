@@ -224,6 +224,7 @@ const Home2 = () => {
 	const [selected, setSelected] = useState(1);
 	const [courses, setCourses] = useState([]);
 
+
 	useEffect(() => {
 		const fetchCourses = async () => {
 			try {
