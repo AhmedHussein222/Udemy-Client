@@ -1,86 +1,85 @@
 import { Box, Card, TextField, Typography } from '@mui/material';
 import { styled } from '@mui/material/styles';
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import Swal from 'sweetalert2';
 import { CartContext } from '../../context/cart-context';
 import { auth, db } from '../../Firebase/firebase';
 import PayPalButton from '../payment/PayPalButton';
 
-const StyledCard = styled(Card)(({ theme }) => ({
-  maxWidth: 400,
-  margin: theme.spacing(2),
-  padding: theme.spacing(2),
-}));
 
-const handleSuccess = async (details, cartItems, getCartTotal) => {
-  const user = auth.currentUser;
-  
-  if (!user) {
-    Swal.fire({
-      icon: "error",
-      title: "خطأ في تسجيل الدخول",
-      text: "يرجى تسجيل الدخول أولاً للمتابعة",
-    });
-    return;
-  }
 
-  try {
-    // تحديث بيانات الدفع
-    await db.collection("payments").add({
-      userId: user.uid,
-      items: cartItems.map(item => ({
-        id: item.id,
-        title: item.title,
-        price: item.price,
-      })),
-      totalAmount: getCartTotal(),
-      paymentDetails: details,
-      paymentId: details.id,
-      method: 'PayPal',
-      timestamp: new Date(),
-    });
-
-    // تحديث بيانات المستخدم لامتلاك الكورس
-    const userRef = db.collection("users").doc(user.uid);
-    const userDoc = await userRef.get();
-    
-    if (userDoc.exists) {
-      const currentCourses = userDoc.data().ownedCourses || [];
-      const newCourses = cartItems.map(item => item.id);
-      
-      await userRef.update({
-        ownedCourses: [...currentCourses, ...newCourses],
-        lastPurchase: new Date()
-      });
-    }
-
-    // إظهار رسالة نجاح
-    await Swal.fire({
-      icon: "success",
-      title: "تم الدفع بنجاح!",
-      text: "تم إضافة الكورسات إلى حسابك",
-      confirmButtonText: "حسناً"
-    });
-
-    // إعادة توجيه المستخدم إلى صفحة الكورسات
-    window.location.href = "/my-courses";
-    
-  } catch (error) {
-    console.error("خطأ في معالجة الدفع:", error);
-    await Swal.fire({
-      icon: "error",
-      title: "حدث خطأ",
-      text: "حدث خطأ أثناء معالجة الدفع. يرجى المحاولة مرة أخرى",
-      confirmButtonText: "حسناً"
-    });
-  }
-};
 
 const CheckoutComponent = () => {
+  const StyledCard = styled(Card)(({ theme }) => ({
+    maxWidth: 400,
+    margin: theme.spacing(2),
+    padding: theme.spacing(2),
+  }));
+  const handleSuccess = async (
+    details, cartItems
+  ) => {
+    const user = auth.currentUser;
+    
+ 
+    try {
+      // Update payment data
+      await db.collection("payments").add({
+        userId: user.uid,
+        items: cartItems.map(item => ({
+          id: item.id,
+          title: item.title,
+          price: item.price,
+        })),
+        totalAmount: total,
+        paymentDetails: details,
+        paymentId: details.id,
+        method: 'PayPal',
+        timestamp: new Date(),
+      });
+  
+      // Update user data for course ownership
+      const userRef = db.collection("users").doc(user.uid);
+      const userDoc = await userRef.get();
+      
+      if (userDoc.exists) {
+        const currentCourses = userDoc.data().ownedCourses || [];
+        const newCourses = cartItems.map(item => item.id);
+        
+        await userRef.update({
+          ownedCourses: [...currentCourses, ...newCourses],
+          lastPurchase: new Date()
+        });
+      }
+  
+      // Show success message
+      await Swal.fire({
+        icon: "success",
+        title: "Payment Successful!",
+        text: "Courses have been added to your account",
+        confirmButtonText: "OK"
+      });
+  
+      // Redirect user to courses page
+      window.location.href = "/my-courses";
+      
+    } catch (error) {
+      console.error("Payment processing error:", error);
+      await Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "An error occurred while processing the payment. Please try again",
+        confirmButtonText: "OK"
+      });
+    }
+  };
   const { cartItems, getCartTotal } =
   useContext(CartContext);
-  console.log('total', getCartTotal());
   
+  let [total , setTotal] = useState(0);
+  useEffect(() => {
+    setTotal(getCartTotal());
+  
+  }, [getCartTotal]);
 
   return (
     <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-start', minHeight: '100vh', backgroundColor: '#f3f4f6', padding: 3 }}>
@@ -115,9 +114,11 @@ const CheckoutComponent = () => {
           <Box sx={{ marginBottom: 3 }}>
             <Typography variant='h6' gutterBottom>Payment method <Box component='span' sx={{ color: 'green', fontSize: '0.8em' }}>Secure and encrypted</Box></Typography>
             <PayPalButton 
-              amount={getCartTotal()}
-              onSuccess={(details) => handleSuccess(details, cartItems, getCartTotal)}
+              amountval={"100"}
+              onSuccess={(details) => handleSuccess(details, cartItems)}
             />
+    
+
           </Box>
 
           {/* Order details */}

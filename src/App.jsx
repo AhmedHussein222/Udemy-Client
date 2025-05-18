@@ -32,11 +32,11 @@ import CourseDetails from "./Components/Coursedetails/CourseDetails"
 import Wishlist from "./Components/Wishlist/wishlist";
 import  Reviews from "./Components/Instructor Dashboard/components/Reviews";
 import Revenue from "./Components/Instructor Dashboard/components/Revenue";
-import PaymentPage from "./Components/payment/test";
 import Checkout from "./Components/checkout/checkout";
 import AuthGuard from "./Guards/AuthGuard";
 import Unauthorized from "./Pages/Unauthorized";
 import CheckoutComponent from "./Components/checkout/checkout";
+import MyLearning from "./Pages/learn";
 
 const router = createBrowserRouter([
 	{
@@ -53,18 +53,20 @@ const router = createBrowserRouter([
 			{ path: "", element: <Home /> },
 			{ path: "Welcomehome", element: <Welcomehome /> },
 			{ path: "checkout", element: <Checkout /> },
+			{path:"/my-learning", element:<MyLearning/>},
 
 		],
 	},
 	{ path: "category", element: <Category /> },
-	{ path: "pay", element: <PaymentPage /> },
 
 	{
 		path: "instructor",
 
-		element: <AuthGuard allowedRoles={["instructor"]} >
+		element:
+		 <AuthGuard allowedRoles={["instructor"]} >
 			<InsMain />
-		</AuthGuard> ,
+		</AuthGuard> 
+		,
 		children: [
 			{ path: "", element: <InsHome /> },
 			{ path: "courses" , element: <InsHome /> },
@@ -140,7 +142,7 @@ const App = () => {
 
 export default App;
 
-// import React from 'react';
+
 // import { BrowserRouter, Routes, Route } from 'react-router-dom';
 // import Layout from './Layout';
 // import Home from './Components/Home/Home';

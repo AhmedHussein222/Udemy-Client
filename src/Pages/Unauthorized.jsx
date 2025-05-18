@@ -38,7 +38,7 @@ const Unauthorized = () => {
             mb: 2
           }}
         >
-          {t('غير مصرح')}
+          {t('Unauthorized')}
         </Typography>
 
         <Typography 
@@ -49,7 +49,7 @@ const Unauthorized = () => {
             maxWidth: '600px'
           }}
         >
-          {t('عذراً، ليس لديك الصلاحيات الكافية للوصول إلى هذه الصفحة.')}
+          {t('Sorry, you do not have sufficient permissions to access this page.')}
         </Typography>
 
         <Box sx={{ display: 'flex', gap: 2 }}>
@@ -65,7 +65,7 @@ const Unauthorized = () => {
               px: 4
             }}
           >
-            {t('العودة للرئيسية')}
+            {t('Back to Home')}
           </Button>
 
           <Button
@@ -82,7 +82,7 @@ const Unauthorized = () => {
               px: 4
             }}
           >
-            {t('تسجيل الدخول')}
+            {t('Login')}
           </Button>
         </Box>
       </Box>

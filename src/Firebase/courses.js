@@ -1,4 +1,13 @@
-import { addDoc, collection, doc, getDocs, updateDoc, writeBatch } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  doc,
+  getDocs,
+  query,
+  updateDoc,
+  where,
+  writeBatch,
+} from "firebase/firestore";
 import { db } from "./firebase";
 
 export async function getCategories() {
@@ -6,9 +15,7 @@ export async function getCategories() {
     const categoriesCollection = collection(db, "Categories");
     const querySnapshot = await getDocs(categoriesCollection);
     const categories = [];
-    querySnapshot.forEach((doc) =>
-      categories.push({  ...doc.data() })
-    );
+    querySnapshot.forEach((doc) => categories.push({ ...doc.data() }));
     return categories;
   } catch (error) {
     console.error("Error fetching categories:", error);
@@ -24,7 +31,7 @@ export async function getSubcategories(categoryId) {
     querySnapshot.forEach((doc) => {
       const data = doc.data();
       if (data.category_id === categoryId) {
-        subcategories.push({...doc.data()});
+        subcategories.push({ ...doc.data() });
       }
     });
 
@@ -44,26 +51,25 @@ export async function addCourse(courseData) {
     throw error;
   }
 }
-export async function addLessons(lessonsData , courseId) {
-    const batch = writeBatch(db);
-    const lessonsCollection = collection(db, "Lessons");
-    
-    const lessonIds = [];
-    lessonsData.lessons.forEach((lessonData) => {
-      const newLessonRef = doc(lessonsCollection);
-      batch.set(newLessonRef, {...lessonData, course_id: courseId});
-      lessonIds.push(newLessonRef.id);
-    });
+export async function addLessons(lessonsData, courseId) {
+  const batch = writeBatch(db);
+  const lessonsCollection = collection(db, "Lessons");
 
-    await batch.commit();
-    return lessonIds;
+  const lessonIds = [];
+  lessonsData.lessons.forEach((lessonData) => {
+    const newLessonRef = doc(lessonsCollection);
+    batch.set(newLessonRef, { ...lessonData, course_id: courseId });
+    lessonIds.push(newLessonRef.id);
+  });
 
+  await batch.commit();
+  return lessonIds;
 }
 export async function deleteLessons(lessonIds) {
   try {
     const batch = writeBatch(db);
     const lessonsCollection = collection(db, "Lessons");
-    
+
     lessonIds.forEach((id) => {
       const lessonRef = doc(lessonsCollection, id);
       batch.delete(lessonRef);
@@ -85,7 +91,7 @@ export async function deleteCourse(courseId) {
     // البحث عن الكورس باستخدام course_id
     const coursesSnapshot = await getDocs(coursesCollection);
     let courseDocId = null;
-    
+
     coursesSnapshot.forEach((doc) => {
       if (doc.data().course_id === courseId) {
         courseDocId = doc.id;
@@ -119,7 +125,7 @@ export async function geCourseLessons(courseId) {
   try {
     const allLessons = collection(db, "Lessons");
 
-    let lessons =  []
+    let lessons = [];
     const snapshot = await getDocs(allLessons);
     snapshot.forEach((doc) => {
       if (doc.data().course_id === courseId) {
@@ -127,7 +133,6 @@ export async function geCourseLessons(courseId) {
       }
     });
     return lessons;
-
   } catch (error) {
     console.error("Error  :", error.message);
     throw error;
@@ -137,7 +142,7 @@ export async function getInsCourses(instructor) {
   try {
     const allcourses = collection(db, "Courses");
 
-    let courses =  []
+    let courses = [];
     const snapshot = await getDocs(allcourses);
     snapshot.forEach((doc) => {
       if (doc.data().instructor_id === instructor) {
@@ -145,7 +150,6 @@ export async function getInsCourses(instructor) {
       }
     });
     return courses;
-
   } catch (error) {
     console.error("Error  :", error.message);
     throw error;
@@ -176,41 +180,94 @@ export async function getInstructorReviews(instructorId) {
 
     coursesSnapshot.forEach((doc) => {
       if (doc.data().instructor_id === instructorId) {
-        courses.push( doc.data().course_id);
+        courses.push(doc.data().course_id);
       }
     });
 
     reviewsSnapshot.forEach((doc) => {
-      if (courses.includes( doc.data().course_id) ) {
+      if (courses.includes(doc.data().course_id)) {
         reviews.push({ ...doc.data() });
       }
-      
     });
 
-    return {  reviews };
+    return { reviews };
   } catch (error) {
     console.error("Error fetching instructor reviews:", error);
     throw error;
   }
-  
 }
 export async function updateLessons(lessonsData) {
   try {
     const batch = writeBatch(db);
     const lessonsCollection = collection(db, "Lessons");
-    
+
     for (const lesson of lessonsData) {
       const lessonRef = doc(lessonsCollection, lesson.id);
-      const {...lessonData } = lesson; 
+      const { ...lessonData } = lesson;
       batch.update(lessonRef, lessonData);
     }
 
     await batch.commit();
     return true;
   } catch (error) {
-    return error.message
+    return error.message;
   }
 }
+export async function getCourseById(courseId) {
+  try {
+    const coursesCollection = collection(db, "Courses");
+    const snapshot = await getDocs(coursesCollection);
+    let course = null;
+    snapshot.forEach((doc) => {
+      if (doc.data().course_id === courseId || doc.id === courseId) {
+        course = { ...doc.data() };
+      }
+    });
+    return course;
+  } catch (error) {
+    console.error("Error fetching course by id:", error);
+    throw error;
+  }
+}
+export async function getCourseReviews(courseId) {
+  try {
+    const reviewsCollection = collection(db, "Reviews");
+    const usersCollection = collection(db, "Users");
 
+    // Query reviews for this course only
+    const reviewsQuery = query(
+      reviewsCollection,
+      where("course_id", "==", courseId)
+    );
+    const [reviewsSnapshot, usersSnapshot] = await Promise.all([
+      getDocs(reviewsQuery),
+      getDocs(usersCollection),
+    ]);
 
+    // Build a map of user_id to user full name
+    const userMap = {};
+    usersSnapshot.forEach((userDoc) => {
+      const user = userDoc.data();
+      if (user.user_id) {
+        userMap[user.user_id] =
+          (user.first_name || "") + " " + (user.last_name || "");
+      }
+    });
+console.log("User Map:", userMap);
 
+    let reviews = [];
+    reviewsSnapshot.forEach((doc) => {
+      const data = doc.data();
+      reviews.push({
+        ...data,
+        userName:
+          userMap[data.user_id] ||
+          "Anonymous",
+      });
+    });
+    return reviews;
+  } catch (error) {
+    console.error("Error fetching course reviews:", error);
+    throw error;
+  }
+}

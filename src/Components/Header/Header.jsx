@@ -189,16 +189,18 @@ const Header = () => {
 											</Button>
 										</Box>
 									)}
-								</Box>								{userData?.role !== "instructor" && (
+								</Box>								{userData?.role !== "instructor" ? (
 									<Box
 										onMouseEnter={() => setOpenTeach(true)}
 										onMouseLeave={() => setOpenTeach(false)}
 										sx={{ position: "relative" }}>
+											
 										<Typography
 											onClick={() => navigate("/Welcomehome")}
 											sx={linkStyle}>
 											{t("Teach on Udemy")}
 										</Typography>
+
 										{openTeach && (
 											<Box sx={popoverStyle}>
 												<Typography
@@ -209,13 +211,19 @@ const Header = () => {
 														"Turn what you know into an opportunity and reach millions around the world."
 													)}
 												</Typography>
-												<Button variant="contained" sx={teachBtnStyle}>
+												<Button onClick={()=>navigate("/Welcomehome")} variant="contained" sx={teachBtnStyle}>
 													{t("Learn more")}
 												</Button>
 											</Box>
 										)}
 									</Box>
-								)}
+								) : <Typography
+								onClick={() => navigate("/instructor")}
+								sx={linkStyle}>
+								{t("Instructor")}
+							</Typography>
+								
+								}
 								{user ? (
 									<>
 										<IconButton
