@@ -12,11 +12,11 @@ import {
 } from "@mui/material";
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 import {
   deleteCourse,
   getInsCourses,
 } from "../../../../Firebase/courses";
-import Swal from "sweetalert2";
 
 function Home() {
   const navigate = useNavigate();
@@ -25,12 +25,12 @@ function Home() {
     getInsCourses("2")
       .then((res) => {
         setCourses(res);
-        
       })
       .catch((error) => {
+        console.error("Error fetching courses:", error);
         Alert(error.message);
       });
-  }, [courses, setCourses]);
+  }, []);
 
   return (
     <Box>
@@ -155,15 +155,25 @@ function Home() {
                               confirmButtonText: "Yes, delete it!",
                             }).then((result) => {
                               if (result.isConfirmed) {
-                                deleteCourse(course.course_id).then(()=>{
-                                  Swal.fire({
-                                    title: "Deleted!",
-                                    text: "Your file has been deleted.",
-                                    icon: "success",
+                                deleteCourse(course.course_id)
+                                  .then(() => {
+                                    setCourses(prevCourses => 
+                                      prevCourses.filter(c => c.course_id !== course.course_id)
+                                    );
+                                    Swal.fire({
+                                      title: "Course!",
+                                      text: "Course deleted successfully",
+                                      icon: "success",
+                                    });
+                                  })
+                                  .catch((error) => {
+                                    console.error("Error deleting course:", error);
+                                    Swal.fire({
+                                      title: "Error!",
+                                      text: "Failed to delete course. Please try again",
+                                      icon: "error",
+                                    });
                                   });
-
-                                })
-
                               } 
                             });
                           }}
