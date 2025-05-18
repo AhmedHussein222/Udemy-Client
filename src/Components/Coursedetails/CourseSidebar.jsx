@@ -12,6 +12,8 @@ import {
   IconButton,
 } from '@mui/material';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import FavoriteIcon from '@mui/icons-material/Favorite';
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import VideoLibraryIcon from '@mui/icons-material/VideoLibrary';
 import ArticleIcon from '@mui/icons-material/Article';
 import DownloadIcon from '@mui/icons-material/Download';
@@ -27,71 +29,55 @@ import { db, doc, getDoc, collection, query, where, getDocs } from '../../Fireba
 const CourseSidebar = ({ course }) => {
   const [courseData, setCourseData] = useState(null);
   const [previewVideoUrl, setPreviewVideoUrl] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [openModal, setOpenModal] = useState(false);
   const [videoError, setVideoError] = useState(null);
+  const [isWishlisted, setIsWishlisted] = useState(false);
+
+  const formatDuration = (minutes) => {
+    if (!minutes) return '0 min';
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    if (hours === 0) return `${mins} min`;
+    return `${hours} hr ${mins} min`;
+  };
 
   useEffect(() => {
     const fetchCourseData = async () => {
-      if (!course?.id) {
-        setError('No course ID provided');
-        setLoading(false);
-        return;
-      }
+      if (!course?.id) return;
 
       try {
-        // Fetch course data from Courses
+        // Fetch course data
         const courseRef = doc(db, 'Courses', course.id);
         const courseSnap = await getDoc(courseRef);
-
-        if (!courseSnap.exists()) {
-          setError('Course not found');
-          setLoading(false);
-          return;
-        }
+        if (!courseSnap.exists()) return;
 
         const courseDocData = courseSnap.data();
-        console.log('Course Data:', courseDocData);
 
-        // Fetch videos from Lessons
+        // Fetch all lessons for the course
         const lessonsQuery = query(
           collection(db, 'Lessons'),
-          where('course_id', '==', course.id.toString()),
-          where('is_preview', '==', true)
+          where('course_id', '==', course.id.toString())
         );
         const lessonsSnap = await getDocs(lessonsQuery);
 
-        // Calculate total seconds
-        let totalSeconds = 0;
         let firstPreviewVideo = null;
-        const lessons = lessonsSnap.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
+        const lessons = lessonsSnap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
         lessons.sort((a, b) => a.order - b.order);
 
+        // Sum duration for lessons with video_url
+        const totalMins = lessons.reduce((sum, lesson) => {
+          if (lesson.video_url) {
+            return sum + (Number(lesson.duration) || 0);
+          }
+          return sum;
+        }, 0);
+
+        // Find first preview video
         lessons.forEach((lesson) => {
-          const duration = Number(lesson.duration) || 0;
-          totalSeconds += duration * 60; // Convert minutes to seconds
-          if (!firstPreviewVideo && lesson.video_url) {
+          if (!firstPreviewVideo && lesson.is_preview && lesson.video_url) {
             firstPreviewVideo = lesson.video_url;
           }
         });
-
-        // Convert to hours or minutes for display
-        const totalHours = totalSeconds > 0 ? (totalSeconds / 3600).toFixed(1) : 0;
-        let displayText;
-        if (totalSeconds >= 3600) {
-          displayText = `${totalHours} hours on-demand video`;
-        } else if (totalSeconds > 0) {
-          displayText = `${Math.round(totalSeconds / 60)} minutes on-demand video`;
-        } else {
-          displayText = 'No video content';
-        }
-
-        console.log('Total Hours:', totalHours);
-        console.log('Display Text:', displayText);
 
         // Calculate discounted price
         const price = Number(courseDocData.price) || 0;
@@ -101,8 +87,8 @@ const CourseSidebar = ({ course }) => {
         setCourseData({
           price,
           discountedPrice,
-          hoursOfContent: totalHours,
-          displayText,
+          hoursOfContent: totalMins > 0 ? (totalMins / 60).toFixed(1) : 0,
+          displayText: totalMins > 0 ? `${formatDuration(totalMins)} on-demand video` : 'No video content',
           articleCount: courseDocData.articleCount || 0,
           resourceCount: courseDocData.resourceCount || 0,
           thumbnail: courseDocData.thumbnail || 'https://images.pexels.com/photos/4974915/pexels-photo-4974915.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
@@ -110,9 +96,6 @@ const CourseSidebar = ({ course }) => {
         setPreviewVideoUrl(firstPreviewVideo);
       } catch (err) {
         console.error('Error fetching course data:', err);
-        setError('Failed to load course data');
-      } finally {
-        setLoading(false);
       }
     };
 
@@ -142,40 +125,12 @@ const CourseSidebar = ({ course }) => {
     }
   };
 
-  const validateVideoUrl = async (url) => {
-    if (isYouTubeUrl(url)) {
-      return true; // YouTube URLs don't need CORS validation
-    }
-    try {
-      const response = await fetch(url, { method: 'HEAD', mode: 'cors' });
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-      const contentType = response.headers.get('content-type');
-      if (!contentType || !contentType.includes('video')) {
-        throw new Error('URL does not point to a valid video file');
-      }
-      return true;
-    } catch (error) {
-      console.error('Video URL validation failed:', error);
-      return false;
-    }
-  };
-
-  const handleOpenModal = async () => {
-    console.log('Attempting to open modal with video URL:', previewVideoUrl);
+  const handleOpenModal = () => {
     if (!previewVideoUrl) {
-      setVideoError('No preview video available for this course.');
+      setVideoError('No preview video available.');
       setOpenModal(true);
       return;
     }
-    const isValid = await validateVideoUrl(previewVideoUrl);
-    if (!isValid && !isYouTubeUrl(previewVideoUrl)) {
-      setVideoError('Invalid or inaccessible video URL. Try opening the video directly.');
-      setOpenModal(true);
-      return;
-    }
-    setVideoError(null);
     setOpenModal(true);
   };
 
@@ -184,52 +139,14 @@ const CourseSidebar = ({ course }) => {
     setVideoError(null);
   };
 
-  const handleVideoError = (e) => {
-    console.error('Video error details:', {
-      code: e.target.error?.code,
-      message: e.target.error?.message,
-      src: e.target.src,
-    });
-    let errorMessage = 'Failed to load or play the video.';
-    switch (e.target.error?.code) {
-      case MediaError.MEDIA_ERR_ABORTED:
-        errorMessage += ' Playback was aborted.';
-        break;
-      case MediaError.MEDIA_ERR_NETWORK:
-        errorMessage += ' A network error occurred.';
-        break;
-      case MediaError.MEDIA_ERR_DECODE:
-        errorMessage += ' The video format is not supported.';
-        break;
-      case MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED:
-        errorMessage += ' The video source is not supported or inaccessible (likely a CORS issue).';
-        break;
-      default:
-        errorMessage += ' An unknown error occurred.';
-    }
-    setVideoError(errorMessage);
+  const handleWishlistToggle = () => {
+    setIsWishlisted((prev) => !prev);
   };
-
-  if (loading) {
-    return (
-      <Box sx={{ p: 3, bgcolor: 'white', border: 1, borderColor: 'grey.200', borderRadius: 1 }}>
-        <Typography>Loading course data...</Typography>
-      </Box>
-    );
-  }
-
-  if (error) {
-    return (
-      <Box sx={{ p: 3, bgcolor: 'white', border: 1, borderColor: 'grey.200', borderRadius: 1 }}>
-        <Typography color="error">{error}</Typography>
-      </Box>
-    );
-  }
 
   if (!courseData) {
     return (
       <Box sx={{ p: 3, bgcolor: 'white', border: 1, borderColor: 'grey.200', borderRadius: 1 }}>
-        <Typography>No course data available</Typography>
+        <Typography>Loading...</Typography>
       </Box>
     );
   }
@@ -247,7 +164,7 @@ const CourseSidebar = ({ course }) => {
         overflow: 'hidden',
       }}
     >
-      <Box sx={{ position: 'relative', paddingTop: '56.25%' /* 16:9 aspect ratio */ }}>
+      <Box sx={{ position: 'relative', paddingTop: '56.25%' }}>
         <Box
           component="img"
           src={courseData.thumbnail}
@@ -349,26 +266,37 @@ const CourseSidebar = ({ course }) => {
             fontWeight="medium"
             sx={{ mb: 2 }}
           >
-            <span>2 days</span> left at this price!
+            2 days left at this price!
           </Typography>
         )}
 
-        <Button
-          variant="contained"
-          color="primary"
-          fullWidth
-          sx={{
-            bgcolor: '#a435f0',
-            '&:hover': { bgcolor: '#8710d8' },
-            fontWeight: 'bold',
-            py: 1.5,
-            mb: 1,
-            textTransform: 'none',
-          }}
-          startIcon={<ShoppingCartIcon />}
-        >
-          Add to cart
-        </Button>
+        <Box sx={{ display: 'flex', gap: 1, mb: 1 }}>
+          <Button
+            variant="contained"
+            color="primary"
+            fullWidth
+            sx={{
+              bgcolor: '#a435f0',
+              '&:hover': { bgcolor: '#8710d8' },
+              fontWeight: 'bold',
+              py: 1.5,
+              textTransform: 'none',
+            }}
+            startIcon={<ShoppingCartIcon />}
+          >
+            Add to cart
+          </Button>
+          <IconButton
+            onClick={handleWishlistToggle}
+            sx={{
+              bgcolor: '#f5f5f5',
+              '&:hover': { bgcolor: '#e0e0e0' },
+              color: isWishlisted ? '#a435f0' : 'inherit',
+            }}
+          >
+            {isWishlisted ? <FavoriteIcon /> : <FavoriteBorderIcon />}
+          </IconButton>
+        </Box>
 
         <Button
           variant="outlined"
@@ -515,7 +443,7 @@ const CourseSidebar = ({ course }) => {
             <CloseIcon />
           </IconButton>
           {previewVideoUrl && !videoError ? (
-            <Box sx={{ position: 'relative', paddingTop: '56.25%' /* 16:9 aspect ratio */ }}>
+            <Box sx={{ position: 'relative', paddingTop: '56.25%' }}>
               {isYouTubeUrl(previewVideoUrl) ? (
                 <iframe
                   src={getYouTubeEmbedUrl(previewVideoUrl)}
@@ -537,7 +465,6 @@ const CourseSidebar = ({ course }) => {
                   key={previewVideoUrl}
                   controls
                   src={previewVideoUrl}
-                  onError={handleVideoError}
                   style={{
                     position: 'absolute',
                     top: 0,
