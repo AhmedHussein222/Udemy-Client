@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../Firebase/firebase.js";
+import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
+import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import {
   Card,
   CardMedia,
@@ -96,28 +98,52 @@ const CoursesSection = () => {
               </span>
             </Typography>
 
-            <Box
-              sx={{
-                display: "flex",
-                gap: 2,
-                overflowX: "auto",
-                pb: 1,
-                "&::-webkit-scrollbar": { display: "none" },
-                "-ms-overflow-style": "none",
-                "scrollbar-width": "none",
-              }}
-            >
-              {filteredCourses.map((course, i) => (
-                <Link
-                  to={`/course-details/${course.id}`}
-                  key={i}
-                  style={{ textDecoration: "none" }}
-                >
-                  <Card
-                    sx={{ minWidth: 250, flex: "0 0 auto" }}
-                    onMouseEnter={(event) => handlePopoverOpen(event, course)}
-                    onMouseLeave={handlePopoverClose}
-                  >
+      <Box sx={{ position: "relative" }}>
+  <IconButton
+    onClick={() => {
+      document.getElementById(`scroll-box-${index}`).scrollBy({
+        left: -300,
+        behavior: "smooth",
+      });
+    }}
+    sx={{
+      position: "absolute",
+      left: 0,
+      top: "50%",
+      transform: "translateY(-50%)",
+      zIndex: 1,
+      backgroundColor: "white",
+      boxShadow: 1,
+    }}
+  >
+    <ArrowBackIosIcon />
+  </IconButton>
+
+  <Box
+    id={`scroll-box-${index}`}
+    sx={{
+      display: "flex",
+      gap: 2,
+      overflowX: "auto",
+      scrollBehavior: "smooth",
+      pb: 1,
+      px: 4, // to add some space from left/right
+      "&::-webkit-scrollbar": { display: "none" },
+      "-ms-overflow-style": "none",
+      "scrollbar-width": "none",
+    }}
+  >
+    {filteredCourses.map((course, i) => (
+      <Link
+        to={`/course-details/${course.id}`}
+        key={i}
+        style={{ textDecoration: "none" }}
+      >
+        <Card
+          sx={{ minWidth: 250, flex: "0 0 auto" }}
+          onMouseEnter={(event) => handlePopoverOpen(event, course)}
+          onMouseLeave={handlePopoverClose}
+        >
                     <CardMedia
                       component="img"
                       height="140"
@@ -175,10 +201,31 @@ const CoursesSection = () => {
                         </Box>
                       )}
                     </CardContent>
-                  </Card>
-                </Link>
-              ))}
-            </Box>
+               </Card>
+      </Link>
+    ))}
+  </Box>
+
+  <IconButton
+    onClick={() => {
+      document.getElementById(`scroll-box-${index}`).scrollBy({
+        left: 300,
+        behavior: "smooth",
+      });
+    }}
+    sx={{
+      position: "absolute",
+      right: 0,
+      top: "50%",
+      transform: "translateY(-50%)",
+      zIndex: 1,
+      backgroundColor: "white",
+      boxShadow: 1,
+    }}
+  >
+    <ArrowForwardIosIcon />
+  </IconButton>
+</Box>
 
             <Popover
               id={id}
