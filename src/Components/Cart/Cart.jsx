@@ -1,254 +1,325 @@
+/** @format */
 
-import { Style } from '@mui/icons-material'
-import { Box, Button, Card, CardActionArea, CardContent, CardMedia, Grid, Stack, TextField, Typography } from '@mui/material'
-import { grey, purple, yellow } from '@mui/material/colors'
-import React from 'react'
-import StarBorderIcon from '@mui/icons-material/StarBorder';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import CloseIcon from '@mui/icons-material/Close';
-import { useTranslation } from 'react-i18next';
+import {
+	Box,
+	Button,
+	Card,
+	CardActionArea,
+	CardContent,
+	CardMedia,
+	Grid,
+	Stack,
+	TextField,
+	Typography,
+	CircularProgress,
+} from "@mui/material";
+import { grey, purple, yellow } from "@mui/material/colors";
+import React, { useContext, useState } from "react";
+import StarBorderIcon from "@mui/icons-material/StarBorder";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import { useTranslation } from "react-i18next";
+import { CartContext } from "../../context/cart-context";
+import { useNavigate } from "react-router-dom";
 
 function Cart() {
+	const { t } = useTranslation();
+	const navigate = useNavigate();
+	const { cartItems, loading, removeFromCart, getCartTotal } =
+		useContext(CartContext);
+	const [couponCode, setCouponCode] = useState("");
 
-   const { t } = useTranslation();
+	const handleCheckout = () => {
+		navigate("/checkout");
+	};
 
-  return (
-    <Box>
- //#region If card is empty
-        <Box  sx={{ px: 3}}>
-    <Typography variant="h4" sx={{ textAlign: "start", marginTop: "20px", fontWeight: "bold" }}>
-      {t('Shopping Cart')}
-    </Typography>
-    <Typography variant="h6" sx={{ textAlign: "start", marginTop: "20px", fontWeight: "bold" }}>
-      0 {t('courses in cart')}
-    </Typography>
-        </Box>
+	const handleRemoveItem = async (courseId) => {
+		await removeFromCart(courseId);
+	};
 
-  <Stack direction="column" alignItems="center" sx={{ px: 2, width: '100%' ,pb:3}}>
-  <Card
-    sx={{
-      width: "100%",  
-      marginTop: "20px",
-      borderRadius: "10px",
-      px: 2,
-      '@media (max-width: 600px)': {
-        width: "100%",  
-      },
-    }}
-  >
-    <CardActionArea>
-      <CardMedia
-        component="img"
-        height="140"
-        image="/src/assets/empty-shopping-cart-v2-2x.webp"
-        alt="Cart empty"
-        sx={{
-          marginTop: 5,
-          marginBottom: 3,
-          width: "100%", 
-          objectFit: "contain",
-          mx: "auto",
-       
-        }}
-      />
-      <CardContent>
-        <Typography
-          marginBottom={3}
-          variant="subtitle2"
-          component="div"
-          textAlign="center"
-        >
-          {t('Your cart is empty. Keep shopping to find a course!')}
-        </Typography>
+	if (loading) {
+		return (
+			<Box
+				sx={{
+					display: "flex",
+					justifyContent: "center",
+					alignItems: "center",
+					height: "50vh",
+				}}>
+				<CircularProgress />
+			</Box>
+		);
+	}
 
-        <Button
-          variant="contained"
-          sx={{
-            backgroundColor: "#8000ff",
-            color: "#fff",
-            textTransform: "none",
-            fontWeight: "bold",
-            borderRadius: "4px",
-            py: 1,
-            mt: 2,
-            mb:3,
-            display: "block",
-            mx: "auto", 
-            "&:hover": { backgroundColor: "#6a1b9a" },
-          }}
-          size='large'
-        >
-          {t('Keep shopping')}
-        </Button>
-      </CardContent>
-    </CardActionArea>
-  </Card>
-</Stack>
+	return (
+		<Box sx={{ width: "100%", minHeight: "80vh", pb: 4 }}>
+			{cartItems.length === 0 ? (
+				<Stack
+					direction="column"
+					alignItems="center"
+					sx={{ px: 2, width: "100%", pb: 3 }}>
+					<Card
+						sx={{
+							width: "100%",
+							maxWidth: "800px",
+							marginTop: "20px",
+							borderRadius: "10px",
+							px: 2,
+						}}>
+						<CardActionArea onClick={() => navigate("/")}>
+							<CardMedia
+								component="img"
+								height="140"
+								image="/src/assets/empty-shopping-cart-v2-2x.webp"
+								alt="Cart empty"
+								sx={{
+									marginTop: 5,
+									marginBottom: 3,
+									width: "100%",
+									objectFit: "contain",
+									mx: "auto",
+								}}
+							/>
+							<CardContent>
+								<Typography
+									marginBottom={3}
+									variant="subtitle1"
+									component="div"
+									textAlign="center">
+									{t("Your cart is empty. Keep shopping to find a course!")}
+								</Typography>
+								<Button
+									variant="contained"
+									sx={{
+										backgroundColor: purple[700],
+										color: "#fff",
+										textTransform: "none",
+										fontWeight: "bold",
+										borderRadius: "4px",
+										py: 1,
+										mt: 2,
+										mb: 3,
+										display: "block",
+										mx: "auto",
+										"&:hover": { backgroundColor: purple[900] },
+									}}
+									size="large">
+									{t("Keep shopping")}
+								</Button>
+							</CardContent>
+						</CardActionArea>
+					</Card>
+				</Stack>
+			) : (
+				<>
+					<Box sx={{ px: 3 }}>
+						<Typography
+							variant="h4"
+							sx={{
+								textAlign: "start",
+								marginTop: "20px",
+								fontWeight: "bold",
+							}}>
+							{t("Shopping Cart")}
+						</Typography>
+						<Typography
+							variant="h6"
+							sx={{
+								textAlign: "start",
+								marginTop: "20px",
+								fontWeight: "bold",
+							}}>
+							{cartItems.length} {t("courses in cart")}
+						</Typography>
+					</Box>
 
-//#endregion
+					<Grid container spacing={3} sx={{ px: 3, py: 2 }}>
+						{/* Cart Items */}
+						<Grid item xs={12} md={8}>
+							{cartItems.map((item) => (
+								<Card key={item.id} sx={{ mb: 2 }}>
+									<CardContent>
+										<Grid container spacing={2}>
+											<Grid item xs={12} sm={3}>
+												<CardMedia
+													component="img"
+													image={item.thumbnail}
+													alt={item.title}
+													sx={{
+														borderRadius: 1,
+														height: 100,
+														objectFit: "cover",
+													}}
+												/>
+											</Grid>
+											<Grid item xs={12} sm={7}>
+												<Typography variant="h6" gutterBottom>
+													{item.title}
+												</Typography>
+												<Typography variant="body2" color="textSecondary">
+													{t("By")} {item.instructor}
+												</Typography>
+												<Stack direction="row" spacing={1} sx={{ mt: 1 }}>
+													{item.bestSeller && (
+														<Button
+															variant="text"
+															size="small"
+															sx={{
+																backgroundColor: purple[100],
+																color: purple[700],
+																"&:hover": {
+																	backgroundColor: purple[100],
+																},
+															}}>
+															{t("Best seller")}
+														</Button>
+													)}
+													<Stack direction="row">
+														{[...Array(5)].map((_, index) => (
+															<StarBorderIcon
+																key={index}
+																sx={{
+																	color:
+																		index < Math.floor(item.rating || 0)
+																			? yellow[700]
+																			: grey[400],
+																	fontSize: "1rem",
+																}}
+															/>
+														))}
+													</Stack>
+												</Stack>
+												<Stack direction="row" spacing={2} sx={{ mt: 1 }}>
+													{item.totalHours && (
+														<Typography variant="body2" color="textSecondary">
+															{item.totalHours} {t("total hours")}
+														</Typography>
+													)}
+													{item.lectures && (
+														<Typography variant="body2" color="textSecondary">
+															{item.lectures} {t("lectures")}
+														</Typography>
+													)}
+													{item.level && (
+														<Typography variant="body2" color="textSecondary">
+															{item.level}
+														</Typography>
+													)}
+												</Stack>
+											</Grid>
+											<Grid item xs={12} sm={2}>
+												<Stack spacing={1} alignItems="flex-end">
+													<Typography variant="h6" sx={{ color: purple[700] }}>
+														{t("E£")} {Number(item.price).toFixed(2)}
+													</Typography>
+													{item.originalPrice && (
+														<Typography
+															variant="body2"
+															sx={{
+																textDecoration: "line-through",
+																color: grey[500],
+															}}>
+															{t("E£")} {Number(item.originalPrice).toFixed(2)}
+														</Typography>
+													)}
+													<Stack direction="column" spacing={1}>
+														<Button
+															variant="text"
+															color="error"
+															size="small"
+															onClick={() => handleRemoveItem(item.id)}>
+															{t("Remove")}
+														</Button>
+														<Button
+															variant="text"
+															size="small"
+															sx={{ color: purple[700] }}>
+															{t("Save for later")}
+														</Button>
+														<Button
+															variant="text"
+															size="small"
+															sx={{ color: purple[700] }}>
+															{t("Move to wishlist")}
+														</Button>
+													</Stack>
+												</Stack>
+											</Grid>
+										</Grid>
+									</CardContent>
+								</Card>
+							))}
+						</Grid>
 
-//#region  card is not empty
+						{/* Total and Checkout */}
+						<Grid item xs={12} md={4}>
+							<Card sx={{ position: "sticky", top: 20 }}>
+								<CardContent>
+									<Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
+										{t("Total")}
+									</Typography>
 
-<Box  sx={{ px: 3}}>
-    <Typography variant="h4" sx={{ textAlign: "start", marginTop: "20px", fontWeight: "bold" }}>
-      {t('Shopping Cart')}
-    </Typography>
-    <Typography variant="h6" sx={{ textAlign: "start", marginTop: "20px", fontWeight: "bold" }}>
-      0 {t('courses in cart')}
-    </Typography>
-        </Box>
+									<Typography
+										variant="h5"
+										sx={{ fontWeight: "bold", color: purple[700] }}>
+										{t("E£")} {getCartTotal().toFixed(2)}
+									</Typography>
 
- <Stack   direction={{ xs: "column", md: "row" }}
-  justifyContent="space-around"
-  alignItems="flex-start"
-  spacing={3}
-  sx={{ px: 2, width: "100%", pb: 3 }}>
-   <Card  sx={{ width: { xs: "100%", md: "70%" ,paddingTop:4 } }}>
-    <Grid container spacing={2}>
-  <Grid size={3}>
-  <CardMedia
-        component="img"
-        height="140"
-        image="https://img-c.udemycdn.com/course/240x135/2196488_8fc7_10.jpg"
-        alt="Cart empty"
-        sx={{
-          marginTop: 5,
-          marginBottom: 3,
-          width: "100%", 
-          objectFit: "contain",
-          mx: "auto",
-       
-        }}
-      />
-  </Grid>
-  <Grid size={5}>
-<Typography variant='subtitle1' sx={{fontWeight:'bold'}}>Ultimate AWS Certified Solutions Architect Associate 2025</Typography>
-<Typography variant='subtitle2' sx={{color:grey}}>Stephane Maarek | AWS Certified Cloud Practitioner,Solutions Architect,Developer</Typography>
- <Stack direction={'row'} gap={2}>
-    <Button variant="text" size='small' sx={{background:purple[100]}}>Best seller</Button>
-    <Grid size={4}>
-        <Stack direction={'row'}><StarBorderIcon  sx={{color:yellow[700]}}/><StarBorderIcon sx={{color:yellow[700]}} /> <StarBorderIcon  sx={{color:yellow[700]}}/><StarBorderIcon sx={{color:yellow[700]}} /> <StarBorderIcon  sx={{color:yellow[700]}}/>
-      </Stack>
+									<Button
+										variant="contained"
+										fullWidth
+										sx={{
+											mt: 2,
+											backgroundColor: purple[700],
+											"&:hover": { backgroundColor: purple[900] },
+										}}
+										onClick={handleCheckout}
+										endIcon={<ArrowForwardIcon />}>
+										{t("Checkout")}
+									</Button>
 
-    </Grid>
-    <Grid size={4}></Grid>
- </Stack>
- 
+									<Typography
+										variant="body2"
+										sx={{
+											color: grey[600],
+											mt: 1,
+											pb: 2,
+											borderBottom: "1px solid",
+											borderColor: "divider",
+										}}>
+										{t("You won't be charged yet")}
+									</Typography>
 
-
-        <Stack direction={'row'} gap={2}>  <Typography variant='subtitle2' color='grey'>22 total hours</Typography>
-         <Typography variant='subtitle2' color='grey'>35 lecture</Typography>
-         <Typography variant='subtitle2' color='grey'> All levels</Typography >
-        </Stack>
-
-
-
-  </Grid>
-
-  <Grid size={2}>
-    <Stack direction={'column'} gap={2} >
-<Button variant="text" size='small' sx={{color:'#8000ff'}}>{t('Remove')}</Button>
-<Button variant="text" size='small' sx={{color:'#8000ff'}}>{t('Save for later')}</Button>
-<Button variant="text" size='small' sx={{color:'#8000ff'}}>{t('Move to wishlist')}</Button>
-</Stack>
-  </Grid>
-  <Grid size={2}>
-    <Stack direction={'column'} gap={2} >
-        <Typography variant='subtitle1' sx={{fontWeight:'bold' ,color:'#8000ff'}}>Price</Typography>
-        <Typography variant='subtitle1' sx={{color:grey[500],textDecoration:'line-through'}}>Discount</Typography>
-        </Stack>
-
-  </Grid>
-</Grid>
-
-</Card> 
-
-<Card
-sx={{ width: { xs: "100%", md: "27%" } }}
->
-  <CardContent>
-    <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
-      {t('Total')}
-    </Typography>
-
-    <Typography variant="h5" sx={{ fontWeight: "bold" }}>
-      $199
-    </Typography>
-
-    <Typography
-      variant="subtitle1"
-      sx={{ color: grey[500], textDecoration: "line-through" }}
-    >
-      $249
-    </Typography>
-
-    <Typography variant="subtitle1">{t('20% off')}</Typography>
-
-    <Button
-      variant="contained"
-      sx={{
-        background: "#8000ff",
-        color: "white",
-        fontWeight: "bold",
-        borderRadius: "4px",
-        fontSize: 12,
-        mt: 2,
-        px: 3,
-        py: 1,
-        display: "flex",
-        alignItems: "center",
-        gap: 1,
-        "&:hover": {
-          backgroundColor: "#6a1b9a",
-        },
-      }}
-    >
-      {t('Proceed to Checkout')} <ArrowForwardIcon fontSize="small" />
-    </Button>
-
-    <Typography variant="subtitle2" sx={{ color: grey[500], mt: 1 ,borderBottom:'1px solid lightgray',paddingBottom:2}}>
-      {t("You won't be charged yet")}
-    </Typography>
-
-    <Box   sx={{border:'1px dashed gray',borderRadius:'5px',padding:2,marginTop:2}}>
-        <Stack direction={'row'} gap={5} >
-            <Box>
-            <Typography variant='subtitle2' sx={{color:'gray',fontSize:14}}>{t('ST8MT220425G3 is applied')}</Typography>
-            <Typography variant='subtitle2' sx={{color:'gray',fontSize:14}}>{t('Udemy coupon')}</Typography>
-            </Box>
-            <Box>
-                 <CloseIcon sx={{alignSelf:'center'}}/>
-            </Box>
-
-
-
-
-        </Stack>
-
-    </Box>
-
-    <Stack direction={'row'} gap={1} sx={{marginTop:2}}>
-    <TextField  label={t("Inter coupon")} variant="outlined"  size='small'/>
-    <Button variant="contained" size='small' sx={{backgroundColor:'#8000ff',fontSize:10,fontWeight:'bold'}}>{t('Apply')}</Button>
-
-    </Stack>
-  </CardContent>
-</Card>
-
-
-        </Stack>
-
-
-
-//#endregion
-
-
-
-  </Box>
-  
-  )
+									<Box sx={{ mt: 2 }}>
+										<Typography variant="subtitle2" gutterBottom>
+											{t("Promotions")}
+										</Typography>
+										<Stack direction="row" spacing={1}>
+											<TextField
+												size="small"
+												placeholder={t("Enter coupon")}
+												value={couponCode}
+												onChange={(e) => setCouponCode(e.target.value)}
+												fullWidth
+											/>
+											<Button
+												variant="contained"
+												size="small"
+												sx={{
+													backgroundColor: purple[700],
+													"&:hover": { backgroundColor: purple[900] },
+												}}>
+												{t("Apply")}
+											</Button>
+										</Stack>
+									</Box>
+								</CardContent>
+							</Card>
+						</Grid>
+					</Grid>
+				</>
+			)}
+		</Box>
+	);
 }
 
-
-
-export default Cart
+export default Cart;
