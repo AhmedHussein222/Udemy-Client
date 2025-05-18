@@ -34,6 +34,9 @@ import  Reviews from "./Components/Instructor Dashboard/components/Reviews";
 import Revenue from "./Components/Instructor Dashboard/components/Revenue";
 import PaymentPage from "./Components/payment/test";
 import Checkout from "./Components/checkout/checkout";
+import AuthGuard from "./Guards/AuthGuard";
+import Unauthorized from "./Pages/Unauthorized";
+import CheckoutComponent from "./Components/checkout/checkout";
 
 const router = createBrowserRouter([
 	{
@@ -58,7 +61,10 @@ const router = createBrowserRouter([
 
 	{
 		path: "instructor",
-		element: <InsMain />,
+
+		element: <AuthGuard allowedRoles={["instructor"]} >
+			<InsMain />
+		</AuthGuard> ,
 		children: [
 			{ path: "", element: <InsHome /> },
 			{ path: "courses" , element: <InsHome /> },
@@ -68,6 +74,8 @@ const router = createBrowserRouter([
 			{ path: "revenue", element: <Revenue /> },
 		],
 	},
+	{path:"/unauthorized", element:<Unauthorized/>},
+	{path:"/checkout", element:<CheckoutComponent/>},
 ]);
 
 function Main() {

@@ -1,18 +1,18 @@
 import { Delete as DeleteIcon, AddCircle as PlusCircle } from "@mui/icons-material";
 import {
-    Box,
-    Button,
-    Container,
-    Paper,
-    TextField,
-    Typography,
+  Box,
+  Button,
+  Container,
+  Paper,
+  TextField,
+  Typography,
 } from "@mui/material";
 import { useEffect } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { v4 } from "uuid";
 
 const CurriculumForm = ({ course_id, defaultlessons, onChange }) => {
-  const { register, watch, control } = useForm({
+  const { register, watch, control, reset } = useForm({
     defaultValues: {
       lessons: defaultlessons || [],
     },
@@ -23,6 +23,12 @@ const CurriculumForm = ({ course_id, defaultlessons, onChange }) => {
     control,
     name: "lessons",
   });
+
+  useEffect(() => {
+    if (defaultlessons && defaultlessons.length > 0) {
+      reset({ lessons: defaultlessons });
+    }
+  }, [defaultlessons, reset]);
 
   useEffect(() => {
     const subscription = watch((value) => {

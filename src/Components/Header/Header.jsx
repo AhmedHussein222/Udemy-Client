@@ -189,33 +189,33 @@ const Header = () => {
 											</Button>
 										</Box>
 									)}
-								</Box>
-
-								<Box
-									onMouseEnter={() => setOpenTeach(true)}
-									onMouseLeave={() => setOpenTeach(false)}
-									sx={{ position: "relative" }}>
-									<Typography
-										onClick={() => navigate("/Welcomehome")}
-										sx={linkStyle}>
-										{t("Teach on Udemy")}
-									</Typography>
-									{openTeach && (
-										<Box sx={popoverStyle}>
-											<Typography
-												variant="h6"
-												fontWeight="bold"
-												sx={{ color: "#001a33" }}>
-												{t(
-													"Turn what you know into an opportunity and reach millions around the world."
-												)}
-											</Typography>
-											<Button variant="contained" sx={teachBtnStyle}>
-												{t("Learn more")}
-											</Button>
-										</Box>
-									)}
-								</Box>
+								</Box>								{userData?.role !== "instructor" && (
+									<Box
+										onMouseEnter={() => setOpenTeach(true)}
+										onMouseLeave={() => setOpenTeach(false)}
+										sx={{ position: "relative" }}>
+										<Typography
+											onClick={() => navigate("/Welcomehome")}
+											sx={linkStyle}>
+											{t("Teach on Udemy")}
+										</Typography>
+										{openTeach && (
+											<Box sx={popoverStyle}>
+												<Typography
+													variant="h6"
+													fontWeight="bold"
+													sx={{ color: "#001a33" }}>
+													{t(
+														"Turn what you know into an opportunity and reach millions around the world."
+													)}
+												</Typography>
+												<Button variant="contained" sx={teachBtnStyle}>
+													{t("Learn more")}
+												</Button>
+											</Box>
+										)}
+									</Box>
+								)}
 								{user ? (
 									<>
 										<IconButton
@@ -361,14 +361,15 @@ const Header = () => {
 													navigate("/wishlist");
 												}}>
 												{t("Wishlist")}
-											</MenuItem>
-											<MenuItem
-												onClick={() => {
-													handleMenuClose();
-													navigate("/Welcomehome");
-												}}>
-												{t("Teach on Udemy")}
-											</MenuItem>
+											</MenuItem>											{userData?.role !== "instructor" && (
+												<MenuItem
+													onClick={() => {
+														handleMenuClose();
+														navigate("/Welcomehome");
+													}}>
+													{t("Teach on Udemy")}
+												</MenuItem>
+											)}
 											<Divider sx={{ borderColor: "#d1d2e0", my: 1 }} />
 											<MenuItem
 												onClick={() => {
