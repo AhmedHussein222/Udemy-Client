@@ -42,6 +42,7 @@ const Header = () => {
 	const [showSearch, setShowSearch] = useState(false);
 	const [anchorEl, setAnchorEl] = useState(null);
 	const [userData, setUserData] = useState(null);
+	const [searchQuery, setSearchQuery] = useState("");
 	const isMobile = useMediaQuery("(max-width:768px)");
 	const location = useLocation();
 	const navigate = useNavigate();
@@ -100,6 +101,13 @@ const Header = () => {
 		}
 	}, [i18n]);
 
+	const handleSearch = (e) => {
+		e.preventDefault();
+		if (searchQuery.trim()) {
+			navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+		}
+	};
+
 	return (
 		<AppBar position="static" sx={{ backgroundColor: "#fff" }} elevation={1}>
 			<Box sx={{ px: 2, py: 1 }}>
@@ -148,10 +156,10 @@ const Header = () => {
 								</Box>
 								<Typography sx={linkStyle}>{t("Explore")}</Typography>
 							</Box>
-							{/* Search Bar */}
+							{/* Search Bar */}{" "}
 							<Paper
 								component="form"
-								onSubmit={(e) => e.preventDefault()}
+								onSubmit={handleSearch}
 								sx={{
 									...searchBarStyle,
 									flexGrow: 1,
@@ -159,10 +167,12 @@ const Header = () => {
 								}}>
 								<IconButton type="submit" sx={searchBtnStyle}>
 									<SearchIcon sx={{ color: "gray" }} />
-								</IconButton>
+								</IconButton>{" "}
 								<InputBase
 									sx={{ flex: 1, fontSize: "16px" }}
 									placeholder={t("Search for anything")}
+									value={searchQuery}
+									onChange={(e) => setSearchQuery(e.target.value)}
 								/>
 							</Paper>
 							<Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
@@ -189,7 +199,8 @@ const Header = () => {
 											</Button>
 										</Box>
 									)}
-								</Box>								{userData?.role !== "instructor" ? (
+								</Box>
+								{userData?.role !== "instructor" && (
 									<Box
 										onMouseEnter={() => setOpenTeach(true)}
 										onMouseLeave={() => setOpenTeach(false)}
@@ -300,7 +311,8 @@ const Header = () => {
 																color: "#8000ff",
 															},
 														},
-													},													"& .MuiDivider-root": {
+													},
+													"& .MuiDivider-root": {
 														margin: "4px 0",
 														borderColor: "#d1d2e0",
 													},
@@ -369,7 +381,8 @@ const Header = () => {
 													navigate("/wishlist");
 												}}>
 												{t("Wishlist")}
-											</MenuItem>											{userData?.role !== "instructor" && (
+											</MenuItem>{" "}
+											{userData?.role !== "instructor" && (
 												<MenuItem
 													onClick={() => {
 														handleMenuClose();
@@ -450,7 +463,8 @@ const Header = () => {
 													navigate("/help");
 												}}>
 												{t("Help and Support")}
-											</MenuItem>												<MenuItem
+											</MenuItem>{" "}
+											<MenuItem
 												onClick={() => {
 													handleMenuClose();
 													toggleLanguage();
@@ -465,10 +479,11 @@ const Header = () => {
 													<LanguageIcon sx={{ mr: 1 }} />
 													{i18n.language === "en" ? "عربي" : "English"}
 												</Box>
-
 											</MenuItem>
 											<Divider sx={{ borderColor: "#d1d2e0", my: 1 }} />
-											<MenuItem onClick={handleLogout} sx={{ color: "#d32f2f" }}>
+											<MenuItem
+												onClick={handleLogout}
+												sx={{ color: "#d32f2f" }}>
 												{t("Log Out")}
 											</MenuItem>
 										</Menu>
@@ -516,14 +531,16 @@ const Header = () => {
 					<Box sx={{ mt: 2 }}>
 						<Paper
 							component="form"
-							onSubmit={(e) => e.preventDefault()}
+							onSubmit={handleSearch}
 							sx={{ ...searchBarStyle, width: "100%" }}>
 							<InputBase
 								sx={{ flex: 1, fontSize: "16px" }}
 								placeholder={t("Search...")}
+								value={searchQuery}
+								onChange={(e) => setSearchQuery(e.target.value)}
 							/>
 							<IconButton type="submit" sx={searchBtnStyle}>
-								<SearchIcon sx={{ color: "#fff" }} />
+								<SearchIcon sx={{ color: "gray" }} />
 							</IconButton>
 						</Paper>
 					</Box>
