@@ -2,6 +2,7 @@ import StarIcon from "@mui/icons-material/Star";
 import {
   Avatar,
   Box,
+  CircularProgress,
   Divider,
   Grid,
   Paper,
@@ -11,13 +12,13 @@ import {
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { getInsCourses, getInstructorReviews } from "../../../Firebase/courses";
-
 const udemyPurple = "#A435F0";
 const udemyPurpleDark = "#5624d0";
 const udemyGray = "#f7f7fa";
 
 const Reviews = () => {
   const [coursesWithReviews, setCoursesWithReviews] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -25,20 +26,24 @@ const Reviews = () => {
         const coursesData = await getInsCourses("2");
         const reviewsResponse = await getInstructorReviews("2");
 
-        const processedCourses = coursesData.map(course => {
+        const processedCourses = coursesData.map((course) => {
           let total = 0;
           let count = 0;
           let course_reviews = [];
-          
-          if (reviewsResponse.reviews && Array.isArray(reviewsResponse.reviews)) {
-            reviewsResponse.reviews.forEach(review => {
+
+          if (
+            reviewsResponse.reviews &&
+            Array.isArray(reviewsResponse.reviews)
+          ) {
+            reviewsResponse.reviews.forEach((review) => {
               if (course.course_id === review.course_id) {
                 count += 1;
                 total += review.rating;
                 course_reviews.push({
                   ...review,
                   name: review.student_name || "Anonymous",
-                  date: review.created_at || new Date().toISOString().split('T')[0]
+                  date:
+                    review.created_at || new Date().toISOString().split("T")[0],
                 });
               }
             });
@@ -49,18 +54,33 @@ const Reviews = () => {
             name: course.title,
             average: count > 0 ? total / count : 0,
             total: count,
-            reviews: course_reviews
+            reviews: course_reviews,
           };
         });
 
         setCoursesWithReviews(processedCourses);
       } catch (error) {
         console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchData();
   }, []);
+
+  if (loading) {
+    return (
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        height="100vh"
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   // حساب المتوسط الكلي وعدد التقييمات الكلية
   const allReviews = coursesWithReviews.flatMap((course) => course.reviews);
@@ -76,14 +96,14 @@ const Reviews = () => {
     <Box
       sx={{ p: { xs: 1, md: 4 }, background: udemyGray, minHeight: "100vh" }}
     >
-      <Typography
+      {/* <Typography
         variant="h4"
         fontWeight="bold"
         mb={3}
         sx={{ color: udemyPurple }}
       >
         Student Feedback
-      </Typography>
+      </Typography> */}
       {/* بطاقة المتوسط الكلي */}
       <Box display="flex" justifyContent="center" mb={4}>
         <Paper
@@ -143,7 +163,7 @@ const Reviews = () => {
         </Paper>
       </Box>
       {/* تفاصيل كل كورس */}
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, px: 2 }}>
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 3, px: 2 }}>
         {coursesWithReviews.map((course) => (
           <Paper
             key={course.id}
@@ -211,7 +231,7 @@ const Reviews = () => {
                             fontWeight="bold"
                             sx={{ color: udemyPurpleDark }}
                           >
-                            {review.name}
+                            {review.userName}
                           </Typography>
                           <Rating
                             value={review.rating}

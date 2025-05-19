@@ -1,5 +1,6 @@
 import { Box, Button, Paper } from "@mui/material";
 import { useContext, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate } from "react-router-dom";
 import { v4 } from "uuid";
 import { UserContext } from "../../../../context/UserContext";
@@ -10,12 +11,14 @@ import {
   getCategories,
   getSubcategories,
   updateCourse,
+  updateLessons,
 } from "../../../../Firebase/courses";
 import { errorModal, successModal } from "../alerts";
 import CourseForm from "./CourseForm";
 import CurriculumForm from "./CurriculumForm";
 
 const EditCourse = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { user } = useContext(UserContext);
   user;
@@ -95,9 +98,20 @@ const EditCourse = () => {
     try {
       if (course) {
         updateCourse(course.course_id, courseData)
-          .then(()=>{
-            successModal()
-            navigate("/instructor/dashboard/courses");
+          .then(() => {
+            successModal();
+            navigate("/instructor/");
+          })
+          .catch((err) => {
+            errorModal(
+              "Error",
+              err.message || "Something went wrong while updating the course!"
+            );
+          });
+        updateLessons(curriculumData.lessons, course.course_id)
+          .then(() => {
+            successModal("Course updated successfully");
+            navigate("/instructor/");
           })
           .catch((err) => {
             errorModal(
@@ -109,8 +123,8 @@ const EditCourse = () => {
         const course_id = v4();
         await addCourse({ ...courseData, course_id, instructor_id: "2" });
         await addLessons(curriculumData, course_id);
-        successModal( "Course created successfully");
-        navigate("/instructor/courses");
+        successModal("Course created successfully");
+        navigate("/instructor/");
       }
     } catch (err) {
       errorModal(
@@ -167,7 +181,9 @@ const EditCourse = () => {
               onChange={setCurriculumData}
             />
 
-            <Box sx={{ mt: 5, display: "flex", justifyContent: "center" }}>
+            <Box
+              sx={{ mt: 5, display: "flex", justifyContent: "center", gap: 3 }}
+            >
               <Button
                 type="submit"
                 variant="contained"
@@ -179,11 +195,17 @@ const EditCourse = () => {
                   fontWeight: 600,
                   fontSize: 18,
                   py: 1.5,
+                  px: 5,
                   borderRadius: 2,
                   boxShadow: "0 2px 8px 0 rgba(164,53,240,0.10)",
+                  letterSpacing: 1,
+                  transition: "all 0.2s cubic-bezier(.4,0,.2,1)",
+                  textTransform: "none",
                   "&:hover": {
                     background:
                       "linear-gradient(90deg, #8710d8 60%, #a435f0 100%)",
+                    transform: "translateY(-2px) scale(1.03)",
+                    boxShadow: "0 4px 16px 0 rgba(164,53,240,0.15)",
                   },
                   "&.Mui-disabled": {
                     backgroundColor: "#e7e7e7",
@@ -191,7 +213,36 @@ const EditCourse = () => {
                   },
                 }}
               >
-                {course ?"Update" : "Create"} Course
+                {course ? t("Update Course") : t("Create Course")}
+              </Button>
+              <Button
+                variant="outlined"
+                size="large"
+                sx={{
+                  fontWeight: 600,
+                  fontSize: 18,
+                  py: 1.5,
+                  px: 5,
+                  borderRadius: 2,
+                  color: "#8710d8",
+                  borderColor: "#8710d8",
+                  textTransform: "none",
+                  letterSpacing: 1,
+                  ml: 2,
+                  transition: "all 0.2s cubic-bezier(.4,0,.2,1)",
+                  "&:hover": {
+                    background: "#f3eaff",
+                    borderColor: "#a435f0",
+                    color: "#a435f0",
+                    transform: "translateY(-2px) scale(1.03)",
+                  },
+                }}
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate("/instructor/");
+                }}
+              >
+                {t("Cancel")}
               </Button>
             </Box>
           </form>
