@@ -44,7 +44,9 @@ import Checkout from "./Components/checkout/checkout";
 import AuthGuard from "./Guards/AuthGuard";
 import Unauthorized from "./Pages/Unauthorized";
 import CheckoutComponent from "./Components/checkout/checkout";
-import MyLearning from "./Pages/learn";
+import CourseCondent from "./Pages/courseContent";
+import Career from "./HomeComponents/Career/Career";
+import Home2 from "./HomeComponents/Home2/Home2";
 
 
 const router = createBrowserRouter([
@@ -68,11 +70,13 @@ const router = createBrowserRouter([
 			{ path: "", element: <Home /> },
 			{ path: "Welcomehome", element: <Welcomehome /> },
 			{ path: "checkout", element: <Checkout /> },
-			{path:"/my-learning", element:<MyLearning/>},
+			{path:"/my-learning/:id", element:<CourseCondent/>},
+			{path:"/career-accelerators", element:<Career/>},
+			{path:"/home2", element:<Home2/>},
 
 		],
 	},
-	{ path: "category", element: <Category /> },
+	{ path: "/category/:id", element: <Category /> },
 
 	{
 		path: "instructor",

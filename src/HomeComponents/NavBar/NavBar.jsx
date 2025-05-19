@@ -10,6 +10,7 @@ import Typography from "@mui/material/Typography";
 import { useNavigate } from "react-router-dom";
 import { ShoppingCart } from "@mui/icons-material";
 import "./NavBar.css";
+// import { useNavigate } from "react-router-dom";
 
 const NavBar = () => {
   const [categories, setCategories] = useState([]);
@@ -23,6 +24,7 @@ const NavBar = () => {
 
 
   const navigate = useNavigate();
+
 
   const fetchCategories = async () => {
     try {

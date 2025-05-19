@@ -6,7 +6,7 @@ import Swal from 'sweetalert2';
 const PayPalButton = ({ onSuccess, amountval  }) => {
   return (
     <PayPalScriptProvider options={{ 
-      clientId:"AdOX28IIBHA4i5bo-amDpVDoUOlxN5kgjHK4cK5MpHZdTDnH24craCYEGfAwAgIO1gu_slz-mfu4lveE",
+      clientId:"AT1NmU2_TdPJEU49q5gA5cCObkGtrLOmw5l9Ixg3Pjmse2aC06ysZW4_deINXW1c88xglnwgr9y-jCdM",
       currency: "USD",
       components: "buttons",
       intent: "capture",
