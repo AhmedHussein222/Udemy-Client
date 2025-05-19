@@ -7,7 +7,8 @@ import { Accordion, AccordionDetails, AccordionSummary, Button } from "@mui/mate
 import Box from "@mui/material/Box";
 import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
-import StarIcon from "@mui/icons-material/Star";
+import { useNavigate } from "react-router-dom";
+import { ShoppingCart } from "@mui/icons-material";
 import "./NavBar.css";
 
 const NavBar = () => {
@@ -17,6 +18,11 @@ const NavBar = () => {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedSubcategory, setSelectedSubcategory] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [hoveredCourseId, setHoveredCourseId] = useState(null);
+
+
+
+  const navigate = useNavigate();
 
   const fetchCategories = async () => {
     try {
@@ -30,7 +36,7 @@ const NavBar = () => {
       if (categoriesList.length > 0) {
         const firstCategory = categoriesList[0];
         setSelectedCategory(firstCategory);
-        fetchSubcategories(firstCategory.id, true); // true = autoSelectFirstSub
+        fetchSubcategories(firstCategory.id, true);
       }
     } catch (error) {
       console.error("Error fetching categories: ", error);
@@ -54,7 +60,7 @@ const NavBar = () => {
       if (autoSelectFirst && subcategoriesList.length > 0) {
         const firstSub = subcategoriesList[0];
         setSelectedSubcategory(firstSub);
-        fetchCourses(categoryId, firstSub.id);
+        fetchCoursesWithRatings(categoryId, firstSub.id);
       }
     } catch (error) {
       console.error("Error fetching subcategories: ", error);
@@ -62,20 +68,53 @@ const NavBar = () => {
     setLoading(false);
   };
 
-  const fetchCourses = async (categoryId, subcategoryId) => {
+  const fetchCoursesWithRatings = async (categoryId, subcategoryId) => {
     setLoading(true);
     try {
+      // جلب التقييمات
+      const reviewsSnapshot = await getDocs(collection(db, "Reviews"));
+      const ratingsMap = {};
+      reviewsSnapshot.forEach((doc) => {
+        const data = doc.data();
+        const courseId = data.course_id;
+        const rating = Number(data.rating) || 0;
+        if (ratingsMap[courseId]) {
+          ratingsMap[courseId].push(rating);
+        } else {
+          ratingsMap[courseId] = [rating];
+        }
+      });
+
+      const averageRatings = {};
+      Object.keys(ratingsMap).forEach((courseId) => {
+        const ratings = ratingsMap[courseId];
+        const avg = ratings.reduce((a, b) => a + b, 0) / ratings.length;
+        averageRatings[courseId] = {
+          rate: avg,
+          count: ratings.length,
+        };
+      });
+
+      // جلب الكورسات حسب التصنيف والتصنيف الفرعي
       const coursesQuery = query(
         collection(db, "Courses"),
         where("category_id", "==", categoryId.toString()),
         where("subcategory_id", "==", subcategoryId.toString())
       );
       const snapshot = await getDocs(coursesQuery);
-      const coursesList = snapshot.docs.map((doc) => doc.data());
+      const coursesList = snapshot.docs.map((doc) => {
+        const courseData = doc.data();
+        const rating = averageRatings[doc.id] || { rate: 0, count: 0 };
+        return {
+          id: doc.id,
+          ...courseData,
+          rating,
+        };
+      });
 
       setCourses(coursesList);
     } catch (error) {
-      console.error("Error fetching courses: ", error);
+      console.error("Error fetching courses with ratings: ", error);
     }
     setLoading(false);
   };
@@ -86,67 +125,68 @@ const NavBar = () => {
 
   useEffect(() => {
     if (selectedSubcategory && selectedCategory) {
-      fetchCourses(selectedCategory.id, selectedSubcategory.id);
+      fetchCoursesWithRatings(selectedCategory.id, selectedSubcategory.id);
     }
-  }, [selectedSubcategory]);
+  }, [selectedSubcategory, selectedCategory]);
+
+  const handleAddToCart = (course) => {
+    alert(`Added "${course.title}" to cart!`);
+  };
 
   return (
     <div style={{ padding: "20px" }}>
       {/* Categories Tabs */}
-     {/* Categories - Desktop */}
-<div className="navbar-container desktop-only">
-  <ul className="navbar">
-    {categories.map((category) => (
-      <li
-        key={category.id}
-        className={`nav-item ${
-          selectedCategory?.id === category.id ? "selected" : ""
-        }`}
-        onClick={() => {
-          setSelectedCategory(category);
-          setSelectedSubcategory(null);
-          setCourses([]);
-          fetchSubcategories(category.id, true);
-        }}
-      >
-        {category.name}
-      </li>
-    ))}
-  </ul>
-</div>
+      <div className="navbar-container desktop-only">
+        <ul className="navbar">
+          {categories.map((category) => (
+            <li
+              key={category.id}
+              className={`nav-item ${
+                selectedCategory?.id === category.id ? "selected" : ""
+              }`}
+              onClick={() => {
+                setSelectedCategory(category);
+                setSelectedSubcategory(null);
+                setCourses([]);
+                fetchSubcategories(category.id, true);
+              }}
+            >
+              {category.name}
+            </li>
+          ))}
+        </ul>
+      </div>
 
-{/* Categories - Mobile Accordion */}
-<div className="mobile-only">
-  <Accordion>
-    <AccordionSummary expandIcon={<span>▼</span>}>
-      <Typography>
-        {selectedCategory?.name || "Select Category"}
-      </Typography>
-    </AccordionSummary>
-    <AccordionDetails>
-      {categories.map((category) => (
-        <div
-          key={category.id}
-          onClick={() => {
-            setSelectedCategory(category);
-            setSelectedSubcategory(null);
-            setCourses([]);
-            fetchSubcategories(category.id, true);
-          }}
-          style={{
-            padding: "10px 0",
-            fontWeight: selectedCategory?.id === category.id ? "bold" : "normal",
-            color: selectedCategory?.id === category.id ? "#1f365d" : "gray",
-            cursor: "pointer",
-          }}
-        >
-          {category.name}
-        </div>
-      ))}
-    </AccordionDetails>
-  </Accordion>
-</div>
-
+      {/* Categories - Mobile Accordion */}
+      <div className="mobile-only">
+        <Accordion>
+          <AccordionSummary expandIcon={<span>▼</span>}>
+            <Typography>{selectedCategory?.name || "Select Category"}</Typography>
+          </AccordionSummary>
+          <AccordionDetails>
+            {categories.map((category) => (
+              <div
+                key={category.id}
+                onClick={() => {
+                  setSelectedCategory(category);
+                  setSelectedSubcategory(null);
+                  setCourses([]);
+                  fetchSubcategories(category.id, true);
+                }}
+                style={{
+                  padding: "10px 0",
+                  fontWeight:
+                    selectedCategory?.id === category.id ? "bold" : "normal",
+                  color: selectedCategory?.id === category.id ? "#1f365d" : "gray",
+                  cursor: "pointer",
+                }}
+              >
+                {category.name}
+              </div>
+            ))}
+          </AccordionDetails>
+        </Accordion>
+      </div>
 
       {/* Subcategories */}
       {subcategories.length > 0 && (
@@ -156,7 +196,6 @@ const NavBar = () => {
             gap: "12px",
             margin: "30px 0",
             flexWrap: "wrap",
-
           }}
         >
           {subcategories.map((subcategory) => (
@@ -169,13 +208,8 @@ const NavBar = () => {
                 fontWeight: "bold",
                 fontSize: "18px",
                 backgroundColor:
-                  selectedSubcategory?.id === subcategory.id
-                    ? "#003366"
-                    : "#f5f5f5",
-                color:
-                  selectedSubcategory?.id === subcategory.id
-                    ? "#ffffff"
-                    : "#003366",
+                  selectedSubcategory?.id === subcategory.id ? "#003366" : "#f5f5f5",
+                color: selectedSubcategory?.id === subcategory.id ? "#ffffff" : "#003366",
                 cursor: "pointer",
                 transition: "all 0.3s ease",
                 boxShadow:
@@ -192,8 +226,10 @@ const NavBar = () => {
 
       {/* Loading Skeletons */}
       {loading && (
-        <div className="hide-scrollbar" style={{ display: "flex", gap: "20px", paddingBottom: "10px" }}>
-
+        <div
+          className="hide-scrollbar"
+          style={{ display: "flex", gap: "20px", paddingBottom: "10px" }}
+        >
           {Array.from({ length: 4 }).map((_, i) => (
             <Card key={i} sx={{ width: 250, flex: "0 0 auto" }}>
               <Skeleton variant="rectangular" height={150} />
@@ -210,76 +246,179 @@ const NavBar = () => {
 
       {/* Courses */}
       {!loading && selectedSubcategory && (
-        <div className="hide-scrollbar" style={{ display: "flex", paddingBottom: "10px"  ,gap:12}}>
-
-          {courses.map((course, index) => (
-            <Card key={index} sx={{ width: 250, flex: "0 0 auto" }}>
-              <img
-                src={course.thumbnail}
-                alt={course.title}
-                style={{
-                  width: "100%",
-                  height: "150px",
-                  objectFit: "cover",
-                  borderRadius: "8px 8px 0 0",
+        <div
+          className="hide-scrollbar"
+          style={{ display: "flex", paddingBottom: "10px", gap: 12 }}
+        >
+          {courses.map((course) => (
+            <Box
+              key={course.id}
+              sx={{ position: "relative", width: 250, flex: "0 0 auto" }}
+              onMouseEnter={() => setHoveredCourseId(course.id)}
+              onMouseLeave={() => setHoveredCourseId(null)}
+            >
+              <Card
+                onClick={(e) => {
+                  if (e.target.closest("button")) return;
+                  navigate(`/course/${course.id}`);
                 }}
-              />
-              <CardContent>
-                <Typography
-                  gutterBottom
-                  variant="h6"
-                  component="div"
-                  style={{ fontWeight: "bold", color: "#000000" }}
-                >
-                  {course.title}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {course.description}
-                </Typography>
-                <div
+                sx={{ cursor: "pointer" }}
+              >
+                <img
+                  src={course.thumbnail}
+                  alt={course.title}
                   style={{
-                    display: "flex",
-                    alignItems: "center",
-                    marginTop: "10px",
+                    width: "100%",
+                    height: "150px",
+                    objectFit: "cover",
+                    borderRadius: "8px 8px 0 0",
+                  }}
+                />
+                <CardContent>
+                  <Typography
+                    gutterBottom
+                    variant="h6"
+                    component="div"
+                    style={{ fontWeight: "bold", color: "#000000" }}
+                  >
+                    {course.title}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" noWrap>
+                    {course.description}
+                  </Typography>
+
+                  {/* التقييم والسعر */}
+                  {(() => {
+                    const ratingValue = course.rating?.rate || 0;
+                    const ratingCount = course.rating?.count || 0;
+                    const price = Number(course.price) || 0;
+                    const discount = Number(course.discount) || 0;
+
+                    return (
+                      <>
+                        <div
+                          className="rating"
+                          style={{
+                            marginTop: 10,
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 8,
+                          }}
+                        >
+                          <span style={{ fontWeight: "bold" }}>
+                            {ratingValue.toFixed(1)}
+                          </span>
+                          <span style={{ color: "#ffb400", fontSize: "18px" }}>
+                            {"★".repeat(Math.round(ratingValue)) +
+                              "☆".repeat(5 - Math.round(ratingValue))}
+                          </span>
+                          <span style={{ color: "#666" }}>
+                            ({ratingCount.toLocaleString()})
+                          </span>
+                        </div>
+
+                        <div
+                          className="pricing"
+                          style={{ marginTop: 10, fontWeight: "bold" }}
+                        >
+                          {price === 0 ? (
+                            <>
+                              <span style={{ color: "green" }}>Free</span>
+                              {discount > 0 && (
+                                <span
+                                  style={{
+                                    textDecoration: "line-through",
+                                    marginLeft: 8,
+                                    color: "#999",
+                                  }}
+                                >
+                                  {(price + discount).toFixed(2)} EGP
+                                </span>
+                              )}
+                            </>
+                          ) : (
+                            <>
+                              <span>{price.toFixed(2)} EGP</span>
+                              {discount > 0 && (
+                                <span
+                                  style={{
+                                    textDecoration: "line-through",
+                                    marginLeft: 8,
+                                    color: "#999",
+                                  }}
+                                >
+                                  {(price + discount).toFixed(2)} EGP
+                                </span>
+                              )}
+                            </>
+                          )}
+                        </div>
+                      </>
+                    );
+                  })()}
+                </CardContent>
+              </Card>
+
+              {/* Popup on hover */}
+              {hoveredCourseId === course.id && (
+                <Box
+                  sx={{
+                    position: 'absolute',
+  top: '20px',
+  left: '50%',
+  transform: 'translateX(-50%)',
+  width: '240px',
+  background: 'white',
+  border:' 1px solid #ddd',
+  borderRadius: '10px',
+  padding: '10px',
+  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+   zIndex : '99',
+   textAlign:'right',
                   }}
                 >
-                  <StarIcon style={{ color: "#ffb400", marginRight: "5px" }} />
-                  <Typography variant="body2" color="text.secondary">
-                    {course.rating?.rate} ({course.rating?.count} learners)
+           
+                    <Typography variant="h6" fontWeight="bold" gutterBottom>
+                    {course.title}
                   </Typography>
-                </div>
-                <Typography
-                  variant="body2"
-                  style={{ marginTop: "10px", fontWeight: "bold" }}
-                >
-                  €{course.price}
-                </Typography>
-              </CardContent>
-            </Card>
+                  <Typography
+                    variant="body2"
+                    sx={{ mb: 1.5, maxHeight: "80px", overflow: "hidden" }}
+                  >
+                    {course.description}
+                  </Typography>
+              <Typography variant="body1" fontWeight="bold" sx={{ mb: 2 }}>
+                   {course.price} 'EGP'
+                  </Typography>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    size="small"
+                    sx={{ background: '#8e2de2',
+    color: 'white',
+  border: 'none',
+ borderRadius: '2%',
+  // height: '36px',
+  display: 'flex',
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent: 'center',
+  fontWeight: 'bold',
+  fontSize: '15px',
+  // left: '15%',
+alignSelf:'center'}}
+                   
+                    onClick={() => handleAddToCart(course)}
+                    fullWidth
+                  >
+                    Add to Cart<ShoppingCart />
+                  </Button>
+                </Box>
+              )}
+            </Box>
           ))}
         </div>
       )}
-      <Box mt={4} textAlign="left">
-  <Button
-    variant="outlined"
-    sx={{
-      color: " #5624d0",
-      borderColor: " #5624d0",
-      fontWeight: "bold",
-      textTransform: "none",
-      px: 4,
-      py: 1.5,
-      borderRadius: "6px",
-      "&:hover": {
-        borderColor: "darkviolet",
-        color: "darkviolet",
-      },
-    }}
-  >
-    Show All {selectedSubcategory?.name} Courses
-  </Button>
-</Box>
-
     </div>
   );
 };
