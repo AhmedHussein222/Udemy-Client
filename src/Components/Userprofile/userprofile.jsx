@@ -9,9 +9,10 @@ import { UserContext } from '../../context/UserContext';
 import { db,  storage } from '../../Firebase/firebase';
 import { doc, setDoc, getDoc, deleteDoc } from 'firebase/firestore';
 import { deleteUser, updatePassword, EmailAuthProvider, reauthenticateWithCredential } from 'firebase/auth';
-import { useNavigate } from 'react-router-dom';
+import { Form, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
+import { ref, getDownloadURL, deleteObject } from 'firebase/storage';
+import axios from 'axios';
 
 const drawerWidth = 250;
 
@@ -46,8 +47,9 @@ const Userprofile = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
+  const [uploadimg, setuploadimg] = useState(null);
 
-  const handleImageChange = (e) => {
+  const  handleImageChange =async (e) => {
     const file = e.target.files[0];
     if (file) {
       const validImageTypes = ['image/jpeg', 'image/png', 'image/gif'];
@@ -70,6 +72,13 @@ const Userprofile = () => {
       };
       reader.readAsDataURL(file);
     }
+   const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', 'flutter_upload'); // Replace with your Cloudinary upload preset
+    const response = await axios.post('https://api.cloudinary.com/v1_1/dimwxding/image/upload', formData )
+    console.log(response.data);
+    const imageUrl = response.data.secure_url;
+    setuploadimg(imageUrl);
   };
 
   useEffect(() => {
@@ -183,20 +192,20 @@ const handleSavePhoto = async () => {
     }
 
     // 2. رفع الصورة الجديدة
-    const fileExtension = imageFile.name.split('.').pop();
-    const newImageRef = ref(storage, `profile_picture/${user.uid}-${Date.now()}.${fileExtension}`);
-    await uploadBytes(newImageRef, imageFile);
-    const imageUrl = await getDownloadURL(newImageRef);
+    // const fileExtension = imageFile.name.split('.').pop();
+    // const newImageRef = ref(storage, `profile_picture/${user.uid}-${Date.now()}.${fileExtension}`);
+    // await uploadBytes(newImageRef, imageFile);
+    // const imageUrl = await getDownloadURL(newImageRef);
 
   
     await setDoc(
       doc(db, 'Users', user.uid),
-      { profile_picture: imageUrl },
+      { profile_picture: uploadimg },
       { merge: true }
     );
 
    
-    setFormData((prev) => ({ ...prev, profile_picture: imageUrl }));
+    setFormData((prev) => ({ ...prev, profile_picture: uploadimg }));
     setSnackbarMessage(t('Profile photo updated successfully.'));
     setSnackbarSeverity('success');
     setOpenSnackbar(true);
