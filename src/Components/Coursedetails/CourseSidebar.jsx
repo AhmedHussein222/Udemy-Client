@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState, useEffect, useContext } from 'react';
 import {
   Box,
   Typography,
@@ -24,7 +25,9 @@ import CardGiftcardIcon from '@mui/icons-material/CardGiftcard';
 import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 import CloseIcon from '@mui/icons-material/Close';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { db, doc, getDoc, collection, query, where, getDocs } from '../../Firebase/firebase';
+import { CartContext } from '../../context/cart-context'; // Adjust path as needed
 
 const CourseSidebar = ({ course }) => {
   const [courseData, setCourseData] = useState(null);
@@ -32,6 +35,8 @@ const CourseSidebar = ({ course }) => {
   const [openModal, setOpenModal] = useState(false);
   const [videoError, setVideoError] = useState(null);
   const [isWishlisted, setIsWishlisted] = useState(false);
+  const [isInCart, setIsInCart] = useState(false); // Track if course is in cart
+  const { addToCart, loading, cartItems } = useContext(CartContext); // Access cartItems
 
   const formatDuration = (minutes) => {
     if (!minutes) return '0 min';
@@ -40,6 +45,14 @@ const CourseSidebar = ({ course }) => {
     if (hours === 0) return `${mins} min`;
     return `${hours} hr ${mins} min`;
   };
+
+  // Check if course is already in cart on mount or when cartItems/course changes
+  useEffect(() => {
+    if (course?.id && cartItems) {
+      const isCourseInCart = cartItems.some((item) => item.id === course.id);
+      setIsInCart(isCourseInCart);
+    }
+  }, [course?.id, cartItems]);
 
   useEffect(() => {
     const fetchCourseData = async () => {
@@ -141,6 +154,29 @@ const CourseSidebar = ({ course }) => {
 
   const handleWishlistToggle = () => {
     setIsWishlisted((prev) => !prev);
+  };
+
+  const handleAddToCart = async () => {
+    if (!courseData || isInCart) return;
+
+    const courseToAdd = {
+      id: course.id,
+      title: course.title || 'Untitled Course',
+      price: courseData.discountedPrice || courseData.price,
+      thumbnail: courseData.thumbnail,
+      instructor: course.instructor || 'Unknown Instructor',
+      description: course.description || '',
+      rating: course.rating || 0,
+      discount: calculateDiscount(courseData.price, courseData.discountedPrice) || 0,
+      badge: course.badge || '',
+    };
+
+    const success = await addToCart(courseToAdd);
+    if (success) {
+      setIsInCart(true); // Update button state
+    } else {
+      alert('Failed to add to cart. Please log in or try again.');
+    }
   };
 
   if (!courseData) {
@@ -273,18 +309,20 @@ const CourseSidebar = ({ course }) => {
         <Box sx={{ display: 'flex', gap: 1, mb: 1 }}>
           <Button
             variant="contained"
-            color="primary"
             fullWidth
             sx={{
-              bgcolor: '#a435f0',
-              '&:hover': { bgcolor: '#8710d8' },
+              bgcolor: isInCart ? '#4caf50' : '#a435f0',
+              '&:hover': { bgcolor: isInCart ? '#388e3c' : '#8710d8' },
               fontWeight: 'bold',
               py: 1.5,
               textTransform: 'none',
             }}
-            startIcon={<ShoppingCartIcon />}
+            startIcon={isInCart ? <CheckCircleIcon /> : <ShoppingCartIcon />}
+            onClick={handleAddToCart}
+            disabled={loading || isInCart}
+            aria-label={isInCart ? 'Course added to cart' : 'Add to cart'}
           >
-            Add to cart
+            {loading ? 'Adding...' : isInCart ? 'Added to Cart' : 'Add to Cart'}
           </Button>
           <IconButton
             onClick={handleWishlistToggle}
@@ -293,6 +331,7 @@ const CourseSidebar = ({ course }) => {
               '&:hover': { bgcolor: '#e0e0e0' },
               color: isWishlisted ? '#a435f0' : 'inherit',
             }}
+            aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
           >
             {isWishlisted ? <FavoriteIcon /> : <FavoriteBorderIcon />}
           </IconButton>
@@ -311,6 +350,7 @@ const CourseSidebar = ({ course }) => {
             textTransform: 'none',
             '&:hover': { bgcolor: 'grey.50', borderColor: 'grey.800' },
           }}
+          aria-label="Buy now"
         >
           Buy now
         </Button>
@@ -385,6 +425,7 @@ const CourseSidebar = ({ course }) => {
               '&:hover': { color: '#401b9c' },
             }}
             startIcon={<ShareIcon sx={{ fontSize: 14 }} />}
+            aria-label="Share course"
           >
             Share
           </Button>
@@ -398,6 +439,7 @@ const CourseSidebar = ({ course }) => {
               '&:hover': { color: '#401b9c' },
             }}
             startIcon={<CardGiftcardIcon sx={{ fontSize: 14 }} />}
+            aria-label="Gift this course"
           >
             Gift
           </Button>
@@ -411,6 +453,7 @@ const CourseSidebar = ({ course }) => {
               '&:hover': { color: '#401b9c' },
             }}
             startIcon={<LocalOfferIcon sx={{ fontSize: 14 }} />}
+            aria-label="Apply coupon"
           >
             Coupon
           </Button>
@@ -439,6 +482,7 @@ const CourseSidebar = ({ course }) => {
           <IconButton
             onClick={handleCloseModal}
             sx={{ position: 'absolute', top: 8, right: 8, zIndex: 1 }}
+            aria-label="Close video modal"
           >
             <CloseIcon />
           </IconButton>
@@ -492,6 +536,7 @@ const CourseSidebar = ({ course }) => {
                   target="_blank"
                   rel="noopener noreferrer"
                   sx={{ mt: 1 }}
+                  aria-label="Open video in new tab"
                 >
                   Open Video in New Tab
                 </Button>
