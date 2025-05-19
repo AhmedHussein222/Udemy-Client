@@ -67,15 +67,17 @@ const router = createBrowserRouter([
 			{ path: "instructor-signup", element: <InsSignup /> },
 			{ path: "course-details/:id", element: <CourseDetails /> },
 			{ path: "search", element: <SearchResults /> },
-			{ path: "", element: <Home /> },
 			{ path: "Welcomehome", element: <Welcomehome /> },
 			{ path: "checkout", element: <Checkout /> },
-			{ path: "/my-learning/:id", element: <CourseCondent /> },
-			{ path: "/career-accelerators", element: <Career /> },
-			{ path: "/home2", element: <Home2 /> },
+			{path:"/my-learning/:id", element:<CourseCondent/>},
+			{path:"/career-accelerators", element:<Career/>},
+			{ path: "", element: <Home /> },
+			{path:"/home2", element:<HomeAfterLogin/>},
+
 		],
 	},
 	{ path: "/category/:id", element: <Category /> },
+	{ path: "t", element: <AuthGuard /> },
 
 	{
 		path: "instructor",

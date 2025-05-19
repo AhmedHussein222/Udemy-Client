@@ -1,20 +1,13 @@
-import { collection, db, getDocs } from "./firebase";
+import { doc, getDoc, db } from "./firebase";
 
-export async function getUserByEmail(user_email) {
+export async function getUserById(userId) {
   try {
-    const usersCollection = collection(db, "Users");
-    const querySnapshot = await getDocs(usersCollection);
-    let userData = null;
+    const userDoc = doc(db, "Users", userId);
+    const docSnap = await getDoc(userDoc);
 
-    querySnapshot.forEach((doc) => {
-      if (doc.data().email === user_email) {
-        userData = { ...doc.data()};
-      }
-    });
-
-    return userData;
+      return { ...docSnap.data() };
   } catch (error) {
-    console.error("Error fetching user by email:", error);
+    console.error("Error fetching user by ID:", error);
     throw error;
   }
 }
