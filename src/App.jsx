@@ -6,6 +6,7 @@ import Cart from "./Components/Cart/Cart";
 import Category from "./Components/Category/Category";
 import Footer from "./Components/Footer/Footer";
 import Header from "./Components/Header/Header";
+import SearchResults from "./Components/Search/SearchResults";
 import CreateCourse from "./Components/Instructor Dashboard/components/CreateCourse/createcourse";
 import InsSignup from "./Components/Instructor Dashboard/InsSignup";
 import Welcomehome from "./Components/Instructor Dashboard/welcomehome";
@@ -24,19 +25,27 @@ import { ThemeProvider, createTheme } from "@mui/material";
 import Userprofile from "./Components/Userprofile/userprofile";
 import { UserContext } from "./context/UserContext";
 import Home from "./Components//Home/Home";
-
 import InsHome from "./Components/Instructor Dashboard/components/Home/home";
 import EditCourse from "./Components/Instructor Dashboard/components/Edit Course/edit";
 import { CourseProvider } from "./context/CourseContext";
-import CourseDetails from "./Components/Coursedetails/CourseDetails"
+import { CartProvider } from "./context/CartContext";
+import CourseDetails from "./Components/Coursedetails/CourseDetails";
 import Wishlist from "./Components/Wishlist/wishlist";
-import  Reviews from "./Components/Instructor Dashboard/components/Reviews";
+import Reviews from "./Components/Instructor Dashboard/components/Reviews";
 import Revenue from "./Components/Instructor Dashboard/components/Revenue";
+
 import PaymentPage from "./Components/payment/test";
 import SubcategoryPage from "./Components/Courses/SubCourses";
 import CategoryPage from "./Components/Courses/CatCourses";
 import HomeAfterLogin from "./Components/HomeAfterLogin/HomeLogin";
 import Navbar from "./HomeAfterLoginComponents/NavBar";
+
+import Checkout from "./Components/checkout/checkout";
+import AuthGuard from "./Guards/AuthGuard";
+import Unauthorized from "./Pages/Unauthorized";
+import CheckoutComponent from "./Components/checkout/checkout";
+import MyLearning from "./Pages/learn";
+
 
 const router = createBrowserRouter([
 	{
@@ -55,26 +64,35 @@ const router = createBrowserRouter([
 			{ path: "signup", element: <Signup /> },
 			{ path: "instructor-signup", element: <InsSignup /> },
 			{ path: "coursedetails/:id", element: <CourseDetails /> },
+			{ path: "search", element: <SearchResults /> },
 			{ path: "", element: <Home /> },
 			{ path: "Welcomehome", element: <Welcomehome /> },
+			{ path: "checkout", element: <Checkout /> },
+			{path:"/my-learning", element:<MyLearning/>},
 
 		],
 	},
 	{ path: "category", element: <Category /> },
-	{ path: "pay", element: <PaymentPage /> },
 
 	{
 		path: "instructor",
-		element: <InsMain />,
+
+		element:
+		 <AuthGuard allowedRoles={["instructor"]} >
+			<InsMain />
+		</AuthGuard> 
+		,
 		children: [
 			{ path: "", element: <InsHome /> },
-			{ path: "courses" , element: <InsHome /> },
+			{ path: "courses", element: <InsHome /> },
 			{ path: "create", element: <CreateCourse /> },
 			{ path: "edit", element: <EditCourse /> },
 			{ path: "reviews", element: <Reviews /> },
 			{ path: "revenue", element: <Revenue /> },
 		],
 	},
+	{path:"/unauthorized", element:<Unauthorized/>},
+	{path:"/checkout", element:<CheckoutComponent/>},
 ]);
 
 function Main() {
@@ -90,10 +108,9 @@ function Main() {
 }
 
 const App = () => {
-  
-  const { i18n } = useTranslation();
-  const direction = i18n.language === 'ar' ? 'rtl' : 'ltr';
-  const [user, setUser] = useState(null);
+	const { i18n } = useTranslation();
+	const direction = i18n.language === "ar" ? "rtl" : "ltr";
+	const [user, setUser] = useState(null);
 
 	useEffect(() => {
 		const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
@@ -124,11 +141,12 @@ const App = () => {
 	return (
 		<CacheProvider value={cache}>
 			<ThemeProvider theme={theme}>
-				<CssBaseline />
+				<CssBaseline />{" "}
 				<UserContext.Provider value={{ user }}>
 					<CourseProvider>
-						<RouterProvider router={router} />
-					
+						<CartProvider>
+							<RouterProvider router={router} />
+						</CartProvider>
 					</CourseProvider>
 				</UserContext.Provider>
 			</ThemeProvider>
@@ -138,7 +156,7 @@ const App = () => {
 
 export default App;
 
-// import React from 'react';
+
 // import { BrowserRouter, Routes, Route } from 'react-router-dom';
 // import Layout from './Layout';
 // import Home from './Components/Home/Home';

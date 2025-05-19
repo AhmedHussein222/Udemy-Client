@@ -18,11 +18,14 @@ import {
 	Menu,
 	MenuItem,
 	Avatar,
+	Badge,
+	Divider,
 } from "@mui/material";
 import { useLocation, useNavigate } from "react-router-dom";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import NotificationsOutlinedIcon from "@mui/icons-material/NotificationsOutlined";
 import { UserContext } from "../../context/UserContext";
+import { CartContext } from "../../context/cart-context";
 import { auth, db } from "../../Firebase/firebase";
 import { doc, getDoc } from "firebase/firestore";
 import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
@@ -39,10 +42,12 @@ const Header = () => {
 	const [showSearch, setShowSearch] = useState(false);
 	const [anchorEl, setAnchorEl] = useState(null);
 	const [userData, setUserData] = useState(null);
+	const [searchQuery, setSearchQuery] = useState("");
 	const isMobile = useMediaQuery("(max-width:768px)");
 	const location = useLocation();
 	const navigate = useNavigate();
 	const { user } = useContext(UserContext);
+	const { cartItems } = useContext(CartContext);
 
 	useEffect(() => {
 		const fetchUserData = async () => {
@@ -52,7 +57,6 @@ const Header = () => {
 					const docSnap = await getDoc(userDocRef);
 					if (docSnap.exists()) {
 						setUserData(docSnap.data());
-						
 					}
 				} catch (error) {
 					console.error("Error fetching user data:", error);
@@ -60,7 +64,6 @@ const Header = () => {
 			}
 		};
 		fetchUserData();
-		
 	}, [user]);
 
 	const toggleDrawer = () => {
@@ -98,6 +101,13 @@ const Header = () => {
 		}
 	}, [i18n]);
 
+	const handleSearch = (e) => {
+		e.preventDefault();
+		if (searchQuery.trim()) {
+			navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+		}
+	};
+
 	return (
 		<AppBar position="static" sx={{ backgroundColor: "#fff" }} elevation={1}>
 			<Box sx={{ px: 2, py: 1 }}>
@@ -131,7 +141,9 @@ const Header = () => {
 									<SearchIcon />
 								</IconButton>{" "}
 								<IconButton onClick={() => navigate("/cart")}>
-									<ShoppingCartOutlinedIcon />
+									<Badge badgeContent={cartItems.length} color="error">
+										<ShoppingCartOutlinedIcon />
+									</Badge>
 								</IconButton>
 							</Box>
 						</>
@@ -144,10 +156,10 @@ const Header = () => {
 								</Box>
 								<Typography sx={linkStyle}>{t("Explore")}</Typography>
 							</Box>
-							{/* Search Bar */}
+							{/* Search Bar */}{" "}
 							<Paper
 								component="form"
-								onSubmit={(e) => e.preventDefault()}
+								onSubmit={handleSearch}
 								sx={{
 									...searchBarStyle,
 									flexGrow: 1,
@@ -155,10 +167,12 @@ const Header = () => {
 								}}>
 								<IconButton type="submit" sx={searchBtnStyle}>
 									<SearchIcon sx={{ color: "gray" }} />
-								</IconButton>
+								</IconButton>{" "}
 								<InputBase
 									sx={{ flex: 1, fontSize: "16px" }}
 									placeholder={t("Search for anything")}
+									value={searchQuery}
+									onChange={(e) => setSearchQuery(e.target.value)}
 								/>
 							</Paper>
 							<Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
@@ -186,12 +200,18 @@ const Header = () => {
 										</Box>
 									)}
 								</Box>
-
+							{userData?.role !== "instructor" ? (
 								<Box
 									onMouseEnter={() => setOpenTeach(true)}
 									onMouseLeave={() => setOpenTeach(false)}
 									sx={{ position: "relative" }}>
-									<Typography onClick={() => navigate("/Welcomehome")} sx={linkStyle}>{t("Teach on Udemy")}</Typography>
+										
+									<Typography
+										onClick={() => navigate("/Welcomehome")}
+										sx={linkStyle}>
+										{t("Teach on Udemy")}
+									</Typography>
+
 									{openTeach && (
 										<Box sx={popoverStyle}>
 											<Typography
@@ -202,12 +222,19 @@ const Header = () => {
 													"Turn what you know into an opportunity and reach millions around the world."
 												)}
 											</Typography>
-											<Button variant="contained" sx={teachBtnStyle}>
+											<Button onClick={()=>navigate("/Welcomehome")} variant="contained" sx={teachBtnStyle}>
 												{t("Learn more")}
 											</Button>
 										</Box>
 									)}
 								</Box>
+							) : (
+								<Typography
+									onClick={() => navigate("/instructor")}
+									sx={linkStyle}>
+									{t("Instructor")}
+								</Typography>
+							)}
 								{user ? (
 									<>
 										<IconButton
@@ -221,7 +248,9 @@ const Header = () => {
 										<IconButton
 											sx={iconBtnStyle}
 											onClick={() => navigate("/cart")}>
-											<ShoppingCartOutlinedIcon />
+											<Badge badgeContent={cartItems.length} color="error">
+												<ShoppingCartOutlinedIcon />
+											</Badge>
 										</IconButton>
 										<IconButton onClick={handleMenuOpen}>
 											<Avatar
@@ -241,15 +270,222 @@ const Header = () => {
 											transformOrigin={{
 												vertical: "top",
 												horizontal: "right",
+											}}
+											PaperProps={{
+												elevation: 0,
+												sx: {
+													overflow: "visible",
+													filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
+													mt: 1.5,
+													minWidth: 300,
+													maxHeight: "calc(100vh - 64px)",
+													"& .MuiMenu-list": {
+														padding: 0,
+														maxHeight: "calc(100vh - 64px)",
+														overflowY: "auto",
+														overflowX: "hidden",
+														"&::-webkit-scrollbar": {
+															width: "6px",
+														},
+														"&::-webkit-scrollbar-track": {
+															background: "transparent",
+														},
+														"&::-webkit-scrollbar-thumb": {
+															background: "#8000ff20",
+															borderRadius: "3px",
+															"&:hover": {
+																background: "#8000ff40",
+															},
+														},
+													},
+													"& .MuiMenuItem-root": {
+														px: 2,
+														py: 1.5,
+														"&:hover": {
+															backgroundColor: "#e0ccff",
+															color: "#8000ff",
+															"& .MuiTypography-root": {
+																color: "#8000ff",
+															},
+															"& .MuiSvgIcon-root": {
+																color: "#8000ff",
+															},
+														},
+													},
+													"& .MuiDivider-root": {
+														margin: "4px 0",
+														borderColor: "#d1d2e0",
+													},
+												},
 											}}>
 											<MenuItem
 												onClick={() => {
 													handleMenuClose();
 													navigate("/userprofile");
+												}}
+												sx={{
+													p: 2,
+													"&:hover": {
+														backgroundColor: "#e0ccff",
+														"& .MuiTypography-root": {
+															color: "#8000ff",
+														},
+													},
 												}}>
-												{t("Profile")}
+												<Box
+													sx={{
+														display: "flex",
+														alignItems: "center",
+														width: "100%",
+													}}>
+													<Avatar
+														src={userData?.profile_picture}
+														sx={{
+															width: 40,
+															height: 40,
+															mr: 2,
+															bgcolor: "#8000ff",
+														}}>
+														{user?.email?.[0].toUpperCase()}
+													</Avatar>
+													<Box>
+														<Typography
+															variant="subtitle1"
+															sx={{ fontWeight: "bold" }}>
+															{userData?.first_name} {userData?.last_name}
+														</Typography>
+														<Typography variant="body2" color="text.secondary">
+															{user?.email}
+														</Typography>
+													</Box>
+												</Box>
 											</MenuItem>
-											<MenuItem onClick={handleLogout}>{t("Log out")}</MenuItem>
+											<Divider sx={{ borderColor: "#d1d2e0", my: 1 }} />
+											<MenuItem
+												onClick={() => {
+													handleMenuClose();
+													navigate("/userprofile");
+												}}>
+												{t("My Learning")}
+											</MenuItem>
+											<MenuItem
+												onClick={() => {
+													handleMenuClose();
+													navigate("/cart");
+												}}>
+												{t("My Cart")}
+											</MenuItem>
+											<MenuItem
+												onClick={() => {
+													handleMenuClose();
+													navigate("/wishlist");
+												}}>
+												{t("Wishlist")}
+											</MenuItem>{" "}
+											{userData?.role !== "instructor" && (
+												<MenuItem
+													onClick={() => {
+														handleMenuClose();
+														navigate("/Welcomehome");
+													}}>
+													{t("Teach on Udemy")}
+												</MenuItem>
+											)}
+											<Divider sx={{ borderColor: "#d1d2e0", my: 1 }} />
+											<MenuItem
+												onClick={() => {
+													handleMenuClose();
+													navigate("/notifications");
+												}}>
+												{t("Notifications")}
+											</MenuItem>
+											<MenuItem
+												onClick={() => {
+													handleMenuClose();
+													navigate("/messages");
+												}}>
+												{t("Messages")}
+											</MenuItem>
+											<Divider sx={{ borderColor: "#d1d2e0", my: 1 }} />
+											<MenuItem
+												onClick={() => {
+													handleMenuClose();
+													navigate("/userprofile");
+												}}>
+												{t("Account Settings")}
+											</MenuItem>
+											<MenuItem
+												onClick={() => {
+													handleMenuClose();
+													navigate("/payment");
+												}}>
+												{t("Payment Methods")}
+											</MenuItem>
+											<MenuItem
+												onClick={() => {
+													handleMenuClose();
+													navigate("/subscriptions");
+												}}>
+												{t("Subscriptions")}
+											</MenuItem>
+											<MenuItem
+												onClick={() => {
+													handleMenuClose();
+													navigate("/credits");
+												}}>
+												{t("Udemy Credits")}
+											</MenuItem>
+											<MenuItem
+												onClick={() => {
+													handleMenuClose();
+													navigate("/purchase-history");
+												}}>
+												{t("Purchase History")}
+											</MenuItem>
+											<MenuItem
+												onClick={() => {
+													handleMenuClose();
+													navigate("/userprofile");
+												}}>
+												{t("Public Profile")}
+											</MenuItem>
+											<MenuItem
+												onClick={() => {
+													handleMenuClose();
+													navigate("/userprofile");
+												}}>
+												{t("Edit Profile")}
+											</MenuItem>
+											<Divider sx={{ borderColor: "#d1d2e0", my: 1 }} />
+											<MenuItem
+												onClick={() => {
+													handleMenuClose();
+													navigate("/help");
+												}}>
+												{t("Help and Support")}
+											</MenuItem>{" "}
+											<MenuItem
+												onClick={() => {
+													handleMenuClose();
+													toggleLanguage();
+												}}
+												sx={{
+													display: "flex",
+													alignItems: "center",
+													justifyContent: "space-between",
+													width: "100%",
+												}}>
+												<Box sx={{ display: "flex", alignItems: "center" }}>
+													<LanguageIcon sx={{ mr: 1 }} />
+													{i18n.language === "en" ? "عربي" : "English"}
+												</Box>
+											</MenuItem>
+											<Divider sx={{ borderColor: "#d1d2e0", my: 1 }} />
+											<MenuItem
+												onClick={handleLogout}
+												sx={{ color: "#d32f2f" }}>
+												{t("Log Out")}
+											</MenuItem>
 										</Menu>
 									</>
 								) : (
@@ -257,7 +493,9 @@ const Header = () => {
 										<IconButton
 											sx={iconBtnStyle}
 											onClick={() => navigate("/cart")}>
-											<ShoppingCartOutlinedIcon />
+											<Badge badgeContent={cartItems.length} color="error">
+												<ShoppingCartOutlinedIcon />
+											</Badge>
 										</IconButton>
 										{location.pathname !== "/login" && (
 											<Button
@@ -293,14 +531,16 @@ const Header = () => {
 					<Box sx={{ mt: 2 }}>
 						<Paper
 							component="form"
-							onSubmit={(e) => e.preventDefault()}
+							onSubmit={handleSearch}
 							sx={{ ...searchBarStyle, width: "100%" }}>
 							<InputBase
 								sx={{ flex: 1, fontSize: "16px" }}
 								placeholder={t("Search...")}
+								value={searchQuery}
+								onChange={(e) => setSearchQuery(e.target.value)}
 							/>
 							<IconButton type="submit" sx={searchBtnStyle}>
-								<SearchIcon sx={{ color: "#fff" }} />
+								<SearchIcon sx={{ color: "gray" }} />
 							</IconButton>
 						</Paper>
 					</Box>

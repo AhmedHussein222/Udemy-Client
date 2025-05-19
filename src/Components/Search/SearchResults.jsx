@@ -1,0 +1,494 @@
+/** @format */
+
+import React, { useEffect, useState, useContext } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { collection, getDocs, query, where } from "firebase/firestore";
+import { db } from "../../Firebase/firebase";
+import {
+	Box,
+	Typography,
+	Grid,
+	CircularProgress,
+	Container,
+	Button,
+	Card,
+	CardContent,
+	CardMedia,
+	Rating,
+	Avatar,
+	Stack,
+} from "@mui/material";
+import { CartContext } from "../../context/cart-context";
+import { useTranslation } from "react-i18next";
+import PeopleIcon from "@mui/icons-material/People";
+import StarIcon from "@mui/icons-material/Star";
+import VideoLibraryIcon from "@mui/icons-material/VideoLibrary";
+
+const SearchResults = () => {
+	const [searchResults, setSearchResults] = useState({
+		courses: [],
+		instructors: [],
+	});
+	const [loading, setLoading] = useState(true);
+	const location = useLocation();
+	const navigate = useNavigate();
+	const searchQuery = new URLSearchParams(location.search).get("q");
+	useTranslation();
+	const { addToCart, cartItems } = useContext(CartContext);
+
+	const handleAddToCart = (e, course) => {
+		e.preventDefault();
+		e.stopPropagation();
+
+		if (!course) {
+			return;
+		}
+
+		if (!course.id || !course.title) {
+			return;
+		}
+
+		const courseToAdd = {
+			id: course.id,
+			title: course.title,
+			price: course.price,
+			thumbnail: course.thumbnail,
+			instructor: course.instructor_name,
+			description: course.description,
+			rating: course.rating,
+			discount: course.discount || 0,
+			badge: course.badge || "",
+		};
+
+		addToCart(courseToAdd);
+	};
+
+	const calculateSimilarity = (str1, str2) => {
+		const track = Array(str2.length + 1)
+			.fill(null)
+			.map(() => Array(str1.length + 1).fill(null));
+		for (let i = 0; i <= str1.length; i += 1) {
+			track[0][i] = i;
+		}
+		for (let j = 0; j <= str2.length; j += 1) {
+			track[j][0] = j;
+		}
+		for (let j = 1; j <= str2.length; j += 1) {
+			for (let i = 1; i <= str1.length; i += 1) {
+				const indicator = str1[i - 1] === str2[j - 1] ? 0 : 1;
+				track[j][i] = Math.min(
+					track[j][i - 1] + 1,
+					track[j - 1][i] + 1,
+					track[j - 1][i - 1] + indicator
+				);
+			}
+		}
+		return (
+			1 - track[str2.length][str1.length] / Math.max(str1.length, str2.length)
+		);
+	};
+
+	useEffect(() => {
+		const fetchSearchResults = async () => {
+			setLoading(true);
+			try {
+				const coursesSnapshot = await getDocs(collection(db, "Courses"));
+				const allCourses = coursesSnapshot.docs.map((doc) => {
+					const data = doc.data();
+					return {
+						id: doc.id,
+						course_id: doc.id,
+						title: data.title || "",
+						price: parseFloat(data.price || 0),
+						thumbnail: data.thumbnail || "",
+						instructor_name: data.instructor_name || "",
+						instructor_id: data.instructor_id || "",
+						description: data.description || "",
+						rating: data.rating || { rate: 0, count: 0 },
+						discount: parseFloat(data.discount || 0),
+						badge: data.badge || "",
+						enrolled_students: parseInt(data.enrolled_students || 0, 10),
+					};
+				});
+
+				const instructorsSnapshot = await getDocs(
+					query(collection(db, "Users"), where("role", "==", "instructor"))
+				);
+
+				const allInstructors = await Promise.all(
+					instructorsSnapshot.docs.map(async (doc) => {
+						const instructorData = doc.data();
+
+						const instructorCourses = allCourses.filter(
+							(course) => course.instructor_id === doc.id
+						);
+
+						const reviewsSnapshot = await getDocs(
+							query(
+								collection(db, "Reviews"),
+								where("instructor_id", "==", doc.id)
+							)
+						);
+						const reviews = reviewsSnapshot.docs.map((doc) => doc.data());
+
+						const totalRating = reviews.reduce(
+							(sum, review) => sum + (review.rating || 0),
+							0
+						);
+						const averageRating =
+							reviews.length > 0 ? totalRating / reviews.length : 0;
+
+						return {
+							id: doc.id,
+							...instructorData,
+							coursesCount: instructorCourses.length,
+							studentsCount: instructorCourses.reduce(
+								(sum, course) => sum + (course.enrolled_students || 0),
+								0
+							),
+							rating: averageRating,
+							reviewsCount: reviews.length,
+						};
+					})
+				);
+
+				const searchTermLower = searchQuery?.toLowerCase() || "";
+				const scoredCourses = allCourses
+					.map((course) => {
+						const titleMatch = (course.title?.toLowerCase() || "").includes(
+							searchTermLower
+						);
+						const descMatch = (
+							course.description?.toLowerCase() || ""
+						).includes(searchTermLower);
+						const instructorMatch = (
+							course.instructor_name?.toLowerCase() || ""
+						).includes(searchTermLower);
+
+						if (titleMatch || descMatch || instructorMatch) {
+							return {
+								...course,
+								searchScore: 1,
+							};
+						}
+
+						return {
+							...course,
+							searchScore: Math.max(
+								calculateSimilarity(
+									course.title?.toLowerCase() || "",
+									searchTermLower
+								),
+								calculateSimilarity(
+									course.description?.toLowerCase() || "",
+									searchTermLower
+								),
+								calculateSimilarity(
+									course.instructor_name?.toLowerCase() || "",
+									searchTermLower
+								)
+							),
+						};
+					})
+					.filter((course) => course.searchScore > 0.1)
+					.sort((a, b) => b.searchScore - a.searchScore);
+
+				const scoredInstructors = allInstructors
+					.map((instructor) => ({
+						...instructor,
+						searchScore: Math.max(
+							calculateSimilarity(
+								`${instructor.first_name} ${instructor.last_name}`.toLowerCase(),
+								searchTermLower
+							),
+							calculateSimilarity(
+								instructor.bio?.toLowerCase() || "",
+								searchTermLower
+							)
+						),
+					}))
+					.filter((instructor) => instructor.searchScore > 0.2)
+					.sort((a, b) => b.searchScore - a.searchScore);
+
+				setSearchResults({
+					courses: scoredCourses,
+					instructors: scoredInstructors,
+				});
+			} catch (error) {
+				console.error('Error fetching search results:', error);
+			}
+			setLoading(false);
+		};
+
+		if (searchQuery) {
+			fetchSearchResults();
+		} else {
+			setLoading(false);
+		}
+	}, [searchQuery]);
+
+	if (loading) {
+		return (
+			<Box
+				sx={{
+					display: "flex",
+					justifyContent: "center",
+					alignItems: "center",
+					minHeight: "60vh",
+				}}>
+				<CircularProgress sx={{ color: "#8000ff" }} />
+			</Box>
+		);
+	}
+
+	if (!searchQuery) {
+		return (
+			<Container sx={{ py: 4, textAlign: "center" }}>
+				<Typography variant="h5">Please enter a search term</Typography>
+			</Container>
+		);
+	}
+
+	const totalResults =
+		searchResults.courses.length + searchResults.instructors.length;
+	if (totalResults === 0) {
+		return (
+			<Container sx={{ py: 4, textAlign: "center" }}>
+				<Typography variant="h5">
+					No results found for "{searchQuery}"
+				</Typography>
+			</Container>
+		);
+	}
+
+	return (
+		<Container sx={{ py: 4 }}>
+			<Typography variant="h5" sx={{ mb: 3 }}>
+				Search results for "{searchQuery}" ({totalResults} results)
+			</Typography>
+
+			{searchResults.instructors.length > 0 && (
+				<>
+					<Typography variant="h6" sx={{ mt: 4, mb: 2 }}>
+						Instructors ({searchResults.instructors.length})
+					</Typography>
+					<Grid container spacing={3}>
+						{searchResults.instructors.map((instructor) => (
+							<Grid item xs={12} md={6} key={instructor.id}>
+								<Card sx={{ display: "flex", height: "100%" }}>
+									<Box
+										sx={{
+											p: 2,
+											display: "flex",
+											flexDirection: "column",
+											flex: 1,
+										}}>
+										<Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+											<Avatar
+												src={instructor.profile_picture}
+												alt={`${instructor.first_name} ${instructor.last_name}`}
+												sx={{ width: 64, height: 64, mr: 2 }}
+											/>
+											<Box>
+												<Typography variant="h6">
+													{instructor.first_name} {instructor.last_name}
+												</Typography>
+												<Typography
+													variant="body2"
+													color="text.secondary"
+													sx={{ mb: 1 }}>
+													{instructor.title || "Instructor"}
+												</Typography>
+											</Box>
+										</Box>
+
+										<Typography
+											variant="body2"
+											color="text.secondary"
+											sx={{ mb: 2 }}>
+											{instructor.bio?.slice(0, 150)}
+											{instructor.bio?.length > 150 ? "..." : ""}
+										</Typography>
+
+										<Stack direction="row" spacing={2} sx={{ mb: 2 }}>
+											<Box sx={{ display: "flex", alignItems: "center" }}>
+												<StarIcon
+													sx={{ fontSize: 16, color: "orange", mr: 0.5 }}
+												/>
+												<Typography variant="body2">
+													{instructor.rating.toFixed(1)} (
+													{instructor.reviewsCount} reviews)
+												</Typography>
+											</Box>
+											<Box sx={{ display: "flex", alignItems: "center" }}>
+												<VideoLibraryIcon sx={{ fontSize: 16, mr: 0.5 }} />
+												<Typography variant="body2">
+													{instructor.coursesCount} courses
+												</Typography>
+											</Box>
+											<Box sx={{ display: "flex", alignItems: "center" }}>
+												<PeopleIcon sx={{ fontSize: 16, mr: 0.5 }} />
+												<Typography variant="body2">
+													{instructor.studentsCount} students
+												</Typography>
+											</Box>
+										</Stack>
+
+										<Box
+											sx={{
+												mt: "auto",
+												display: "flex",
+												justifyContent: "center",
+											}}>
+											<Button
+												variant="outlined"
+												color="primary"
+												onClick={() => navigate(`/instructor/${instructor.id}`)}
+												sx={{ textTransform: "none" }}>
+												View Profile
+											</Button>
+										</Box>
+									</Box>
+								</Card>
+							</Grid>
+						))}
+					</Grid>
+				</>
+			)}
+
+			{searchResults.courses.length > 0 && (
+				<>
+					<Typography variant="h6" sx={{ mt: 4, mb: 2 }}>
+						Courses ({searchResults.courses.length})
+					</Typography>
+					<Grid container spacing={3}>
+						{searchResults.courses.map((course) => (
+							<Grid item xs={12} sm={6} md={4} lg={3} key={course.id}>
+								<Card
+									onClick={() => navigate(`/coursedetails/${course.id}`)}
+									sx={{
+										height: "100%",
+										display: "flex",
+										flexDirection: "column",
+										transition: "all 0.3s ease",
+										cursor: "pointer",
+										"&:hover": {
+											transform: "translateY(-4px)",
+											boxShadow: 3,
+										},
+									}}>
+									<CardMedia
+										component="img"
+										height="150"
+										image={course.thumbnail}
+										alt={course.title}
+									/>
+									<CardContent
+										sx={{
+											flexGrow: 1,
+											display: "flex",
+											flexDirection: "column",
+										}}>
+										<Typography
+											variant="h6"
+											sx={{ fontSize: "1rem", mb: 1 }}
+											noWrap>
+											{course.title}
+										</Typography>
+										<Typography
+											variant="body2"
+											sx={{
+												color: "text.secondary",
+												mb: 1,
+												cursor: "pointer",
+												"&:hover": {
+													color: "primary.main",
+												},
+											}}
+											onClick={(e) => {
+												e.stopPropagation();
+												navigate(`/instructor/${course.instructor_id}`);
+											}}
+											noWrap>
+											{course.instructor_name}
+										</Typography>
+										<Typography
+											variant="body2"
+											color="text.secondary"
+											sx={{ mb: 2 }}
+											noWrap>
+											{course.description}
+										</Typography>
+
+										{course.rating && (
+											<Box
+												sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+												<Rating
+													value={course.rating.rate}
+													readOnly
+													size="small"
+													precision={0.1}
+												/>
+												<Typography
+													variant="body2"
+													color="text.secondary"
+													sx={{ ml: 1 }}>
+													({course.rating.count})
+												</Typography>
+											</Box>
+										)}
+
+										<Box sx={{ mt: "auto" }}>
+											<Box
+												sx={{
+													display: "flex",
+													alignItems: "center",
+													mb: 1,
+													justifyContent: "space-between",
+												}}>
+												<Typography
+													variant="h6"
+													color="primary.main"
+													sx={{ fontWeight: "bold" }}>
+													${course.price}
+												</Typography>
+												{course.original_price && (
+													<Typography
+														variant="body2"
+														sx={{
+															textDecoration: "line-through",
+															color: "text.secondary",
+														}}>
+														${course.original_price}
+													</Typography>
+												)}
+											</Box>
+											<Button
+												variant="contained"
+												fullWidth
+												color="primary"
+												onClick={(e) => handleAddToCart(e, course)}
+												disabled={cartItems.some(
+													(item) => item.id === course.id
+												)}
+												sx={{
+													textTransform: "none",
+													py: 1,
+												}}>
+												{cartItems.some((item) => item.id === course.id)
+													? "In Cart"
+													: "Add to Cart"}
+											</Button>
+										</Box>
+									</CardContent>
+								</Card>
+							</Grid>
+						))}
+					</Grid>
+				</>
+			)}
+		</Container>
+	);
+};
+
+export default SearchResults;
