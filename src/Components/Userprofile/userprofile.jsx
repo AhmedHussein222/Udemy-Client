@@ -1,6 +1,4 @@
-/** @format */
-
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState, useContext } from 'react';
 import {
   Avatar, Box, List, ListItem, ListItemText, Typography, Divider, Paper,
   MenuItem, FormControl, InputLabel, OutlinedInput, InputAdornment, Button,
@@ -168,10 +166,10 @@ const handleSavePhoto = async () => {
   let oldImagePath = null;
 
   try {
-
+    // 1. حذف الصورة القديمة (إذا كانت موجودة)
     if (formData.profile_picture) {
       try {
-   
+        // استخراج المسار من الـ URL (إذا كان رابطًا)
         const urlParts = formData.profile_picture.split('/profile_picture/');
         oldImagePath = urlParts.length > 1 ? `profile_picture/${urlParts[1]}` : null;
         
@@ -184,7 +182,7 @@ const handleSavePhoto = async () => {
       }
     }
 
-  
+    // 2. رفع الصورة الجديدة
     const fileExtension = imageFile.name.split('.').pop();
     const newImageRef = ref(storage, `profile_picture/${user.uid}-${Date.now()}.${fileExtension}`);
     await uploadBytes(newImageRef, imageFile);
@@ -347,30 +345,20 @@ const handleSavePhoto = async () => {
               <MenuItem value="عربي">{t('عربي')}</MenuItem>
             </TextField>
 
-						<Divider sx={{ my: 2 }} />
-						<Typography variant="subtitle1" gutterBottom>
-							{t("Links:")}
-						</Typography>
-						{["facebook", "instagram", "linkedin", "youtube"].map(
-							(platform) => (
-								<FormControl fullWidth margin="normal" key={platform}>
-									<InputLabel htmlFor={`${platform}-username`}>
-										{platform}
-									</InputLabel>
-									<OutlinedInput
-										id={`${platform}-username`}
-										name={platform}
-										value={formData.links[platform]}
-										onChange={handleChange}
-										startAdornment={
-											<InputAdornment position="start">
-												{platform}.com/
-											</InputAdornment>
-										}
-									/>
-								</FormControl>
-							)
-						)}
+            <Divider sx={{ my: 2 }} />
+            <Typography variant="subtitle1" gutterBottom>{t('Links:')}</Typography>
+            {['facebook', 'instagram', 'linkedin', 'youtube'].map((platform) => (
+              <FormControl fullWidth margin="normal" key={platform}>
+                <InputLabel htmlFor={`${platform}-username`}>{platform}</InputLabel>
+                <OutlinedInput
+                  id={`${platform}-username`}
+                  name={platform}
+                  value={formData.links[platform]}
+                  onChange={handleChange}
+                  startAdornment={<InputAdornment position="start">{platform}.com/</InputAdornment>}
+                />
+              </FormControl>
+            ))}
 
             <FormControl>
               <FormLabel id="gender-radio-buttons-group-label" sx={{ mt: 2 }}>
@@ -524,12 +512,10 @@ const handleSavePhoto = async () => {
           </List>
         </Box>
 
-				<Box
-					component="main"
-					sx={{ flexGrow: 1, width: "100%", p: { xs: 2, sm: 3, md: 4 } }}>
-					{renderSectionContent()}
-				</Box>
-			</Paper>
+        <Box component="main" sx={{ flexGrow: 1, width: '100%', p: { xs: 2, sm: 3, md: 4 } }}>
+          {renderSectionContent()}
+        </Box>
+      </Paper>
 
       <Snackbar
         open={openSnackbar}
