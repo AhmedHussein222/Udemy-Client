@@ -11,14 +11,13 @@ import {
   Typography,
 } from "@mui/material";
 import React, { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
-import {
-  deleteCourse,
-  getInsCourses,
-} from "../../../../Firebase/courses";
+import { deleteCourse, getInsCourses } from "../../../../Firebase/courses";
 
 function Home() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [courses, setCourses] = React.useState([]);
   useEffect(() => {
@@ -48,7 +47,7 @@ function Home() {
                 component="div"
                 sx={{ textAlign: "center", fontSize: "1.2rem" }}
               >
-                Jump Into Course Creation
+                {t("Jump Into Course Creation")}
               </Typography>
             </CardContent>
 
@@ -70,7 +69,7 @@ function Home() {
                     "&:hover": { backgroundColor: "#6a1b9a" },
                   }}
                 >
-                  Create Your Course
+                  {t("Create Your Course")}
                 </Button>
               </CardActions>
             </CardContent>
@@ -121,7 +120,7 @@ function Home() {
                           fontWeight: 600,
                         }}
                       >
-                        {course?.is_published ? "Published" : "Draft"}
+                        {course?.is_published ? t("Published") : t("Draft")}
                       </Typography>
                       <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
                         <Button
@@ -139,46 +138,53 @@ function Home() {
                             },
                           }}
                         >
-                          Edit
+                          {t("Edit")}
                         </Button>
                         <Button
                           variant="outlined"
                           color="error"
                           onClick={() => {
                             Swal.fire({
-                              title: "Are you sure?",
-                              text: "You won't be able to revert this!",
+                              title: t("Are you sure?"),
+                              text: t("You won't be able to revert this!"),
                               icon: "warning",
                               showCancelButton: true,
                               confirmButtonColor: "#3085d6",
                               cancelButtonColor: "#d33",
-                              confirmButtonText: "Yes, delete it!",
+                              confirmButtonText: t("Yes, delete it!"),
                             }).then((result) => {
                               if (result.isConfirmed) {
                                 deleteCourse(course.course_id)
                                   .then(() => {
-                                    setCourses(prevCourses => 
-                                      prevCourses.filter(c => c.course_id !== course.course_id)
+                                    setCourses((prevCourses) =>
+                                      prevCourses.filter(
+                                        (c) => c.course_id !== course.course_id
+                                      )
                                     );
                                     Swal.fire({
-                                      title: "Course!",
-                                      text: "Course deleted successfully",
+                                      title: t("Course!"),
+                                      text: t("Course deleted successfully"),
                                       icon: "success",
                                     });
                                   })
                                   .catch((error) => {
-                                    console.error("Error deleting course:", error);
+                                    console.error(
+                                      "Error deleting course:",
+                                      error
+                                    );
                                     Swal.fire({
-                                      title: "Error!",
-                                      text: "Failed to delete course. Please try again",
+                                      title: t("Error"),
+                                      text: t(
+                                        "Failed to delete course. Please try again"
+                                      ),
                                       icon: "error",
                                     });
                                   });
-                              } 
+                              }
                             });
                           }}
                         >
-                          Delete
+                          {t("Delete")}
                         </Button>
                       </Stack>
                     </CardContent>
@@ -189,14 +195,16 @@ function Home() {
           </Grid>
         ) : (
           <Typography variant="h6" textAlign="center" color="text.secondary">
-            No courses found
+            {t("No courses found")}
           </Typography>
         )}
       </Box>
 
       <Box textAlign={"center"} sx={{ mb: 6 }}>
         <Typography variant="body1">
-          Based on your experience, we think these resources will be helpful.
+          {t(
+            "Based on your experience, we think these resources will be helpful."
+          )}
         </Typography>
       </Box>
 
@@ -220,18 +228,14 @@ function Home() {
             />
             <CardContent sx={{ textAlign: { xs: "center", md: "left" } }}>
               <Typography variant="h6" gutterBottom fontWeight="bold">
-                Create an Engaging Course
+                {t("Create an Engaging Course")}
               </Typography>
               <Typography variant="body1">
-                Whether you've been teaching for years or are teaching for the
-                first time, you can
-                <br />
-                make an engaging course. We've compiled resources and best
-                practices to help you
-                <br />
-                get to the next level, no matter where you're starting.
+                {t(
+                  "Whether you've been teaching for years or are teaching for the first time, you can make an engaging course. We've compiled resources and best practices to help you get to the next level, no matter where you're starting."
+                )}
               </Typography>
-              <Link color="#6a1b9a">Get Started</Link>
+              <Link color="#6a1b9a">{t("Get Started")}</Link>
             </CardContent>
           </Stack>
         </Card>
@@ -269,13 +273,14 @@ function Home() {
               />
               <CardContent sx={{ textAlign: { xs: "center", sm: "left" } }}>
                 <Typography variant="body1" gutterBottom fontWeight="bold">
-                  Get Started with Video
+                  {t("Get Started with Video")}
                 </Typography>
                 <Typography variant="body1">
-                  Quality video lectures can set your course apart. Use our
-                  resources to learn the basics.
+                  {t(
+                    "Quality video lectures can set your course apart. Use our resources to learn the basics."
+                  )}
                 </Typography>
-                <Link color="#6a1b9a">Get Started</Link>
+                <Link color="#6a1b9a">{t("Get Started")}</Link>
               </CardContent>
             </Stack>
           </Card>
@@ -305,12 +310,14 @@ function Home() {
               />
               <CardContent sx={{ textAlign: { xs: "center", sm: "left" } }}>
                 <Typography variant="body1" gutterBottom fontWeight="bold">
-                  Build Your Audience
+                  {t("Build Your Audience")}
                 </Typography>
                 <Typography variant="body1">
-                  Set your course up for success by building your audience.
+                  {t(
+                    "Set your course up for success by building your audience."
+                  )}
                 </Typography>
-                <Link color="#6a1b9a">Get Started</Link>
+                <Link color="#6a1b9a">{t("Get Started")}</Link>
               </CardContent>
             </Stack>
           </Card>
@@ -336,18 +343,14 @@ function Home() {
             />
             <CardContent sx={{ textAlign: { xs: "center", md: "left" } }}>
               <Typography variant="h6" gutterBottom fontWeight="bold">
-                Join the New Instructor Challenge!
+                {t("Join the New Instructor Challenge!")}
               </Typography>
               <Typography variant="body1" gutterBottom>
-                Get exclusive tips and resources designed to help you launch
-                <br />
-                your first course faster! Eligible instructors who publish their{" "}
-                <br />
-                first course on time will receive a special bonus to celebrate.{" "}
-                <br />
-                Start today!
+                {t(
+                  "Get exclusive tips and resources designed to help you launch your first course faster! Eligible instructors who publish their first course on time will receive a special bonus to celebrate. Start today!"
+                )}
               </Typography>
-              <Link color="#6a1b9a">Get Started</Link>
+              <Link color="#6a1b9a">{t("Get Started")}</Link>
             </CardContent>
           </Stack>
         </Card>
@@ -355,7 +358,7 @@ function Home() {
 
       <Box textAlign={"center"} sx={{ mb: 6 }}>
         <Typography>
-          Have questions? Here are our most popular instructor resources.
+          {t("Have questions? Here are our most popular instructor resources.")}
         </Typography>
       </Box>
 
@@ -383,11 +386,10 @@ function Home() {
                 fontWeight="bold"
                 gutterBottom
               >
-                Test Video
+                {t("Test Video")}
               </Link>
               <Typography variant="subtitle2">
-                Send us a sample video and get
-                <br /> expert feedback.
+                {t("Send us a sample video and get expert feedback.")}
               </Typography>
             </Box>
           </Grid>
@@ -414,11 +416,12 @@ function Home() {
                 fontWeight="bold"
                 gutterBottom
               >
-                Instructor Community
+                {t("Instructor Community")}
               </Link>
               <Typography variant="subtitle2">
-                Connect with experienced <br /> instructors. Ask questions,{" "}
-                <br /> browse discussions, and more.
+                {t(
+                  "Connect with experienced instructors. Ask questions, browse discussions, and more."
+                )}
               </Typography>
             </Box>
           </Grid>
@@ -445,10 +448,10 @@ function Home() {
                 fontWeight="bold"
                 gutterBottom
               >
-                Teaching Center
+                {t("Teaching Center")}
               </Link>
               <Typography variant="subtitle2">
-                Learn about best practices for <br /> teaching on Udemy.
+                {t("Learn about best practices for teaching on Udemy.")}
               </Typography>
             </Box>
           </Grid>
@@ -475,11 +478,12 @@ function Home() {
                 fontWeight="bold"
                 gutterBottom
               >
-                Marketplace Insights
+                {t("Marketplace Insights")}
               </Link>
               <Typography variant="subtitle2">
-                Validate your course topic <br /> by exploring our marketplace{" "}
-                <br /> supply and demand.
+                {t(
+                  "Validate your course topic by exploring our marketplace supply and demand."
+                )}
               </Typography>
             </Box>
           </Grid>
@@ -506,10 +510,10 @@ function Home() {
                 fontWeight="bold"
                 gutterBottom
               >
-                Help and Support
+                {t("Help and Support")}
               </Link>
               <Typography variant="subtitle2">
-                Browse our Help Center or <br /> contact our support team.
+                {t("Browse our Help Center or contact our support team.")}
               </Typography>
             </Box>
           </Grid>
@@ -518,7 +522,7 @@ function Home() {
 
       <Box textAlign={"center"} sx={{ mb: 4 }}>
         <Typography variant="body1" sx={{ mb: 2 }}>
-          Are You Ready to Begin?
+          {t("Are You Ready to Begin?")}
         </Typography>
         <Button
           type="submit"
@@ -535,7 +539,7 @@ function Home() {
           }}
           gutterBottom
         >
-          Create Your Course
+          {t("Create Your Course")}
         </Button>
       </Box>
     </Box>

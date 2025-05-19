@@ -110,7 +110,7 @@ const Header = () => {
 
 	return (
 		<AppBar position="static" sx={{ backgroundColor: "#fff" }} elevation={1}>
-			<Box sx={{ px: 2, py: 1 }}>
+	<Box sx={{ px: 2, py: 1 }}>
 				{/* Header */}
 				<Box
 					sx={{
@@ -154,7 +154,12 @@ const Header = () => {
 								<Box sx={{ cursor: "pointer" }} onClick={() => navigate("/")}>
 									<img src={logo} style={{ width: 90 }} alt="logo" />
 								</Box>
-								<Typography sx={linkStyle}>{t("Explore")}</Typography>
+								<Typography onMouseEnter={()=>{console.log("hovered")}
+								} sx={linkStyle}>
+									{t("Explore")} 
+									</Typography>
+
+
 							</Box>
 							{/* Search Bar */}{" "}
 							<Paper
@@ -232,7 +237,7 @@ const Header = () => {
 								<Typography
 									onClick={() => navigate("/instructor")}
 									sx={linkStyle}>
-									{t("Instructor")}
+									{t("instructor")}
 								</Typography>
 							)}
 								{user ? (
