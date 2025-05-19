@@ -456,7 +456,7 @@ const CategoryPage = () => {
                     fontWeight: "bold",
                     borderRadius: "4px",
                   }}
-                  onClick={() => navigate(`/course/${course.id}`)} // هنا الرابط
+                  onClick={() => navigate(`/course-details/${course.id}`)} // هنا الرابط
                 >
                   {course.title}
                 </button>
@@ -478,7 +478,7 @@ const CategoryPage = () => {
                     whiteSpace: "normal",
                     flexShrink: 0,
                   }}
-                  onClick={() => navigate(`/course/${course.id}`)}
+                  onClick={() => navigate(`/course-details/${course.id}`)}
                 >
                   {course.title}
                 </button>
@@ -599,7 +599,7 @@ const CategoryPage = () => {
             .map((course, index) => (
               <Box
                 key={`filtered-${index}`}
-                onClick={() => navigate(`/course/${course.id}`)}
+                onClick={() => navigate(`/course-details/${course.id}`)}
                 sx={{
                   width: 300,
                   border: "1px solid #ccc",
