@@ -57,7 +57,7 @@ const cardData = [
 
 function AcceleratorSection () {
   return (
-    <div style={{ padding: "40px", backgroundColor: "#fff" ,marginLeft:"200px" }}>
+    <div style={{  padding: "40px", backgroundColor: "#fff"  }}>
       <Typography variant="h4" fontWeight="bold" color="#15243f" gutterBottom fontFamily="initial" >
         Accelerate growth — for you or your organization
       </Typography>
