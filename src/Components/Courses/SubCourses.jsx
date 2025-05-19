@@ -145,7 +145,6 @@ const SubcategoryPage = () => {
             ratingsMap[courseId] = [rating];
           }
         });
-        console.log("Review Course IDs:", Object.keys(ratingsMap));
 
         const averageRatings = {};
         Object.keys(ratingsMap).forEach((courseId) => {

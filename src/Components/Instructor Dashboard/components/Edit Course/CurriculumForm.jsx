@@ -1,4 +1,7 @@
-import { Delete as DeleteIcon, AddCircle as PlusCircle } from "@mui/icons-material";
+import {
+  Delete as DeleteIcon,
+  AddCircle as PlusCircle,
+} from "@mui/icons-material";
 import {
   Box,
   Button,
@@ -9,9 +12,12 @@ import {
 } from "@mui/material";
 import { useEffect } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { v4 } from "uuid";
+import { deleteLessons } from "../../../../Firebase/courses";
 
 const CurriculumForm = ({ course_id, defaultlessons, onChange }) => {
+  const { t } = useTranslation();
   const { register, watch, control, reset } = useForm({
     defaultValues: {
       lessons: defaultlessons || [],
@@ -52,11 +58,24 @@ const CurriculumForm = ({ course_id, defaultlessons, onChange }) => {
     });
   };
 
+  const handleRemoveLesson = async (index, lessonId) => {
+    // Remove from DB if lessonId exists (i.e., already saved in DB)
+    if (lessonId) {
+      try {
+        await deleteLessons([lessonId]);
+      } catch (err) {
+        // يمكنك عرض رسالة خطأ هنا إذا أردت
+        console.error("Error deleting lesson from DB:", err);
+      }
+    }
+    remove(index);
+  };
+
   return (
     <Container sx={{ py: 3 }}>
       <Paper elevation={1} sx={{ p: 4 }}>
         <Typography variant="h6" gutterBottom>
-          Course Curriculum
+          {t("Course Curriculum")}
         </Typography>
         {fields.map((lesson, index) => (
           <Box
@@ -64,22 +83,22 @@ const CurriculumForm = ({ course_id, defaultlessons, onChange }) => {
             sx={{ mt: 2, p: 2, bgcolor: "white", position: "relative" }}
           >
             <Button
-              onClick={() => remove(index)}
+              onClick={() => handleRemoveLesson(index, lesson.lesson_id)}
               sx={{ position: "absolute", right: 8, top: -15 }}
               color="error"
               startIcon={<DeleteIcon />}
             >
-              Remove
+              {t("Remove")}
             </Button>
             <TextField
               {...register(`lessons.${index}.title`)}
-              label="Lesson Title"
+              label={t("Lesson Title")}
               fullWidth
               sx={{ mb: 1 }}
             />
             <TextField
               {...register(`lessons.${index}.description`)}
-              label="Description"
+              label={t("Description")}
               multiline
               rows={3}
               fullWidth
@@ -87,7 +106,7 @@ const CurriculumForm = ({ course_id, defaultlessons, onChange }) => {
             />
             <TextField
               {...register(`lessons.${index}.video_url`)}
-              label="Video URL"
+              label={t("Video URL")}
               fullWidth
               sx={{ mb: 1 }}
             />
@@ -96,7 +115,7 @@ const CurriculumForm = ({ course_id, defaultlessons, onChange }) => {
                 {...register(`lessons.${index}.duration`, {
                   valueAsNumber: true,
                 })}
-                label="Duration (minutes)"
+                label={t("Duration (minutes)")}
                 type="number"
                 sx={{ width: 150 }}
               />
@@ -104,7 +123,7 @@ const CurriculumForm = ({ course_id, defaultlessons, onChange }) => {
                 {...register(`lessons.${index}.order`, {
                   valueAsNumber: true,
                 })}
-                label="Order"
+                label={t("Order")}
                 type="number"
                 sx={{ width: 100 }}
               />
@@ -115,12 +134,11 @@ const CurriculumForm = ({ course_id, defaultlessons, onChange }) => {
                   type="checkbox"
                   {...register(`lessons.${index}.is_preview`)}
                 />
-                Preview Lesson
+                {t("Preview Lesson")}
               </label>
             </Box>
           </Box>
         ))}
-
         <Box sx={{ display: "flex", justifyContent: "space-between", mt: 3 }}>
           <Button
             type="button"
@@ -128,7 +146,7 @@ const CurriculumForm = ({ course_id, defaultlessons, onChange }) => {
             startIcon={<PlusCircle />}
             variant="contained"
           >
-            Add Lesson
+            {t("Add Lesson")}
           </Button>
         </Box>
       </Paper>
@@ -136,4 +154,4 @@ const CurriculumForm = ({ course_id, defaultlessons, onChange }) => {
   );
 };
 
-export default CurriculumForm; 
+export default CurriculumForm;
