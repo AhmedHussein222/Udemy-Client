@@ -114,73 +114,190 @@
 	gap: 24px;
 }
 
-.left-options {
-	display: flex;
-	flex-direction: column;
-	gap: 12px;
+  .rating .stars {
+    color: gold;
+  }
+  
+  .popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0,0,0,0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
 }
 
-.option-card {
-	display: flex;
-	height: 170px;
-	gap: 12px;
-	padding: 12px;
-	border-left: 4px solid #d1c4e9;
-	cursor: pointer;
-	background-color: #f9f9f9;
-	border-radius: 8px;
-	transition: border 0.3s;
-	align-items: center;
+.popup-content {
+  background-color: white;
+  padding: 2rem;
+  max-width: 400px;
+  border-radius: 8px;
+  position: relative;
+  box-shadow: 0 0 10px rgba(0,0,0,0.25);
 }
 
-.option-card.active {
-	border-left: 6px solid #8e2de2;
-	background-color: #fff;
-	border-right: 1px solid #8e2de2;
-	border-top: 1px solid #8e2de2;
-	border-bottom: 1px solid #8e2de2;
+.popup-content h2 {
+  margin-top: 0;
 }
 
-.option-img {
-	width: 80px;
-	height: 80px;
-	object-fit: cover;
-	border-radius: 8px;
+.popup-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
 }
 
-.option-card h4 {
-	margin: 0;
-	font-weight: bold;
+.btn {
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
 }
 
-.explore-link {
-	color: #8e2de2;
-	font-weight: bold;
-	font-size: 14px;
-	display: inline-flex;
-	align-items: center;
-	margin-top: 8px;
+.add-to-cart {
+  background-color: #1976d2;
+  color: white;
 }
 
-.right-preview {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	background: #f1f1f1;
-	border-radius: 8px;
-	padding: 16px;
+.wishlist {
+  background-color: #e91e63;
+  color: white;
 }
 
-.preview-img {
-	max-width: 100%;
-	border-radius: 10px;
+.close-popup {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: transparent;
+  border: none;
+  font-weight: bold;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+.course-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+  /* أي ستايلات موجودة حاليا */
 }
 
-.price.free {
-	color: green;
-	font-weight: bold;
+.course-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
 }
 
-.rating .stars {
-	color: gold;
+.course-card {
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hover-popup {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 240px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 99;
+}
+
+.hover-popup h4 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.hover-popup p {
+  font-size: 0.9rem;
+  color: #555;
+  margin: 5px 0;
+}
+
+.popup-price {
+  font-weight: bold;
+  color: #1976d2;
+}
+
+.popup-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.popup-icon {
+  background: #8e2de2;
+    color: white;
+  border: none;
+  border-radius: 2%;
+  /* width: 36px; */
+  height: 36px;
+  display: flex;
+  flex-direction: 'row';
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 15px;
+  /* transition: background 0.3s ease; */
+}
+
+
+.courses-scroll-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  overflow: hidden;
+}
+
+.courses-container {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  padding: 8px 0;
+  scrollbar-width: none; /* Firefox */
+}
+
+.courses-container::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+.scroll-button {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: rgba(0, 0, 0, 0.5);
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  z-index: 10;
+  transition: background-color 0.3s ease;
+}
+
+.scroll-button:hover {
+  background-color: rgba(0, 0, 0, 0.8);
+}
+
+.scroll-button.left {
+  left: 8px;
+}
+
+.scroll-button.right {
+  right: 8px;
 }

@@ -1,6 +1,4 @@
 import Ai from "../../assets/ai.png";
-// import React, { useState } from 'react';
-
 import {
   Box,
   Typography,
@@ -13,6 +11,10 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import { useEffect, useState } from "react";
+import { collection, getDocs, query, where } from "firebase/firestore";
+import { db } from "../../Firebase/firebase";
+import { useNavigate } from "react-router-dom";
 import UB1 from "../../assets/UB1.webp";
 import UB2 from "../../assets/UB2.webp";
 import UB3 from "../../assets/UB3.webp";
@@ -22,6 +24,9 @@ import logo2 from "../../assets/logo-capitalone-2.svg";
 import logo3 from "../../assets/logo-eventbrite-1.svg";
 import logo4 from "../../assets/logo-toyota-1.svg";
 
+
+
+// بيانات شهادات العملاء
 const testimonials = [
   {
     text: "Udemy was rated the most popular online course or certification program for learning how to code according to StackOverflow’s 2023 Developer survey.",
@@ -49,23 +54,7 @@ const testimonials = [
   },
 ];
 
-const trendingSkills = {
-  Development: [
-    { name: "Python", learners: 234231 },
-    { name: "Web Development", learners: 174123 },
-    { name: "Data Science", learners: 174123 },
-  ],
-  Design: [
-    { name: "Blender", learners: 131201 },
-    { name: "Graphic Design", learners: 91231 },
-    { name: "User Experience (UX) Design", learners: 91561 },
-  ],
-  Business: [
-    { name: "PMI Project Management Proffisional (PMP)", learners: 131201 },
-    { name: "Micosoft Power BI", learners: 91231 },
-    { name: "Project Management", learners: 242231 },
-  ],
-};
+
 
 const boozData = [
   {
@@ -126,41 +115,86 @@ const boozData = [
 
 
 
+
 export default function Home3() {
+  const [categories, setCategories] = useState([]);
+  const [subCategoriesMap, setSubCategoriesMap] = useState({});
+const navigate = useNavigate();
+
+  // const fetchCategories = async () => {
+  //   try {
+  //     const snapshot = await getDocs(collection(db, "Categories"));
+  //     const categoryList = snapshot.docs.map((doc) => ({
+  //       id: doc.id,
+  //       name: doc.data().name,
+  //     }));
+  //     setCategories(categoryList);
+  //   } catch (error) {
+  //     console.error("Error fetching categories: ", error);
+  //   }
+  // };
+
+  useEffect(() => {
+    async function fetchData() {
+      
+      const catSnapshot = await getDocs(collection(db, "Categories"));
+      const categoriesData = catSnapshot.docs.map((doc) => ({
+        id: doc.id,
+        name: doc.data().name,
+      }));
+      setCategories(categoriesData);
+
+
+      const map = {};
+      for (const category of categoriesData) {
+        const subSnap = await getDocs(
+          query(collection(db, "SubCategories"), where("category_id", "==", category.id))
+        );
+
+     
+        const subcategories = subSnap.docs.slice(0, 3).map((subDoc) => ({
+          id: subDoc.id,
+          name: subDoc.data().name,
+          courseCount: subDoc.data().courseCount || 0, 
+        }));
+
+        map[category.id] = subcategories;
+      }
+      setSubCategoriesMap(map);
+    }
+
+    fetchData();
+  }, []);
+
+  const handleSubcategoryClick = (subId) => {
+    navigate(`subcategory/${subId}`);
+  };
+const handleCategoryClick = (categoryId) => {
+  navigate(`/subcategory/${categoryId}`); 
+};
+
+
+
+
   return (
     <Box p={4}>
       {/* Testimonials Section */}
-      <div
-        style={{
-          backgroundColor: "#f9f9f9",
-          padding: "20px",
-          marginBottom: "48px",
-          width: "100%", // تحديد العرض ليكون 100% من المساحة المتاحة
-          boxSizing: "border-box", // يتأكد إن البادينج داخل الحساب
-        }}
-      >
-        {/* العنوان */}
+      <Box sx={{ backgroundColor: "#f9f9f9", p: 3, mb: 6 }}>
         <Typography
           variant="h4"
           fontWeight="bold"
           color="#15243f"
           gutterBottom
           fontFamily="initial"
-          style={{ marginBottom: "16px" }}
         >
           See what others are achieving through learning
         </Typography>
-
-        {/* الكروت في سطر أفقي */}
-        <div
-          style={{
+        <Box
+          sx={{
             display: "flex",
-            justifyContent:'space-around',
+            justifyContent: "space-around",
             overflowX: "auto",
-            scrollbarWidth: "none", // Firefox
-            msOverflowStyle: "none", 
-            margin: "0 auto", // لضمان أن الكروت في منتصف الصفحة
-            paddingBottom: "16px", // إذا أردت مساحة بين الكروت والفوتر
+            pb: 2,
           }}
           className="hide-scrollbar"
         >
@@ -168,20 +202,20 @@ export default function Home3() {
             <Card
               key={index}
               variant="outlined"
-              style={{
-                maxWidth: "300px",
+              sx={{
+                maxWidth: 300,
                 flex: "0 0 auto",
-                borderRadius: "16px",
+                borderRadius: 2,
+                mx: 1,
               }}
             >
               <CardContent>
                 <Typography variant="body2">{item.text}</Typography>
-                <Typography variant="subtitle1" mt={1} color="text.dark">
+                <Typography variant="subtitle1" mt={1}>
                   {item.name}
                 </Typography>
                 <Typography
                   variant="subtitle2"
-                  mt={0}
                   color="text.secondary"
                   fontSize={12}
                 >
@@ -197,10 +231,10 @@ export default function Home3() {
               </CardContent>
             </Card>
           ))}
-        </div>
-      </div>
+        </Box>
+      </Box>
 
-      {/* AI for Business Leaders */}
+  {/* AI for Business Leaders */}
     
 <Grid
   container
@@ -213,26 +247,8 @@ export default function Home3() {
     flexDirection: { xs: 'column', md: 'row' }, 
   }}
 >
-  <Grid item xs={12} md={6} >
-    <Typography
-      variant="h4"
-      fontWeight={700}
-      color="#15243f"
-      gutterBottom
-      fontFamily="initial"
-    >
-      AI for Business Leaders
-    </Typography>
-    <Typography variant="body1" paragraph>
-      Build an AI-habit for you and your<br />team that builds hands-on skills
-      to help you lead effectively.
-    </Typography>
-    <Button variant="outlined" endIcon={<ArrowForwardIcon />}>
-      Start Learning
-    </Button>
-  </Grid>
 
-  <Grid
+    <Grid
     item
     xs={12}
     md={6}
@@ -256,158 +272,171 @@ export default function Home3() {
       }}
     />
   </Grid>
+  <Grid item xs={12} md={6} >
+    <Typography
+      variant="h4"
+      fontWeight={700}
+      color="#15243f"
+      gutterBottom
+      fontFamily="initial"
+    >
+      AI for Business Leaders
+    </Typography>
+    <Typography variant="body1" paragraph>
+      Build an AI-habit for you and your<br />team that builds hands-on skills
+      to help you lead effectively.
+    </Typography>
+    <Button variant="outlined" endIcon={<ArrowForwardIcon />}>
+      Start Learning
+    </Button>
+  </Grid>
+
+
 </Grid>
 
-      {/* Trending Now */}
-      <Box mb={6} sx={{ backgroundColor: "#f5f5f5", p: 3, borderRadius: 1 }}>
+ {/* Trending Now */}
+  <Box mb={6} sx={{ backgroundColor: "#f5f5f5", p: 3, borderRadius: 1 }}>
+      <Typography
+        variant="h4"
+        fontWeight={700}
+        color="#15243f"
+        gutterBottom
+        fontFamily="initial"
+      >
+        Trending Now
+      </Typography>
+
+      <Grid container spacing={2}>
+        {/* العمود الأول ثابت */}
+        <Grid item xs={12} md={3}>
+          <Typography variant="h4" fontWeight={600}>
+            Top Trending Skills
+          </Typography>
+          <Button
+            variant="text"
+            sx={{
+              pl: 0,
+              color: "#5624d0",
+              fontWeight: "bold",
+              textTransform: "none",
+              fontSize: "18px",
+            }}
+            endIcon={<ArrowForwardIcon />}
+          >
+            See All Courses
+          </Button>
+          <Typography variant="body2" color="text.secondary" mt={1}>
+            Millions of learners worldwide
+          </Typography>
+          <Button
+            fullWidth
+            variant="outlined"
+            sx={{
+              mt: 2,
+              color: "#5624d0",
+              borderColor: "#5624d0",
+              fontWeight: "bold",
+            }}
+          >
+            Show all trending skills
+          </Button>
+        </Grid>
+
+        {/* الأعمدة الديناميكية */}
+     {categories.map((category) => (
+  <Grid item xs={12} md={3} key={category.id}>
+    <Typography
+      variant="h5"
+      fontWeight={600}
+      sx={{
+        color: "black",
+        cursor: "pointer",
+        mb: 1,
+      }}
+      onClick={() => handleCategoryClick(category.id)}
+    >
+      {category.name}
+    </Typography>
+    {(subCategoriesMap[category.id] || []).map((sub) => (
+      <Box key={sub.id} mt={1}>
         <Typography
-          variant="h4"
-          fontWeight={700}
-          color="#15243f"
-          gutterBottom
-          fontFamily="initial"
-          
+          variant="body1"
+          sx={{
+            color: "#5624d0",
+            fontSize: "18px",
+            fontWeight: "bold",
+            cursor: "pointer",
+          }}
+          onClick={() => handleSubcategoryClick(sub.id)}
         >
-          Trending Now
+          {sub.name}
         </Typography>
-
-        <Grid container spacing={2}>
-          <Grid item xs={12} md={3}>
-            <Typography variant="h4" fontWeight={600}>
-              ChatGPT is a top skill
-            </Typography>
-            <Button
-              variant="text"
-              sx={{
-                pl: 0,
-                color: "#5624d0",
-                fontWeight: "bold",
-                textTransform: "none",
-                fontSize: "18px",
-              }}
-              endIcon={<ArrowForwardIcon />}
-            >
-              See ChatGPT courses
-            </Button>
-            <Typography variant="body2" color="text.secondary" mt={1}>
-              4,558,101 learners
-            </Typography>
-            <Button
-              fullWidth
-              variant="outlined"
-              sx={{
-                mt: 2,
-                color: "#5624d0",
-                borderColor: "#5624d0",
-                fontWeight: "bold",
-              }}
-            >
-              Show all trending skills
-            </Button>
-          </Grid>
-
-          {Object.entries(trendingSkills).map(([category, skills], idx) => (
-            <Grid item xs={12} md={3} key={idx}>
-              <Typography variant="h5" fontWeight={600}>
-                {category}
-              </Typography>
-              {skills.map((skill, i) => (
-                <Box key={i} mt={1}>
-                  <Typography
-                    variant="body1"
-                    sx={{
-                      color: "#5624d0",
-                      fontSize: "18px",
-                      fontWeight: "bold",
-                    }}
-                  >
-                    {skill.name}
-                  </Typography>
-                  <Typography
-                    variant="caption"
-                    color="text.secondary"
-                    sx={{ display: "block" }}
-                  >
-                    {skill.learners.toLocaleString()}
-                  </Typography>
-                </Box>
-              ))}
-            </Grid>
-          ))}
-        </Grid>
-      </Box>
-      {/* Bloz */}
-
-     <Box sx={{ mb: 6 }}>
-  <Slider 
-    dots={true}
-    arrows={false}
-    infinite={true}
-    speed={500}
-    slidesToShow={1}
-    slidesToScroll={1}
-  >
-    {boozData.map((item, index) => (
-      <Box key={index} sx={{ px: 2 }}>
-        <Grid
-          container
-          spacing={4}
-          alignItems="center"
-          justifyContent="space-between"
-          direction={{ xs: "column", md: "row" }}
-          // sx={{ minHeight: "auto" }} 
-        >
-          {/* النصوص */}
-          <Grid item xs={12} md={6}>
-            <img
-              src={item.logo}
-              alt="logo"
-              style={{ maxWidth: "1 rem", marginBottom: "16px" }}
-            />
-            <Typography variant="h6" fontWeight={700} gutterBottom>
-              {item.title}
-            </Typography>
-            <Box sx={{ display: "flex", gap: 4, flexWrap: "wrap", mb: 2 }}>
-              {item.stats.map((stat, i) => (
-                <Box key={i}>
-                  <Typography variant="h4" fontWeight={700}>
-                    {stat.percent}
-                  </Typography>
-                  <Typography variant="body2">{stat.text}</Typography>
-                </Box>
-              ))}
-            </Box>
-            <Button 
-              variant="contained"
-              sx={{ mt: 3, width: "fit-content", backgroundColor:"#7560ab" }}
-              endIcon={<ArrowForwardIcon />}
-            >
-              Read full story
-            </Button>
-          </Grid>
-
-          {/* الصورة */}
-          <Grid item xs={12} md={6}>
-            <Box
-              component="img"
-              src={item.image}
-              alt="Booz Allen Hamilton"
-              sx={{
-                width: "100%",
-                height: "60vh",
-                objectFit: "cover",
-                borderRadius: 2,
-              }}
-            />
-          </Grid>
-        </Grid>
       </Box>
     ))}
-  </Slider>
-</Box>
+  </Grid>
+))}
 
+      </Grid>
+    </Box>
 
+      {/* Booz Slider Section */}
+      <Box sx={{ mb: 6 }}>
+        <Slider dots arrows={false} infinite speed={500} slidesToShow={1}>
+          {boozData.map((item, index) => (
+            <Box key={index} sx={{ px: 2 }}>
+              <Grid
+                container
+                spacing={4}
+                alignItems="center"
+                justifyContent="space-between"
+                direction={{ xs: "column", md: "row" }}
+              >
+                <Grid item xs={12} md={6}>
+                  <img
+                    src={item.logo}
+                    alt="logo"
+                    style={{ maxWidth: "120px", marginBottom: "16px" }}
+                  />
+                  <Typography variant="h6" fontWeight={700} gutterBottom>
+                    {item.title}
+                  </Typography>
+                  <Box sx={{ display: "flex", gap: 4, flexWrap: "wrap", mb: 2 }}>
+                    {item.stats.map((stat, i) => (
+                      <Box key={i}>
+                        <Typography variant="h4" fontWeight={700}>
+                          {stat.percent}
+                        </Typography>
+                        <Typography variant="body2">{stat.text}</Typography>
+                      </Box>
+                    ))}
+                  </Box>
+                  <Button
+                    variant="contained"
+                    sx={{ mt: 3, backgroundColor: "#7560ab" }}
+                    endIcon={<ArrowForwardIcon />}
+                  >
+                    Read full story
+                  </Button>
+                </Grid>
 
+                <Grid item xs={12} md={6}>
+                  <Box
+                    component="img"
+                    src={item.image}
+                    alt="Booz Allen Hamilton"
+                    sx={{
+                      width: "100%",
+                      height: "60vh",
+                      objectFit: "cover",
+                      borderRadius: 2,
+                    }}
+                  />
+                </Grid>
+              </Grid>
+            </Box>
+          ))}
+        </Slider>
+      </Box>
     </Box>
   );
 }
