@@ -33,11 +33,19 @@ import CourseDetails from "./Components/Coursedetails/CourseDetails";
 import Wishlist from "./Components/Wishlist/wishlist";
 import Reviews from "./Components/Instructor Dashboard/components/Reviews";
 import Revenue from "./Components/Instructor Dashboard/components/Revenue";
+
+import PaymentPage from "./Components/payment/test";
+import SubcategoryPage from "./Components/Courses/SubCourses";
+import CategoryPage from "./Components/Courses/CatCourses";
+import HomeAfterLogin from "./Components/HomeAfterLogin/HomeLogin";
+import Navbar from "./HomeAfterLoginComponents/NavBar";
+
 import Checkout from "./Components/checkout/checkout";
 import AuthGuard from "./Guards/AuthGuard";
 import Unauthorized from "./Pages/Unauthorized";
 import CheckoutComponent from "./Components/checkout/checkout";
 import MyLearning from "./Pages/learn";
+
 
 const router = createBrowserRouter([
 	{
@@ -47,6 +55,11 @@ const router = createBrowserRouter([
 			{ path: "login", element: <Login /> },
 			{ path: "cart", element: <Cart /> },
 			{ path: "Userprofile", element: <Userprofile /> },
+			{ path: "/subcategory/:subcategoryId", element: <SubcategoryPage /> },
+			{ path: "/category/:categoryId", element: <CategoryPage /> },
+			 { path: "Home2", element: <HomeAfterLogin /> },
+			{ path: "HomeLogin", element: <Navbar /> },
+
 			{ path: "wishlist", element: <Wishlist /> },
 			{ path: "signup", element: <Signup /> },
 			{ path: "instructor-signup", element: <InsSignup /> },

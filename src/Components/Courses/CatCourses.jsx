@@ -1,13 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import {
-  collection,
-  getDocs,
-  getDoc,
-  doc,
-  query,
-  where,
-} from "firebase/firestore";
+import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "../../Firebase/firebase.js";
 import { useNavigate } from "react-router-dom";
 import {
@@ -23,11 +16,13 @@ import {
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { Link } from "react-router-dom";
+// import getAverageRatings from "../../Functions/Rating.js";
 
-const SubcategoryPage = () => {
-  const { subcategoryId } = useParams();
+const CategoryPage = () => {
+  const { categoryId } = useParams();
   const [courses, setCourses] = useState([]);
-  const [subCategoryName, setSubCategoryName] = useState("");
+  const [categoryName, setCategoryName] = useState("");
+  // const [minRating, setMinRating] = useState(0);
   const [showFilter, setShowFilter] = useState(false);
   const navigate = useNavigate();
 
@@ -157,7 +152,7 @@ const SubcategoryPage = () => {
         const coursesSnapshot = await getDocs(
           query(
             collection(db, "Courses"),
-            where("subcategory_id", "==", subcategoryId)
+            where("category_id", "==", categoryId)
           )
         );
 
@@ -180,28 +175,31 @@ const SubcategoryPage = () => {
       }
     };
 
-    const fetchSubCategoryName = async () => {
+    const fetchCategoryName = async () => {
       try {
-        const docRef = doc(db, "SubCategories", subcategoryId);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          setSubCategoryName(docSnap.data().name);
-        } else {
-          console.warn("No such subcategory with ID:", subcategoryId);
+        const categorySnapshot = await getDocs(
+          query(
+            collection(db, "Categories"),
+            where("category_id", "==", categoryId)
+          )
+        );
+        const categoryDoc = categorySnapshot.docs[0];
+        if (categoryDoc) {
+          setCategoryName(categoryDoc.data().name);
         }
       } catch (error) {
-        console.error("Error fetching subcategory name: ", error);
+        console.error("Error fetching category name: ", error);
       }
     };
 
     const loadSubCategories = async () => {
-      const data = await fetchSubCategories(subcategoryId);
+      const data = await fetchSubCategories(categoryId);
       setSubCategories(data);
     };
-    const fetchSubCategories = async (subcategoryId) => {
+    const fetchSubCategories = async (categoryId) => {
       const q = query(
         collection(db, "SubCategories"),
-        where("category_id", "==", subcategoryId)
+        where("category_id", "==", categoryId)
       );
 
       const querySnapshot = await getDocs(q);
@@ -213,10 +211,10 @@ const SubcategoryPage = () => {
     };
 
     fetchCourses();
-    fetchSubCategoryName();
+    fetchCategoryName();
     fetchSubCategories();
     loadSubCategories();
-  }, [subcategoryId]);
+  }, [categoryId]);
 
   useEffect(() => {
     const fetchFilteredCourses = async () => {
@@ -286,7 +284,7 @@ const SubcategoryPage = () => {
         textAlign="left"
         fontFamily="initial"
       >
-        {subCategoryName} Courses
+        {categoryName} Courses
       </Typography>
 
       {/* البوكس الرئيسي (يسار معلومات + يمين كورسات) */}
@@ -303,7 +301,7 @@ const SubcategoryPage = () => {
         {/* الشمال */}
         <Box sx={{ flex: "1 1 300px" }}>
           <Typography variant="h5" fontWeight="bold" gutterBottom>
-            Looking to advance your skills in {subCategoryName}? We've got you.
+            Looking to advance your skills in {categoryName}? We've got you.
           </Typography>
           <Typography variant="body1" color="text.secondary" gutterBottom>
             Get everything you need to reach your goals in one convenient
@@ -521,7 +519,7 @@ const SubcategoryPage = () => {
       {/* Section: All Business Courses + Filter */}
       <Box sx={{ mt: 6 }}>
         <Typography variant="h5" fontWeight="bold">
-          All {subCategoryName} Courses
+          All {categoryName} Courses
         </Typography>
         <Box
           sx={{
@@ -599,7 +597,7 @@ const SubcategoryPage = () => {
         )}
 
         {/* عرض الكورسات بعد الفلترة */}
-        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
+        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 3}}>
           {courses
             .filter((course) => {
               // Rating Filter
@@ -679,4 +677,4 @@ const SubcategoryPage = () => {
   );
 };
 
-export default SubcategoryPage;
+export default CategoryPage;
