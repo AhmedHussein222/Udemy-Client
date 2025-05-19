@@ -9,6 +9,7 @@ import {
 	Box,
 	InputBase,
 	Paper,
+	Badge,
 	Drawer,
 	List,
 	ListItem,
@@ -18,7 +19,6 @@ import {
 	Avatar,
 	Menu,
 	MenuItem,
-	Badge,
 } from "@mui/material";
 import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
 import SearchIcon from "@mui/icons-material/Search";
@@ -32,6 +32,7 @@ import { UserContext } from "../../context/UserContext";
 import { CartContext } from "../../context/cart-context";
 import { signOut } from "firebase/auth";
 import { auth } from "../../Firebase/firebase";
+import { useWishlist } from "../../context/wishlist-context";
 
 const Header = () => {
 	const [openBusiness, setOpenBusiness] = useState(false);
@@ -44,6 +45,7 @@ const Header = () => {
 	const location = useLocation();
 	const { user } = useContext(UserContext);
 	const { cartItems } = useContext(CartContext);
+	const { wishlistItems } = useWishlist();
 
 	const handleMenu = (event) => {
 		setAnchorEl(event.currentTarget);
@@ -184,8 +186,21 @@ const Header = () => {
 							{/* Icons and Buttons */}
 							{user ? (
 								<>
-									<IconButton onClick={() => navigate("/wishlist")}>
-										<FavoriteBorderIcon />
+									<IconButton
+										onClick={() => navigate("/wishlist")}
+										sx={{ color: "inherit" }}>
+										<Badge
+											badgeContent={wishlistItems?.length}
+											color="error"
+											max={99}
+											sx={{
+												"& .MuiBadge-badge": {
+													backgroundColor: "#a435f0",
+													color: "#fff",
+												},
+											}}>
+											<FavoriteBorderIcon />
+										</Badge>
 									</IconButton>
 									<IconButton>
 										<Badge color="error" variant="dot">
@@ -293,12 +308,25 @@ const Header = () => {
 											navigate("/Userprofile");
 										}}>
 										<ListItemText primary="Profile" />
-									</ListItem>
+									</ListItem>{" "}
 									<ListItem
 										onClick={() => {
 											toggleDrawer();
 											navigate("/wishlist");
 										}}>
+										<ListItemIcon>
+											<Badge
+												badgeContent={wishlistItems?.length || 0}
+												color="error"
+												sx={{
+													"& .MuiBadge-badge": {
+														backgroundColor: "#a435f0",
+														color: "#fff",
+													},
+												}}>
+												<FavoriteBorderIcon />
+											</Badge>
+										</ListItemIcon>
 										<ListItemText primary="My Wishlist" />
 									</ListItem>
 									<ListItem

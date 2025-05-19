@@ -61,11 +61,11 @@ export const CartProvider = ({ children }) => {
 					title: course.title,
 					price: course.price,
 					thumbnail: course.thumbnail,
-					instructor: course.instructor,
+					instructor_name: course.instructor_name,
 					description: course.description,
 					rating: course.rating,
-					discount: course.discount,
-					badge: course.badge,
+					totalHours: Number(course.totalHours || 0),
+					lectures: Number(course.lectures || 0),
 					addedAt: new Date().toISOString(),
 				};
 

@@ -48,7 +48,6 @@ const CategoryPage = () => {
 
   const [selectedRating, setSelectedRating] = useState("");
   const [selectedPrice, setSelectedPrice] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState(null);
   const [subCategories, setSubCategories] = useState([]);
   const [selectedSubcategory, setSelectedSubcategory] = useState("");
   const [selectedDuration, setSelectedDuration] = useState("");
@@ -81,31 +80,6 @@ const CategoryPage = () => {
   const handlePriceChange = (e) => setSelectedPrice(e.target.value);
   const handleDurationChange = (e) => setSelectedDuration(e.target.value);
 
-  const filteredCourses = courses.filter((course) => {
-    if (selectedCategory && course.category !== selectedCategory) return false;
-
-    if (selectedRating) {
-      const ratingThreshold = Number(selectedRating);
-      if (!course.rating || course.rating.rate < ratingThreshold) return false;
-    }
-
-    if (selectedPrice) {
-      const price = Number(course.price) || 0;
-      if (selectedPrice === "free" && price !== 0) return false;
-      if (selectedPrice === "0-50" && (price <= 0 || price > 50)) return false;
-      if (selectedPrice === "50+" && price <= 50) return false;
-    }
-
-    if (selectedDuration) {
-      const duration = course.duration;
-      if (selectedDuration === "short" && duration >= 60) return false;
-      if (selectedDuration === "medium" && (duration < 60 || duration > 180))
-        return false;
-      if (selectedDuration === "long" && duration <= 180) return false;
-    }
-
-    return true;
-  });
 
   const selectedCourses = courses.slice(0, 2);
 
@@ -115,10 +89,8 @@ const CategoryPage = () => {
   }, 0);
   const discountPercentage = 20;
 
-  // حساب قيمة الخصم
   const discountValue = (totalPriceSelected * discountPercentage) / 100;
 
-  // السعر بعد الخصم
   const discountedPrice = totalPriceSelected - discountValue;
 
   console.log(totalPriceSelected);

@@ -3,11 +3,15 @@
 import React, { useState, useEffect, useContext } from "react";
 import "./Home2.css";
 import { db } from "../../Firebase/firebase";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, query, where } from "firebase/firestore";
 import { ArrowForwardIos } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { CartContext } from "../../context/cart-context";
-import { Button } from "@mui/material";
+import { WishlistContext } from "../../context/wishlist-context";
+import { Button, IconButton, Box } from "@mui/material";
+import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
+import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
+import FavoriteIcon from "@mui/icons-material/Favorite";
 import logo1 from "../../assets/hands.webp";
 import logo2 from "../../assets/certificate.webp";
 import logo3 from "../../assets/empty.webp";
@@ -52,30 +56,66 @@ const leftCards = [
 
 const CourseCard = ({ course }) => {
 	const navigate = useNavigate();
-	const { addToCart } = useContext(CartContext);
+	const { addToCart, cartItems } = useContext(CartContext);
+	const { addToWishlist, removeFromWishlist, wishlistItems } =
+		useContext(WishlistContext);
 	const ratingValue = course.rating?.rate ?? 0;
 	const ratingCount = course.rating?.count ?? 0;
 
+	const isInCart = cartItems.some((item) => item.id === course.id);
+	const isInWishlist = wishlistItems.some((item) => item.id === course.id);
+
 	const handleCourseClick = () => {
-		navigate(`/coursedetails/${course.id}`);
+		navigate(`/course-details/${course.id}`);
 	};
 
 	const handleAddToCart = async (e) => {
 		e.stopPropagation();
-		const courseData = {
-			id: course.id,
-			title: course.title || "",
-			price: course.price || 0,
-			thumbnail: course.thumbnail || "",
-			instructor: course.instructor || "",
-			description: course.description || "",
-			rating: course.rating || { rate: 0, count: 0 },
-			discount: course.discount || 0,
-			badge: course.badge || "",
-		};
-		const success = await addToCart(courseData);
-		if (success) {
-			// Don't navigate to cart, just add the item
+		try {
+			const lessonsQuery = query(
+				collection(db, "Lessons"),
+				where("course_id", "==", course.id.toString())
+			);
+			const lessonsSnap = await getDocs(lessonsQuery);
+			const lessons = lessonsSnap.docs.map((doc) => doc.data());
+
+			const totalMins = lessons.reduce((sum, lesson) => {
+				if (lesson.video_url) {
+					return sum + (Number(lesson.duration) || 0);
+				}
+				return sum;
+			}, 0);
+
+			const courseData = {
+				id: course.id,
+				title: course.title || "",
+				price: Number(course.price) || 0,
+				thumbnail: course.thumbnail || "",
+				instructor_name: course.instructor_name || "Unknown Instructor",
+				description: course.description || "",
+				rating: course.rating || { rate: 0, count: 0 },
+				totalHours: Math.floor(totalMins / 60),
+				lectures: lessons.length,
+				discount: course.discount || 0,
+				badge: course.badge || "",
+			};
+
+			await addToCart(courseData);
+		} catch (error) {
+			console.error("Error adding to cart:", error);
+		}
+	};
+
+	const handleWishlistToggle = async (e) => {
+		e.stopPropagation();
+		try {
+			if (isInWishlist) {
+				await removeFromWishlist(course.id);
+			} else {
+				await addToWishlist(course);
+			}
+		} catch (error) {
+			console.error("Error updating wishlist:", error);
 		}
 	};
 
@@ -94,18 +134,36 @@ const CourseCard = ({ course }) => {
 				cursor: "pointer",
 				backgroundColor: "#fff",
 				flexShrink: 0,
+				position: "relative",
 				marginRight: "16px",
 			}}>
 			<div onClick={handleCourseClick} style={{ flex: 1 }}>
-				<img
-					src={course.thumbnail}
-					alt={course.title}
-					style={{
-						width: "100%",
-						height: "160px",
-						objectFit: "cover",
-					}}
-				/>
+				<div style={{ position: "relative" }}>
+					<img
+						src={course.thumbnail}
+						alt={course.title}
+						style={{
+							width: "100%",
+							height: "160px",
+							objectFit: "cover",
+						}}
+					/>
+					<IconButton
+						onClick={handleWishlistToggle}
+						sx={{
+							position: "absolute",
+							top: 8,
+							right: 8,
+							backgroundColor: "rgba(255,255,255,0.9)",
+							"&:hover": {
+								backgroundColor: "rgba(255,255,255,1)",
+								color: isInWishlist ? "#a435f0" : "#e91e63",
+							},
+							color: isInWishlist ? "#a435f0" : "inherit",
+						}}>
+						{isInWishlist ? <FavoriteIcon /> : <FavoriteBorderIcon />}
+					</IconButton>
+				</div>
 				<div style={{ padding: "12px" }}>
 					<h3
 						style={{
@@ -126,7 +184,7 @@ const CourseCard = ({ course }) => {
 							height: "20px",
 							overflow: "hidden",
 						}}>
-						{course.instructor}
+						{course.instructor_name || "Unknown Instructor"}
 					</p>
 					<div
 						style={{
@@ -186,19 +244,26 @@ const CourseCard = ({ course }) => {
 				style={{
 					padding: "12px",
 					borderTop: "1px solid #d1d7dc",
+					display: "flex",
+					gap: "8px",
+					justifyContent: "center",
 				}}>
 				<Button
 					variant="contained"
+					size="small"
+					startIcon={<AddShoppingCartIcon />}
 					onClick={handleAddToCart}
+					disabled={isInCart}
 					fullWidth
 					sx={{
-						backgroundColor: "#8000ff",
-						color: "#fff",
-						"&:hover": {
-							backgroundColor: "#6a1b9a",
+						bgcolor: "#a435f0",
+						"&:hover": { bgcolor: "#8710d8" },
+						"&:disabled": {
+							bgcolor: "#e7e7e7",
+							color: "#a6a6a6",
 						},
 					}}>
-					Add to Cart
+					{isInCart ? "In Cart" : "Add to Cart"}
 				</Button>
 			</div>
 			{course.badge && (
@@ -206,7 +271,7 @@ const CourseCard = ({ course }) => {
 					style={{
 						position: "absolute",
 						top: "12px",
-						right: "12px",
+						left: "12px",
 						background: "#eceb98",
 						padding: "4px 8px",
 						borderRadius: "4px",
@@ -223,7 +288,6 @@ const CourseCard = ({ course }) => {
 const Home2 = () => {
 	const [selected, setSelected] = useState(1);
 	const [courses, setCourses] = useState([]);
-
 
 	useEffect(() => {
 		const fetchCourses = async () => {

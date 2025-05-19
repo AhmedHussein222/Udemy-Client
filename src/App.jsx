@@ -29,6 +29,7 @@ import InsHome from "./Components/Instructor Dashboard/components/Home/home";
 import EditCourse from "./Components/Instructor Dashboard/components/Edit Course/edit";
 import { CourseProvider } from "./context/CourseContext";
 import { CartProvider } from "./context/CartContext";
+import { WishlistProvider } from "./context/WishlistContext";
 import CourseDetails from "./Components/Coursedetails/CourseDetails";
 import Wishlist from "./Components/Wishlist/wishlist";
 import Reviews from "./Components/Instructor Dashboard/components/Reviews";
@@ -48,7 +49,6 @@ import CourseCondent from "./Pages/courseContent";
 import Career from "./HomeComponents/Career/Career";
 import Home2 from "./HomeComponents/Home2/Home2";
 
-
 const router = createBrowserRouter([
 	{
 		path: "/",
@@ -59,21 +59,20 @@ const router = createBrowserRouter([
 			{ path: "Userprofile", element: <Userprofile /> },
 			{ path: "/subcategory/:subcategoryId", element: <SubcategoryPage /> },
 			{ path: "/category/:categoryId", element: <CategoryPage /> },
-			 { path: "Home2", element: <HomeAfterLogin /> },
+			{ path: "Home2", element: <HomeAfterLogin /> },
 			{ path: "HomeLogin", element: <Navbar /> },
 
 			{ path: "wishlist", element: <Wishlist /> },
 			{ path: "signup", element: <Signup /> },
 			{ path: "instructor-signup", element: <InsSignup /> },
-			{ path: "coursedetails/:id", element: <CourseDetails /> },
+			{ path: "course-details/:id", element: <CourseDetails /> },
 			{ path: "search", element: <SearchResults /> },
 			{ path: "", element: <Home /> },
 			{ path: "Welcomehome", element: <Welcomehome /> },
 			{ path: "checkout", element: <Checkout /> },
-			{path:"/my-learning/:id", element:<CourseCondent/>},
-			{path:"/career-accelerators", element:<Career/>},
-			{path:"/home2", element:<Home2/>},
-
+			{ path: "/my-learning/:id", element: <CourseCondent /> },
+			{ path: "/career-accelerators", element: <Career /> },
+			{ path: "/home2", element: <Home2 /> },
 		],
 	},
 	{ path: "/category/:id", element: <Category /> },
@@ -81,11 +80,11 @@ const router = createBrowserRouter([
 	{
 		path: "instructor",
 
-		element:
-		 <AuthGuard allowedRoles={["instructor"]} >
-			<InsMain />
-		</AuthGuard> 
-		,
+		element: (
+			<AuthGuard allowedRoles={["instructor"]}>
+				<InsMain />
+			</AuthGuard>
+		),
 		children: [
 			{ path: "", element: <InsHome /> },
 			{ path: "courses", element: <InsHome /> },
@@ -95,8 +94,8 @@ const router = createBrowserRouter([
 			{ path: "revenue", element: <Revenue /> },
 		],
 	},
-	{path:"/unauthorized", element:<Unauthorized/>},
-	{path:"/checkout", element:<CheckoutComponent/>},
+	{ path: "/unauthorized", element: <Unauthorized /> },
+	{ path: "/checkout", element: <CheckoutComponent /> },
 ]);
 
 function Main() {
@@ -149,7 +148,9 @@ const App = () => {
 				<UserContext.Provider value={{ user }}>
 					<CourseProvider>
 						<CartProvider>
-							<RouterProvider router={router} />
+							<WishlistProvider>
+								<RouterProvider router={router} />
+							</WishlistProvider>
 						</CartProvider>
 					</CourseProvider>
 				</UserContext.Provider>
@@ -159,7 +160,6 @@ const App = () => {
 };
 
 export default App;
-
 
 // import { BrowserRouter, Routes, Route } from 'react-router-dom';
 // import Layout from './Layout';
