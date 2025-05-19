@@ -8,8 +8,12 @@ import {
   ListItemIcon,
   ListItemText,
   Divider,
+  Modal,
+  IconButton,
 } from '@mui/material';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import FavoriteIcon from '@mui/icons-material/Favorite';
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import VideoLibraryIcon from '@mui/icons-material/VideoLibrary';
 import ArticleIcon from '@mui/icons-material/Article';
 import DownloadIcon from '@mui/icons-material/Download';
@@ -18,130 +22,131 @@ import CardMembershipIcon from '@mui/icons-material/CardMembership';
 import ShareIcon from '@mui/icons-material/Share';
 import CardGiftcardIcon from '@mui/icons-material/CardGiftcard';
 import LocalOfferIcon from '@mui/icons-material/LocalOffer';
+import CloseIcon from '@mui/icons-material/Close';
+import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import { db, doc, getDoc, collection, query, where, getDocs } from '../../Firebase/firebase';
 
 const CourseSidebar = ({ course }) => {
   const [courseData, setCourseData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [previewVideoUrl, setPreviewVideoUrl] = useState(null);
+  const [openModal, setOpenModal] = useState(false);
+  const [videoError, setVideoError] = useState(null);
+  const [isWishlisted, setIsWishlisted] = useState(false);
+
+  const formatDuration = (minutes) => {
+    if (!minutes) return '0 min';
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    if (hours === 0) return `${mins} min`;
+    return `${hours} hr ${mins} min`;
+  };
 
   useEffect(() => {
     const fetchCourseData = async () => {
-      if (!course?.id) {
-        setError('No course ID provided');
-        setLoading(false);
-        return;
-      }
+      if (!course?.id) return;
 
       try {
-        // جلب بيانات الكورس من Courses
+        // Fetch course data
         const courseRef = doc(db, 'Courses', course.id);
         const courseSnap = await getDoc(courseRef);
-
-        if (!courseSnap.exists()) {
-          setError('Course not found');
-          setLoading(false);
-          return;
-        }
+        if (!courseSnap.exists()) return;
 
         const courseDocData = courseSnap.data();
-        console.log('Course Data:', courseDocData);
 
-        // جلب الفيديوهات من Lessons
+        // Fetch all lessons for the course
         const lessonsQuery = query(
           collection(db, 'Lessons'),
           where('course_id', '==', course.id.toString())
         );
         const lessonsSnap = await getDocs(lessonsQuery);
 
-        // حساب إجمالي الثواني
-        let totalSeconds = 0;
-        lessonsSnap.docs.forEach(doc => {
-          const lessonData = doc.data();
-          const duration = Number(lessonData.duration) || 0;
-        
-          totalSeconds += duration * 60; // تحويل الدقايق لثواني
+        let firstPreviewVideo = null;
+        const lessons = lessonsSnap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+        lessons.sort((a, b) => a.order - b.order);
+
+        // Sum duration for lessons with video_url
+        const totalMins = lessons.reduce((sum, lesson) => {
+          if (lesson.video_url) {
+            return sum + (Number(lesson.duration) || 0);
+          }
+          return sum;
+        }, 0);
+
+        // Find first preview video
+        lessons.forEach((lesson) => {
+          if (!firstPreviewVideo && lesson.is_preview && lesson.video_url) {
+            firstPreviewVideo = lesson.video_url;
+          }
         });
 
-        
-
-        // تحويل لساعات أو دقايق للعرض
-        const totalHours = totalSeconds > 0 ? (totalSeconds / 3600).toFixed(1) : 0;
-        let displayText;
-
-        if (totalSeconds >= 3600) {
-          // أكتر من ساعة، نعرض بالساعات
-         
-          displayText = `${totalHours} hours on-demand video`;
-        } else if (totalSeconds > 0) {
-          // أقل من ساعة، نعرض بالدقايق
-         
-          displayText = `${Math.round(totalSeconds / 60)} minutes on-demand video`;
-        } else {
-          // مافيش فيديوهات
-        
-          displayText = 'No video content';
-        }
-
-        console.log('Total Hours:', totalHours);
-        console.log('Display Text:', displayText);
-
-        // حساب السعر بعد الخصم
-       const price = Number(courseDocData.price) || 0;
-const discount = Number(courseDocData.discount) || 0;
-
+        // Calculate discounted price
+        const price = Number(courseDocData.price) || 0;
+        const discount = Number(courseDocData.discount) || 0;
         const discountedPrice = discount > 0 && price > 0 ? price * (1 - discount / 100) : null;
 
         setCourseData({
           price,
           discountedPrice,
-          hoursOfContent: totalHours,
-          displayText,
+          hoursOfContent: totalMins > 0 ? (totalMins / 60).toFixed(1) : 0,
+          displayText: totalMins > 0 ? `${formatDuration(totalMins)} on-demand video` : 'No video content',
           articleCount: courseDocData.articleCount || 0,
           resourceCount: courseDocData.resourceCount || 0,
           thumbnail: courseDocData.thumbnail || 'https://images.pexels.com/photos/4974915/pexels-photo-4974915.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
         });
+        setPreviewVideoUrl(firstPreviewVideo);
       } catch (err) {
         console.error('Error fetching course data:', err);
-        setError('Failed to load course data');
-      } finally {
-        setLoading(false);
       }
     };
 
     fetchCourseData();
   }, [course?.id]);
 
-  // حساب نسبة الخصم
   const calculateDiscount = (price, discountedPrice) => {
     if (!price || !discountedPrice || discountedPrice >= price) return null;
     const discount = ((price - discountedPrice) / price) * 100;
     return Math.round(discount);
   };
 
-  // حالة الـ loading
-  if (loading) {
-    return (
-      <Box sx={{ p: 3, bgcolor: 'white', border: 1, borderColor: 'grey.200', borderRadius: 1 }}>
-        <Typography>Loading course data...</Typography>
-      </Box>
-    );
-  }
+  const isYouTubeUrl = (url) => {
+    return url && (url.includes('youtube.com') || url.includes('youtu.be'));
+  };
 
-  // حالة الخطأ
-  if (error) {
-    return (
-      <Box sx={{ p: 3, bgcolor: 'white', border: 1, borderColor: 'grey.200', borderRadius: 1 }}>
-        <Typography color="error">{error}</Typography>
-      </Box>
-    );
-  }
+  const getYouTubeEmbedUrl = (url) => {
+    try {
+      const urlObj = new URL(url);
+      let videoId = urlObj.searchParams.get('v');
+      if (!videoId && url.includes('youtu.be')) {
+        videoId = url.split('/').pop().split('?')[0];
+      }
+      return videoId ? `https://www.youtube.com/embed/${videoId}?controls=1` : null;
+    } catch {
+      return null;
+    }
+  };
 
-  // لو مافيش بيانات
+  const handleOpenModal = () => {
+    if (!previewVideoUrl) {
+      setVideoError('No preview video available.');
+      setOpenModal(true);
+      return;
+    }
+    setOpenModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setOpenModal(false);
+    setVideoError(null);
+  };
+
+  const handleWishlistToggle = () => {
+    setIsWishlisted((prev) => !prev);
+  };
+
   if (!courseData) {
     return (
       <Box sx={{ p: 3, bgcolor: 'white', border: 1, borderColor: 'grey.200', borderRadius: 1 }}>
-        <Typography>No course data available</Typography>
+        <Typography>Loading...</Typography>
       </Box>
     );
   }
@@ -159,7 +164,7 @@ const discount = Number(courseDocData.discount) || 0;
         overflow: 'hidden',
       }}
     >
-      <Box sx={{ position: 'relative', paddingTop: '56.25%' /* 16:9 aspect ratio */ }}>
+      <Box sx={{ position: 'relative', paddingTop: '56.25%' }}>
         <Box
           component="img"
           src={courseData.thumbnail}
@@ -174,6 +179,7 @@ const discount = Number(courseDocData.discount) || 0;
           }}
         />
         <Box
+          onClick={handleOpenModal}
           sx={{
             position: 'absolute',
             inset: 0,
@@ -260,26 +266,37 @@ const discount = Number(courseDocData.discount) || 0;
             fontWeight="medium"
             sx={{ mb: 2 }}
           >
-            <span>2 days</span> left at this price!
+            2 days left at this price!
           </Typography>
         )}
 
-        <Button
-          variant="contained"
-          color="primary"
-          fullWidth
-          sx={{
-            bgcolor: '#a435f0',
-            '&:hover': { bgcolor: '#8710d8' },
-            fontWeight: 'bold',
-            py: 1.5,
-            mb: 1,
-            textTransform: 'none',
-          }}
-          startIcon={<ShoppingCartIcon />}
-        >
-          Add to cart
-        </Button>
+        <Box sx={{ display: 'flex', gap: 1, mb: 1 }}>
+          <Button
+            variant="contained"
+            color="primary"
+            fullWidth
+            sx={{
+              bgcolor: '#a435f0',
+              '&:hover': { bgcolor: '#8710d8' },
+              fontWeight: 'bold',
+              py: 1.5,
+              textTransform: 'none',
+            }}
+            startIcon={<ShoppingCartIcon />}
+          >
+            Add to cart
+          </Button>
+          <IconButton
+            onClick={handleWishlistToggle}
+            sx={{
+              bgcolor: '#f5f5f5',
+              '&:hover': { bgcolor: '#e0e0e0' },
+              color: isWishlisted ? '#a435f0' : 'inherit',
+            }}
+          >
+            {isWishlisted ? <FavoriteIcon /> : <FavoriteBorderIcon />}
+          </IconButton>
+        </Box>
 
         <Button
           variant="outlined"
@@ -399,6 +416,90 @@ const discount = Number(courseDocData.discount) || 0;
           </Button>
         </Box>
       </Box>
+
+      <Modal
+        open={openModal}
+        onClose={handleCloseModal}
+        aria-labelledby="video-modal-title"
+        sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+      >
+        <Box
+          sx={{
+            position: 'relative',
+            width: { xs: '90%', sm: '70%', md: '50%' },
+            bgcolor: 'background.paper',
+            boxShadow: 24,
+            borderRadius: 2,
+            p: 2,
+            outline: 'none',
+            maxHeight: '90vh',
+            overflowY: 'auto',
+          }}
+        >
+          <IconButton
+            onClick={handleCloseModal}
+            sx={{ position: 'absolute', top: 8, right: 8, zIndex: 1 }}
+          >
+            <CloseIcon />
+          </IconButton>
+          {previewVideoUrl && !videoError ? (
+            <Box sx={{ position: 'relative', paddingTop: '56.25%' }}>
+              {isYouTubeUrl(previewVideoUrl) ? (
+                <iframe
+                  src={getYouTubeEmbedUrl(previewVideoUrl)}
+                  title="YouTube video player"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    borderRadius: '8px',
+                  }}
+                />
+              ) : (
+                <video
+                  key={previewVideoUrl}
+                  controls
+                  src={previewVideoUrl}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    borderRadius: '8px',
+                  }}
+                >
+                  <source src={previewVideoUrl} type="video/mp4" />
+                  Your browser does not support the video tag.
+                </video>
+              )}
+            </Box>
+          ) : (
+            <Box sx={{ p: 2, textAlign: 'center' }}>
+              <Typography color="error" sx={{ mb: 2 }}>
+                {videoError || 'No video available.'}
+              </Typography>
+              {previewVideoUrl && (
+                <Button
+                  variant="outlined"
+                  startIcon={<OpenInNewIcon />}
+                  href={previewVideoUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  sx={{ mt: 1 }}
+                >
+                  Open Video in New Tab
+                </Button>
+              )}
+            </Box>
+          )}
+        </Box>
+      </Modal>
     </Box>
   );
 };

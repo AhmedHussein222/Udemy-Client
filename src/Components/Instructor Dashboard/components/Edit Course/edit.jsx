@@ -95,7 +95,8 @@ const EditCourse = () => {
     try {
       if (course) {
         updateCourse(course.course_id, courseData)
-          .then(()=>{successModal()
+          .then(()=>{
+            successModal()
             navigate("/instructor/dashboard/courses");
           })
           .catch((err) => {
@@ -109,6 +110,7 @@ const EditCourse = () => {
         await addCourse({ ...courseData, course_id, instructor_id: "2" });
         await addLessons(curriculumData, course_id);
         successModal( "Course created successfully");
+        navigate("/instructor/courses");
       }
     } catch (err) {
       errorModal(
