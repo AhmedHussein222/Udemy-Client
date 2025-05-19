@@ -151,8 +151,11 @@
   "Udemy coupon": "قسيمة Udemy",
   "Apply": "تطبيق",
   "Inter coupon": "أدخل القسيمة",
-  "Project Management":"ادارة المشروع"
-
+  "Project Management":"ادارة المشروع",
+  "Are you sure you want to permanently delete your account? This action cannot be undone.": "هل أنت متأكد أنك تريد حذف حسابك نهائيًا؟ لا يمكن التراجع عن هذا الإجراء.",
+  "Delete": "حذف",
+  "Cancel": "إلغاء",
+  "Confirm Account Deletion": "تأكيد حذف الحساب"
 
 
 }

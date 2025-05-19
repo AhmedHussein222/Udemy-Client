@@ -3,7 +3,12 @@ import {
   Avatar, Box, List, ListItem, ListItemText, Typography, Divider, Paper,
   MenuItem, FormControl, InputLabel, OutlinedInput, InputAdornment, Button,
   TextField, RadioGroup, FormLabel, FormControlLabel, Radio, CircularProgress,
-  Snackbar, Alert
+  Snackbar, Alert,
+  DialogTitle,
+  Dialog,
+  DialogContent,
+  DialogActions,
+  DialogContentText
 } from '@mui/material';
 import { UserContext } from '../../context/UserContext';
 import { db,  storage } from '../../Firebase/firebase';
@@ -32,6 +37,27 @@ const Userprofile = () => {
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [snackbarSeverity, setSnackbarSeverity] = useState('success');
   const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [open, setOpen] = useState(false); 
+const handleOpen = () => {
+    setOpen(true);
+  };
+
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  const handleConfirmDelete = async () => {
+    try {
+      await closeAccount(); 
+      setOpen(false); 
+      navigate('/'); 
+    } catch (error) {
+      console.error('Error closing account:', error);
+      setOpen(false);
+   
+    }
+  };
   const [formData, setFormData] = useState({
     first_name: '',
     last_name: '',
@@ -175,10 +201,10 @@ const handleSavePhoto = async () => {
   let oldImagePath = null;
 
   try {
-    // 1. حذف الصورة القديمة (إذا كانت موجودة)
+  
     if (formData.profile_picture) {
       try {
-        // استخراج المسار من الـ URL (إذا كان رابطًا)
+   
         const urlParts = formData.profile_picture.split('/profile_picture/');
         oldImagePath = urlParts.length > 1 ? `profile_picture/${urlParts[1]}` : null;
         
@@ -333,14 +359,14 @@ const handleSavePhoto = async () => {
               value={formData.bio}
               onChange={handleChange}
             />
-            <TextField
+            {/* <TextField
               fullWidth
               label={t('Headline')}
               margin="normal"
               name="headline"
               value={formData.headline}
               onChange={handleChange}
-            />
+            /> */}
             <TextField
               select
               fullWidth
@@ -462,22 +488,63 @@ const handleSavePhoto = async () => {
           </>
         );
       case 'close':
-        return (
-          <>
-            <Typography variant="h4" gutterBottom>{t('Close Account')}</Typography>
-            <Typography color="error" gutterBottom>
-              {t('Warning: This will permanently delete your account.')}
-            </Typography>
-            <Button
-              variant="contained"
-              color="error"
-              onClick={closeAccount}
-              disabled={loading}
-            >
-              {loading ? <CircularProgress size={24} sx={{ color: '#fff' }} /> : t('Close My Account')}
-            </Button>
-          </>
-        );
+return (
+    <Box sx={{ textAlign: 'center', py: 3, maxWidth: 500, mx: 'auto' }}>
+      <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'text.primary', mb: 2 }}>
+        {t('Close Account')}
+      </Typography>
+      <Typography color="error" sx={{ mb: 3, fontSize: '1.1rem' }}>
+        {t('Warning: This will permanently delete your account.')}
+      </Typography>
+      <Button
+        variant="contained"
+        color="error"
+        onClick={handleOpen}
+        disabled={loading}
+        sx={{
+          padding: '10px 20px',
+          fontWeight: 'bold',
+          '&:hover': { backgroundColor: '#d32f2f' },
+        }}
+      >
+        {loading ? <CircularProgress size={24} sx={{ color: '#fff' }} /> : t('Close My Account')}
+      </Button>
+      <Dialog
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="confirm-delete-dialog"
+        sx={{ '& .MuiDialog-paper': { borderRadius: 2, padding: 2 } }}
+      >
+        <DialogTitle id="confirm-delete-dialog" sx={{ fontWeight: 'bold', color: 'error.main' }}>
+          {t('Confirm Account Deletion')}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText sx={{ color: 'text.primary', mb: 2 }}>
+            {t('Are you sure you want to permanently delete your account? This action cannot be undone.')}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions sx={{ justifyContent: 'center', gap: 2 }}>
+          <Button
+            onClick={handleClose}
+            variant="outlined"
+            color="primary"
+            sx={{ minWidth: 100 }}
+          >
+            {t('Cancel')}
+          </Button>
+          <Button
+            onClick={handleConfirmDelete}
+            variant="contained"
+            color="error"
+            sx={{ minWidth: 100 }}
+            disabled={loading}
+          >
+            {loading ? <CircularProgress size={20} sx={{ color: '#fff' }} /> : t('Delete')}
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Box>
+  );
       default:
         return null;
     }

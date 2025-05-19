@@ -151,7 +151,11 @@
   "Udemy coupon": "Udemy coupon",
   "Apply": "Apply",
   "Inter coupon": "Enter coupon",
-  "Project Management":"Project Management"
+  "Project Management":"Project Management",
+  "Are you sure you want to permanently delete your account? This action cannot be undone.": "Are you sure you want to permanently delete your account? This action cannot be undone.",
+  "Delete": "Delete",
+  "Cancel": "Cancel",
+  "Confirm Account Deletion": "Confirm Account Deletion"
 
 }
 

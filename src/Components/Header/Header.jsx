@@ -520,7 +520,7 @@ const Header = () => {
 									sx={langBtnStyle}
 									onClick={toggleLanguage}>
 									<LanguageIcon sx={{ mr: 1 }} />
-									{i18n.language === "en" ? "عربي" : "English"}
+									{i18n.language === "en" ? "English" : "عربي"}
 								</Button>
 							</Box>
 						</>
