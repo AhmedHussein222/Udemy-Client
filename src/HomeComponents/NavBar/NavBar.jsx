@@ -9,6 +9,7 @@ import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
 import StarIcon from "@mui/icons-material/Star";
 import "./NavBar.css";
+import { useNavigate } from "react-router-dom";
 
 const NavBar = () => {
   const [categories, setCategories] = useState([]);
@@ -17,7 +18,7 @@ const NavBar = () => {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedSubcategory, setSelectedSubcategory] = useState(null);
   const [loading, setLoading] = useState(false);
-
+ const navigate = useNavigate();
   const fetchCategories = async () => {
     try {
       const querySnapshot = await getDocs(collection(db, "Categories"));
@@ -261,7 +262,10 @@ const NavBar = () => {
       )}
       <Box mt={4} textAlign="left">
   <Button
-    variant="outlined"
+
+    onClick={() => {
+      navigate(`/category/${selectedCategory?.id}`);
+    }}
     sx={{
       color: " #5624d0",
       borderColor: " #5624d0",
@@ -269,6 +273,7 @@ const NavBar = () => {
       textTransform: "none",
       px: 4,
       py: 1.5,
+     
       borderRadius: "6px",
       "&:hover": {
         borderColor: "darkviolet",

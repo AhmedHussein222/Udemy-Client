@@ -4,7 +4,7 @@ import { Navigate } from 'react-router-dom';
 import { UserContext } from '../context/UserContext';
 
 const AuthGuard = ({ children, allowedRoles = [] }) => {
-  const { user, loading } = useContext(UserContext);
+  const { user,  loading } = useContext(UserContext);
   console.log('AuthGuard:', { user, loading, allowedRoles });
 
   if (loading) {

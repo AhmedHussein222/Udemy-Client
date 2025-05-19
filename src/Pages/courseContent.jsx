@@ -17,13 +17,22 @@ import {
   useTheme,
 } from "@mui/material";
 import React, { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import Swal from "sweetalert2";
 import {
+  addReview,
   geCourseLessons,
   getCourseById,
   getCourseReviews,
 } from "../Firebase/courses";
+import { auth } from "../Firebase/firebase";
 
-const tabContents = (selectedCourse, courseReviews = [], courseLessons = []) => ({
+const tabContents = (
+  selectedCourse,
+  courseReviews = [],
+  courseLessons = [],
+  tabContentProps = {}
+) => ({
   Overview: (
     <Box sx={{ py: 2, px: 5 }}>
       {/* Title */}
@@ -53,7 +62,7 @@ const tabContents = (selectedCourse, courseReviews = [], courseLessons = []) => 
         <Typography sx={{ color: "#6a6f73", fontSize: 15 }}>
           {selectedCourse?.rating?.count
             ? `${selectedCourse.rating.count} ratings`
-            : "2,231 ratings"}
+            : "0 ratings"}
         </Typography>
         {/* You can add students count if available */}
         <Typography sx={{ color: "#6a6f73", fontSize: 15 }}>
@@ -62,7 +71,7 @@ const tabContents = (selectedCourse, courseReviews = [], courseLessons = []) => 
         <Typography sx={{ color: "#6a6f73", fontSize: 15 }}>
           {selectedCourse?.duration
             ? `${selectedCourse.duration} min`
-            : "15 hours"}
+            : "1 hours"}
         </Typography>
       </Stack>
       <Typography sx={{ color: "#6a6f73", fontSize: 15, mb: 1 }}>
@@ -73,7 +82,6 @@ const tabContents = (selectedCourse, courseReviews = [], courseLessons = []) => 
             : "February 2025"}
         </span>
       </Typography>
-   
 
       {/* By the numbers */}
       <Stack direction="row" spacing={5} sx={{ mb: 3, pl: 1 }}>
@@ -89,7 +97,9 @@ const tabContents = (selectedCourse, courseReviews = [], courseLessons = []) => 
           <Typography sx={{ color: "#6a6f73", fontSize: 14 }}>
             Lectures:
           </Typography>
-          <Typography sx={{ fontWeight: 600, fontSize: 15 }}>{courseLessons.length}</Typography>
+          <Typography sx={{ fontWeight: 600, fontSize: 15 }}>
+            {courseLessons.length}
+          </Typography>
         </Box>
         <Box>
           <Typography sx={{ color: "#6a6f73", fontSize: 14 }}>
@@ -109,9 +119,7 @@ const tabContents = (selectedCourse, courseReviews = [], courseLessons = []) => 
             {selectedCourse?.language || "English"}
           </Typography>
         </Box>
- 
       </Stack>
-
 
       {/* Description */}
       <Box sx={{ bgcolor: "#fff", borderRadius: 2, p: 0, mb: 2 }}>
@@ -138,32 +146,30 @@ const tabContents = (selectedCourse, courseReviews = [], courseLessons = []) => 
             <Typography sx={{ fontWeight: 600, mb: 1 }}>
               Requirements
             </Typography>
-            <ul style={{ marginTop: 0, marginBottom: 0, paddingLeft: 24 }}>
+            <Box component="ul" sx={{ pl: 3, mb: 0, mt: 0 }}>
               {selectedCourse.requirements.map((item, idx) => (
-                <li key={idx} style={{ color: "#444", marginBottom: 4 }}>
+                <Box
+                  component="li"
+                  key={idx}
+                  sx={{
+                    color: "#444",
+                    mb: 0.5,
+                    fontSize: 15,
+                    fontFamily: "inherit",
+                    listStyle: "disc",
+                  }}
+                >
                   {item}
-                </li>
+                </Box>
               ))}
-            </ul>
+            </Box>
           </>
         )}
-        <Button
-          variant="text"
-          sx={{
-            color: "#5624d0",
-            fontWeight: 700,
-            textTransform: "none",
-            px: 0,
-            mt: 1,
-            fontSize: 15,
-          }}
-        >
-          Show more
-        </Button>
+       
       </Box>
     </Box>
   ),
- 
+
   Notes: (
     <Box sx={{ py: 2 }}>
       <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
@@ -181,6 +187,119 @@ const tabContents = (selectedCourse, courseReviews = [], courseLessons = []) => 
       <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>
         Reviews
       </Typography>
+      {/* Add Review Section */}
+      <Box
+        sx={{
+          mb: 4,
+          p: 2,
+          bgcolor: "#f7f9fa",
+          borderRadius: 2,
+          border: "1px solid #e4e9f0",
+        }}
+      >
+        <Typography sx={{ fontWeight: 600, mb: 1, fontSize: 18 }}>
+          Add your review
+        </Typography>
+        <form
+          onSubmit={tabContentProps.handleSubmit?.(
+            tabContentProps.onSubmitReview
+          )}
+        >
+          <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 1 }}>
+            <Typography sx={{ fontWeight: 500 }}>Your Rating:</Typography>
+            {/* Editable star rating input */}
+            <Stack direction="row" spacing={0.5}>
+              {Array.from({ length: 5 }).map((_, i) => (
+                <span
+                  key={i + 1}
+                  style={{
+                    fontSize: 24,
+                    color:
+                      (tabContentProps.hoverRating ||
+                        tabContentProps.addReviewRating) >=
+                      i + 1
+                        ? "#b4690e"
+                        : "#ccc",
+                    cursor: "pointer",
+                    userSelect: "none",
+                    transition: "color 0.2s",
+                  }}
+                  onClick={() =>
+                    tabContentProps.setAddReviewRating &&
+                    tabContentProps.setAddReviewRating(i + 1)
+                  }
+                  onMouseEnter={() =>
+                    tabContentProps.setHoverRating &&
+                    tabContentProps.setHoverRating(i + 1)
+                  }
+                  onMouseLeave={() =>
+                    tabContentProps.setHoverRating &&
+                    tabContentProps.setHoverRating(0)
+                  }
+                >
+                  {(tabContentProps.hoverRating ||
+                    tabContentProps.addReviewRating) >=
+                  i + 1
+                    ? "★"
+                    : "☆"}
+                </span>
+              ))}
+            </Stack>
+          </Stack>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 2,
+            }}
+          >
+            <textarea
+              rows={3}
+              placeholder="Write your review here..."
+              style={{
+                width: "100%",
+                borderRadius: 8,
+                border: "1px solid #ccc",
+                padding: 10,
+                fontSize: 16,
+                fontFamily: "inherit",
+                resize: "vertical",
+              }}
+              {...(tabContentProps.register
+                ? tabContentProps.register("reviewText")
+                : {})}
+              value={tabContentProps.addReviewText || ""}
+              onChange={(e) =>
+                tabContentProps.setAddReviewText &&
+                tabContentProps.setAddReviewText(e.target.value)
+              }
+            />
+            <input
+              type="hidden"
+              {...(tabContentProps.register
+                ? tabContentProps.register("rating")
+                : {})}
+              value={tabContentProps.addReviewRating || 0}
+              readOnly
+            />
+            <Button
+              type="submit"
+              variant="contained"
+              sx={{
+                bgcolor: "#a435f0",
+                color: "#fff",
+                fontWeight: 700,
+                borderRadius: 2,
+                px: 3,
+                alignSelf: "flex-end",
+                "&:hover": { bgcolor: "#7c28c6" },
+              }}
+            >
+              Submit Review
+            </Button>
+          </Box>
+        </form>
+      </Box>
       {courseReviews.length === 0 ? (
         <Typography sx={{ color: "#888", fontSize: 16 }}>
           No reviews yet for this course.
@@ -336,37 +455,47 @@ const tabContents = (selectedCourse, courseReviews = [], courseLessons = []) => 
       )}
     </Box>
   ),
-
 });
 
-
-
-const CourseCondent = ({ course }) => {
+const CourseCondent = ({ courseId }) => {
   const [selectedTab, setSelectedTab] = React.useState("Overview");
-  const [selectedCourse, setSelectedCourse] = React.useState(course);
+  const [selectedCourse, setSelectedCourse] = React.useState();
   const [courseLessons, setCourseLessons] = React.useState([]);
-  const [currentVideoUrl, setCurrentVideoUrl] = React.useState(null); // NEW: Track current video
+  const [currentVideoUrl, setCurrentVideoUrl] = React.useState(null);
   const [courseReviews, setCourseReviews] = React.useState([]);
+  const [addReviewRating, setAddReviewRating] = React.useState(0);
+  const [hoverRating, setHoverRating] = React.useState(0);
+  const [addReviewText, setAddReviewText] = React.useState("");
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("md"));
 
+  // React Hook Form setup
+  const { register, handleSubmit, setValue, reset, watch } = useForm({
+    defaultValues: {
+      reviewText: "",
+      rating: 0,
+    },
+  });
 
+  // Keep local state in sync with react-hook-form for rating
+  const watchedRating = watch("rating");
+  const watchedText = watch("reviewText");
 
   useEffect(() => {
     // Prevent infinite loop by only fetching on mount
     const fetchData = async () => {
-      const course = await getCourseById("1");
+      const course = await getCourseById(courseId);
       setSelectedCourse(course);
-      const lessons = await geCourseLessons("1");
+      const lessons = await geCourseLessons(courseId);
       setCourseLessons(lessons);
       if (lessons && lessons.length > 0) {
         setCurrentVideoUrl(lessons[0].video_url || "");
       }
-      const reviews = await getCourseReviews("3");
+      const reviews = await getCourseReviews(courseId);
       setCourseReviews(reviews);
     };
     fetchData();
-  }, []); // Only run once on mount
+  }, [courseId]); // Only run once on mount
 
   // When lessons change, update video if needed
   useEffect(() => {
@@ -375,25 +504,70 @@ const CourseCondent = ({ course }) => {
     }
   }, [courseLessons, currentVideoUrl]);
 
+  // Add review submit handler
+  const onSubmitReview = async (data) => {
+    const review = {
+      user_id: auth.currentUser?.uid,
+      rating: data.rating,
+      comment: data.reviewText,
+      course_id: selectedCourse?.course_id || "1",
+      date: new Date().toISOString(),
+    };
+    try {
+      await addReview(auth.currentUser?.uid, review);
+      setCourseReviews([
+        {
+          userName: auth.currentUser?.displayName || "Anonymous",
+          rating: data.rating,
+          comment: data.reviewText,
+          date: review.date,
+        },
+        ...courseReviews,
+      ]);
+      reset();
+      setAddReviewRating(0);
+      
+      setHoverRating(0);
+      setAddReviewText("");
+      Swal.fire({
+        title: "Review Added",
+        text: "Your review has been added successfully.",
+        icon: "success",
+        confirmButtonText: "OK",
+        timer: 1500,
+      });
+    } catch (error) {
+      Swal.fire({
+        title: "Error",
+        text: error.message,
+        icon: "error",
+      });
+    }
+  };
+
+  // Pass state setters and react-hook-form to tabContents for Add Review section
+  const tabContentProps = {
+    addReviewRating: watchedRating,
+    setAddReviewRating: (val) => {
+      setAddReviewRating(val);
+      setValue("rating", val);
+    },
+    hoverRating,
+    setHoverRating,
+    addReviewText: watchedText,
+    setAddReviewText: (val) => {
+      setAddReviewText(val);
+      setValue("reviewText", val);
+    },
+    handleSubmit,
+    onSubmitReview,
+    register,
+  };
+
   // Responsive tab list: add "Course content" as a tab on small screens
   const responsiveTabList = isSmallScreen
-    ? [
-        "Overview",
-        "Course content",
-        "Q&A",
-        "Notes",
-        "Announcements",
-        "Reviews",
-        "Learning tools",
-      ]
-    : [
-        "Overview",
-        "Q&A",
-        "Notes",
-        "Announcements",
-        "Reviews",
-        "Learning tools",
-      ];
+    ? ["Overview", "Course content", "Reviews"]
+    : ["Overview", "Reviews"];
 
   return (
     <Box sx={{ bgcolor: "#f7f9fa", minHeight: "100vh", pb: 4 }}>
@@ -454,7 +628,7 @@ const CourseCondent = ({ course }) => {
                   style={{
                     borderRadius: 10,
                     width: "100%",
-                    maxHeight: isSmallScreen ? 220 : 320,
+                    maxHeight: isSmallScreen ? "70%" : "80%",
                   }}
                 ></iframe>
               ) : (
@@ -647,7 +821,12 @@ const CourseCondent = ({ course }) => {
                 </List>
               </Box>
             ) : (
-              tabContents(selectedCourse, courseReviews, courseLessons)[selectedTab]
+              tabContents(
+                selectedCourse,
+                courseReviews,
+                courseLessons,
+                tabContentProps // pass props for add review
+              )[selectedTab]
             )}
           </Box>
         </Box>

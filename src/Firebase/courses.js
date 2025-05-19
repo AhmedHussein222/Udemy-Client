@@ -2,8 +2,10 @@ import {
   addDoc,
   collection,
   doc,
+  getDoc,
   getDocs,
   query,
+  setDoc,
   updateDoc,
   where,
   writeBatch,
@@ -269,5 +271,44 @@ console.log("User Map:", userMap);
   } catch (error) {
     console.error("Error fetching course reviews:", error);
     throw error;
+  }
+}
+export async function updateEnrollments( userid, cartItems ) {
+  const enrollmentRef = doc(db, "Enrollments", userid);
+const enrollmentSnap = await getDoc(enrollmentRef);
+
+let existingCourses = [];
+
+if (enrollmentSnap.exists()) {
+  const data = enrollmentSnap.data();
+  existingCourses = data.courses || [];
+}
+
+// حذف التكرارات عن طريق ID
+const newCourses = cartItems.filter(
+  (item) => !existingCourses.some((existing) => existing.id === item.id)
+);
+
+const updatedCourses = [...existingCourses, ...newCourses];
+
+await setDoc(enrollmentRef, {
+  user_id: userid,
+  courses: updatedCourses,
+  timestamp: new Date(),
+})
+
+}
+export async function addReview(userId , review) {
+  try {
+    const reviewsCollection = collection(db, "Reviews");
+    const newReviewRef = await addDoc(reviewsCollection, {
+      ...review,
+      user_id: userId,
+      timestamp: new Date(),
+    });
+    return newReviewRef.id;
+  } catch (error) {
+    console.error("Error adding review:", error);
+    
   }
 }
