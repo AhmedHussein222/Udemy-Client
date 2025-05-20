@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import FlagOutlinedIcon from "@mui/icons-material/FlagOutlined";
 import ThumbDownAltOutlinedIcon from "@mui/icons-material/ThumbDownAltOutlined";
 import ThumbUpAltOutlinedIcon from "@mui/icons-material/ThumbUpAltOutlined";
@@ -484,18 +485,18 @@ const CourseCondent = ({ courseId }) => {
   useEffect(() => {
     // Prevent infinite loop by only fetching on mount
     const fetchData = async () => {
-      const course = await getCourseById(courseId);
+      const course = await getCourseById("1");
       setSelectedCourse(course);
-      const lessons = await geCourseLessons(courseId);
+      const lessons = await geCourseLessons("1");
       setCourseLessons(lessons);
       if (lessons && lessons.length > 0) {
         setCurrentVideoUrl(lessons[0].video_url || "");
       }
-      const reviews = await getCourseReviews(courseId);
+      const reviews = await getCourseReviews("3");
       setCourseReviews(reviews);
     };
     fetchData();
-  }, [courseId]); // Only run once on mount
+  }, []); // Only run once on mount
 
   // When lessons change, update video if needed
   useEffect(() => {

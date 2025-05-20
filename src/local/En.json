@@ -237,5 +237,24 @@
   "Advanced (Experienced learners)": "Advanced (Experienced learners)",
   "Update Course": "Update Course",
   "Create Course": "Create Course",
-  "Cancel": "Cancel"
+  "Cancel": "Cancel",
+  "revenue": {
+    "overview": "Revenue Overview",
+    "totalRevenue": "Total Revenue",
+    "thisMonth": "This Month",
+    "transactions": "Transactions",
+    "lastMonth": "Last month",
+    "last6Months": "Last 6 months",
+    "last12Months": "Last 12 months",
+    "export": "Export",
+    "loading": "Loading...",
+    "noData": "No data to display",
+    "date": "Date",
+    "courseTitle": "Course Title",
+    "student": "Student",
+    "amount": "Amount",
+    "status": "Status",
+    "method": "Method",
+    "completed": "Completed"
+  }
 }

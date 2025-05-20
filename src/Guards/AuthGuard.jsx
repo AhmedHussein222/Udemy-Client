@@ -18,7 +18,6 @@ const AuthGuard = ({ children, allowedRoles = [] }) => {
           const docSnap = await getDoc(userDocRef);
           if (docSnap.exists()) {
             setUserData(docSnap.data());
-            console.log("Firestore userData:", docSnap.data());
           } else {
             setUserData(null);
           }
