@@ -17,12 +17,16 @@ import {
 	Rating,
 	Avatar,
 	Stack,
+	IconButton,
 } from "@mui/material";
 import { CartContext } from "../../context/cart-context";
+import { WishlistContext } from "../../context/wishlist-context";
 import { useTranslation } from "react-i18next";
 import PeopleIcon from "@mui/icons-material/People";
 import StarIcon from "@mui/icons-material/Star";
 import VideoLibraryIcon from "@mui/icons-material/VideoLibrary";
+import FavoriteIcon from "@mui/icons-material/Favorite";
+import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 
 const SearchResults = () => {
 	const [searchResults, setSearchResults] = useState({
@@ -35,32 +39,54 @@ const SearchResults = () => {
 	const searchQuery = new URLSearchParams(location.search).get("q");
 	useTranslation();
 	const { addToCart, cartItems } = useContext(CartContext);
+	const { addToWishlist, removeFromWishlist, wishlistItems } =
+		useContext(WishlistContext);
 
-	const handleAddToCart = (e, course) => {
+	const handleAddToCart = async (e, course) => {
 		e.preventDefault();
 		e.stopPropagation();
 
-		if (!course) {
+		if (!course || !course.id || !course.title) {
 			return;
 		}
 
-		if (!course.id || !course.title) {
-			return;
+		try {
+			// Fetch lessons to calculate total duration and count
+			const lessonsQuery = query(
+				collection(db, "Lessons"),
+				where("course_id", "==", course.id.toString())
+			);
+			const lessonsSnap = await getDocs(lessonsQuery);
+			const lessons = lessonsSnap.docs.map((doc) => ({
+				...doc.data(),
+			}));
+
+			// Calculate total duration and lectures count
+			const totalMins = lessons.reduce((sum, lesson) => {
+				if (lesson.video_url) {
+					return sum + (Number(lesson.duration) || 0);
+				}
+				return sum;
+			}, 0);
+			const courseToAdd = {
+				id: course.id,
+				title: course.title || "",
+				price: course.price || 0,
+				thumbnail: course.thumbnail || "",
+				instructor_name: course.instructor_name || "Unknown Instructor",
+				description: course.description || "",
+				rating: course.rating || { rate: 0, count: 0 },
+				totalHours: Math.floor(totalMins / 60),
+				lectures: lessons.length,
+				addedAt: new Date().toISOString(),
+				badge: course.badge || "",
+				discount: course.discount || 0,
+			};
+
+			await addToCart(courseToAdd);
+		} catch (error) {
+			console.error("Error adding to cart:", error);
 		}
-
-		const courseToAdd = {
-			id: course.id,
-			title: course.title,
-			price: course.price,
-			thumbnail: course.thumbnail,
-			instructor: course.instructor_name,
-			description: course.description,
-			rating: course.rating,
-			discount: course.discount || 0,
-			badge: course.badge || "",
-		};
-
-		addToCart(courseToAdd);
 	};
 
 	const calculateSimilarity = (str1, str2) => {
@@ -215,7 +241,7 @@ const SearchResults = () => {
 					instructors: scoredInstructors,
 				});
 			} catch (error) {
-				console.error('Error fetching search results:', error);
+				console.error("Error fetching search results:", error);
 			}
 			setLoading(false);
 		};
@@ -365,7 +391,7 @@ const SearchResults = () => {
 						{searchResults.courses.map((course) => (
 							<Grid item xs={12} sm={6} md={4} lg={3} key={course.id}>
 								<Card
-									onClick={() => navigate(`/coursedetails/${course.id}`)}
+									onClick={() => navigate(`/course-details/${course.id}`)}
 									sx={{
 										height: "100%",
 										display: "flex",
@@ -419,7 +445,6 @@ const SearchResults = () => {
 											noWrap>
 											{course.description}
 										</Typography>
-
 										{course.rating && (
 											<Box
 												sx={{ display: "flex", alignItems: "center", mb: 2 }}>
@@ -436,8 +461,7 @@ const SearchResults = () => {
 													({course.rating.count})
 												</Typography>
 											</Box>
-										)}
-
+										)}{" "}
 										<Box sx={{ mt: "auto" }}>
 											<Box
 												sx={{
@@ -462,6 +486,27 @@ const SearchResults = () => {
 														${course.original_price}
 													</Typography>
 												)}
+												<IconButton
+													onClick={(e) => {
+														e.stopPropagation();
+														const isInWishlist = wishlistItems.some(
+															(item) => item.id === course.id
+														);
+														if (isInWishlist) {
+															removeFromWishlist(course.id);
+														} else {
+															addToWishlist(course);
+														}
+													}}
+													sx={{ ml: 1 }}>
+													{wishlistItems.some(
+														(item) => item.id === course.id
+													) ? (
+														<FavoriteIcon sx={{ color: "#a435f0" }} />
+													) : (
+														<FavoriteBorderIcon />
+													)}
+												</IconButton>
 											</Box>
 											<Button
 												variant="contained"
