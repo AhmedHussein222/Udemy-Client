@@ -4,7 +4,6 @@ import {
 	Box,
 	Button,
 	Card,
-	CardActionArea,
 	CardContent,
 	CardMedia,
 	Grid,
@@ -82,47 +81,58 @@ function Cart() {
 							boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
 							borderRadius: "8px",
 						}}>
-						<CardActionArea onClick={() => navigate("/")}>
-							<CardMedia
-								component="img"
-								image="/src/assets/empty-shopping-cart-v2-2x.webp"
-								alt="Cart empty"
-								sx={{
-									mt: 6,
-									mb: 2,
-									width: "200px",
-									objectFit: "contain",
-									mx: "auto",
-								}}
-							/>
-							<CardContent sx={{ textAlign: "center", pb: 4 }}>
-								<Typography
-									variant="h6"
+							<Box 
+								sx={{ 
+									cursor: "pointer",
+									'&:hover': {
+										bgcolor: "#f7f9fa"
+									}
+								}} 
+								onClick={() => navigate("/")}>
+								<CardMedia
+									component="img"
+									image="/src/assets/empty-shopping-cart-v2-2x.webp"
+									alt="Cart empty"
 									sx={{
-										fontFamily: "Roboto, sans-serif",
-										color: "#1c1d1f",
+										mt: 6,
 										mb: 2,
-										fontWeight: 700,
-									}}>
-									{t("Your cart is empty. Keep shopping to find a course!")}
-								</Typography>
-								<Button
-									variant="contained"
-									sx={{
-										bgcolor: "#a435f0",
-										color: "#fff",
-										textTransform: "none",
-										fontFamily: "Roboto, sans-serif",
-										fontWeight: 600,
-										borderRadius: "4px",
-										px: 4,
-										py: 1.5,
-										"&:hover": { bgcolor: "#ede5f9", color: "#1c1d1f" },
-									}}>
-									{t("Keep shopping")}
-								</Button>
-							</CardContent>
-						</CardActionArea>
+										width: "200px",
+										objectFit: "contain",
+										mx: "auto"
+									}}
+								/>
+								<CardContent sx={{ textAlign: "center", pb: 4 }}>
+									<Typography
+										variant="h6"
+										sx={{
+											fontFamily: "Roboto, sans-serif",
+											color: "#1c1d1f",
+											mb: 2,
+											fontWeight: 700,
+										}}>
+										{t("Your cart is empty. Keep shopping to find a course!")}
+									</Typography>
+									<Button
+										variant="contained"
+										onClick={(e) => {
+											e.stopPropagation();
+											navigate("/");
+										}}
+										sx={{
+											bgcolor: "#a435f0",
+											color: "#fff",
+											textTransform: "none",
+											fontFamily: "Roboto, sans-serif",
+											fontWeight: 600,
+											borderRadius: "4px",
+											px: 4,
+											py: 1.5,
+											"&:hover": { bgcolor: "#8710d8" },
+										}}>
+										{t("Keep shopping")}
+									</Button>
+								</CardContent>
+							</Box>
 					</Card>
 				</Stack>
 			) : (

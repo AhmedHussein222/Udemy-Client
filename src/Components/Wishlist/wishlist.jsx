@@ -48,6 +48,10 @@ function Wishlist() {
 			event.stopPropagation();
 		}
 
+		// Close any open popover
+		setAnchorEl(null);
+		setSelectedCourse(null);
+
 		await removeFromWishlist(courseId);
 		setNotification({
 			open: true,
@@ -58,6 +62,10 @@ function Wishlist() {
 
 	const handleMoveToCart = async (course) => {
 		try {
+			// Close any open popover
+			setAnchorEl(null);
+			setSelectedCourse(null);
+
 			await addToCart(course);
 			await removeFromWishlist(course.id);
 			setNotification({
@@ -145,7 +153,12 @@ function Wishlist() {
 				open={notification.open}
 				autoHideDuration={3000}
 				onClose={handleCloseNotification}
-				anchorOrigin={{ vertical: "top", horizontal: "center" }}>
+				anchorOrigin={{ vertical: "top", horizontal: "center" }}
+				sx={{
+					left: "50% !important",
+					right: "auto !important",
+					transform: "translateX(-50%)",
+				}}>
 				<Alert
 					onClose={handleCloseNotification}
 					severity={notification.severity}>
@@ -365,7 +378,8 @@ function Wishlist() {
 											color="text.secondary"
 											sx={{ mb: 2 }}>
 											{selectedCourse.description}
-										</Typography>										<Box display="flex" gap={1}>
+										</Typography>
+										<Box display="flex" gap={1}>
 											<Button
 												variant="contained"
 												sx={{
@@ -395,6 +409,7 @@ function Wishlist() {
 													event.preventDefault();
 													event.stopPropagation();
 													handleRemoveFromWishlist(selectedCourse.id, event);
+													setAnchorEl(null); // Ensure popover closes immediately
 												}}
 												sx={{
 													backgroundColor: "rgba(255,255,255,0.9)",

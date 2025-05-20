@@ -26,6 +26,7 @@ import LanguageIcon from "@mui/icons-material/Language";
 import MenuIcon from "@mui/icons-material/Menu";
 import NotificationsOutlinedIcon from "@mui/icons-material/NotificationsOutlined";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
+import FavoriteIcon from "@mui/icons-material/Favorite";
 import logo from "../../assets/logo-udemy.svg";
 import { useNavigate, useLocation } from "react-router-dom";
 import { UserContext } from "../../context/UserContext";
@@ -67,6 +68,17 @@ const Header = () => {
 
 	const toggleDrawer = () => {
 		setDrawerOpen(!drawerOpen);
+	};
+
+	// Function to render the appropriate wishlist icon based on content
+	const renderWishlistIcon = () => {
+		const hasWishlistItems = wishlistItems && wishlistItems.length > 0;
+
+		return hasWishlistItems ? (
+			<FavoriteIcon sx={{ color: "#a435f0" }} />
+		) : (
+			<FavoriteBorderIcon />
+		);
 	};
 
 	return (
@@ -190,8 +202,8 @@ const Header = () => {
 										onClick={() => navigate("/wishlist")}
 										sx={{ color: "inherit" }}>
 										<Badge
-											badgeContent={wishlistItems?.length}
-											color="error"
+											badgeContent={wishlistItems?.length || 0}
+											color="secondary"
 											max={99}
 											sx={{
 												"& .MuiBadge-badge": {
@@ -199,7 +211,7 @@ const Header = () => {
 													color: "#fff",
 												},
 											}}>
-											<FavoriteBorderIcon />
+											{renderWishlistIcon()}
 										</Badge>
 									</IconButton>
 									<IconButton>
@@ -317,14 +329,14 @@ const Header = () => {
 										<ListItemIcon>
 											<Badge
 												badgeContent={wishlistItems?.length || 0}
-												color="error"
+												color="secondary"
 												sx={{
 													"& .MuiBadge-badge": {
 														backgroundColor: "#a435f0",
 														color: "#fff",
 													},
 												}}>
-												<FavoriteBorderIcon />
+												{renderWishlistIcon()}
 											</Badge>
 										</ListItemIcon>
 										<ListItemText primary="My Wishlist" />

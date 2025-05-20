@@ -66,6 +66,7 @@ const router = createBrowserRouter([
 			{ path: "signup", element: <Signup /> },
 			{ path: "instructor-signup", element: <InsSignup /> },
 			{ path: "course-details/:id", element: <CourseDetails /> },
+			{ path: "course/:id", element: <CourseDetails /> },
 			{ path: "search", element: <SearchResults /> },
 			{ path: "Welcomehome", element: <Welcomehome /> },
 			{ path: "checkout", element: <Checkout /> },
