@@ -335,3 +335,53 @@ export async function addReview(userId, review) {
     console.error("Error adding review:", error);
   }
 }
+export async function getInstructorTransactions(instructorId) {
+  // 1. Get all courses for this instructor
+  const coursesSnapshot = await getDocs(collection(db, "Courses"));
+  const instructorCourses = [];
+  coursesSnapshot.forEach((doc) => {
+    const data = doc.data();
+    if (data.instructor_id === instructorId) {
+      instructorCourses.push({ ...data, id: data.course_id || doc.id });
+    }
+  });
+  const courseIds = instructorCourses.map((c) => c.id);
+
+  // 2. Get all users (for username)
+  const usersSnapshot = await getDocs(collection(db, "Users"));
+  const userMap = {};
+  usersSnapshot.forEach((doc) => {
+    const data = doc.data();
+    userMap[data.user_id] = (data.first_name || "") + " " + (data.last_name || "");
+  });
+
+  // 3. Get all orders
+  const ordersSnapshot = await getDocs(collection(db, "orders"));
+  const transactions = [];
+  ordersSnapshot.forEach((doc) => {
+    const order = doc.data();
+    const userName = userMap[order.user_id] || "Unknown";
+    const status = order.status || "Completed";
+    const paymentMethod = order.method || "PayPal";
+    const date = order.timestamp?.toDate ? order.timestamp.toDate() : order.timestamp;
+
+    // لكل كورس في الأوردر، لو هو من كورسات الانستراكتور
+    (order.items || []).forEach((item) => {
+      if (courseIds.includes(item.course_id)) {
+        transactions.push({
+          date: date,
+          amount: item.price,
+          transactionId: doc.id,
+          paymentMethod: paymentMethod,
+          status: status,
+          username: userName,
+          courseTitle: item.title,
+        });
+      }
+    });
+  });
+
+  // ترتيب حسب التاريخ تنازلي
+  transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
+  return transactions;
+}

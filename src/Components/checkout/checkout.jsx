@@ -34,6 +34,7 @@ const CheckoutComponent = () => {
       });
       await updateEnrollments( user.uid, cartItems );
  
+  
 
       await setDoc(doc(db, "Carts", user.uid), { items: [] });
 
