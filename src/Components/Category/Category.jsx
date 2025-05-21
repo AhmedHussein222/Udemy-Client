@@ -13,9 +13,13 @@ import {
 	Rating,
 	Chip,
 	CircularProgress,
+	IconButton,
 } from "@mui/material";
 import { purple, grey } from "@mui/material/colors";
 import { db, collection, getDocs } from "../../Firebase/firebase";
+import { useWishlist } from "../../context/wishlist-context";
+import FavoriteIcon from "@mui/icons-material/Favorite";
+import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 
 function Category() {
 	const categories = [
@@ -29,6 +33,7 @@ function Category() {
 	const [selectedCategory, setSelectedCategory] = useState("Development");
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState(null);
+	const { wishlistItems, addToWishlist, removeFromWishlist } = useWishlist();
 
 	const handleCategoryChange = (category) => {
 		setSelectedCategory(category);
@@ -124,7 +129,39 @@ function Category() {
 									height: "100%",
 									display: "flex",
 									flexDirection: "column",
+									position: "relative",
 								}}>
+								<IconButton
+									sx={{
+										position: "absolute",
+										top: 8,
+										right: 8,
+										backgroundColor: "rgba(255, 255, 255, 0.9)",
+										"&:hover": {
+											backgroundColor: "rgba(255, 255, 255, 1)",
+										},
+										color: wishlistItems.some((item) => item.id === course.id)
+											? "#a435f0"
+											: "inherit",
+									}}
+									onClick={(e) => {
+										e.preventDefault();
+										e.stopPropagation();
+										const isInWishlist = wishlistItems.some(
+											(item) => item.id === course.id
+										);
+										if (isInWishlist) {
+											removeFromWishlist(course.id);
+										} else {
+											addToWishlist(course);
+										}
+									}}>
+									{wishlistItems.some((item) => item.id === course.id) ? (
+										<FavoriteIcon />
+									) : (
+										<FavoriteBorderIcon />
+									)}
+								</IconButton>
 								<CardMedia
 									component="img"
 									height="140"

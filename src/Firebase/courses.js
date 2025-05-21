@@ -45,9 +45,11 @@ export async function getSubcategories(categoryId) {
 }
 export async function addCourse(courseData) {
   try {
-    const coursesCollection = collection(db, "Courses");
-    const newCourseRef = await addDoc(coursesCollection, courseData);
-    return newCourseRef.id;
+    let newCourseRef = await setDoc(
+      doc(db, "Courses", courseData.course_id),
+      courseData
+    );
+    return newCourseRef;
   } catch (error) {
     console.error("Error adding course:", error);
     throw error;
@@ -173,9 +175,15 @@ export async function getInstructorReviews(instructorId) {
   try {
     const coursesCollection = collection(db, "Courses");
     const reviewsCollection = collection(db, "Reviews");
+    const usersCollection = collection(db, "Users");
 
-    const coursesSnapshot = await getDocs(coursesCollection);
-    const reviewsSnapshot = await getDocs(reviewsCollection);
+    const [coursesSnapshot, reviewsSnapshot, usersSnapshot] = await Promise.all(
+      [
+        getDocs(coursesCollection),
+        getDocs(reviewsCollection),
+        getDocs(usersCollection),
+      ]
+    );
 
     let courses = [];
     let reviews = [];
@@ -186,9 +194,23 @@ export async function getInstructorReviews(instructorId) {
       }
     });
 
+    // Build a map of user_id to user full name
+    const userMap = {};
+    usersSnapshot.forEach((userDoc) => {
+      const user = userDoc.data();
+      if (user.user_id) {
+        userMap[user.user_id] =
+          (user.first_name || "") + " " + (user.last_name || "");
+      }
+    });
+
     reviewsSnapshot.forEach((doc) => {
       if (courses.includes(doc.data().course_id)) {
-        reviews.push({ ...doc.data() });
+        const data = doc.data();
+        reviews.push({
+          ...data,
+          userName: userMap[data.user_id] ,
+        });
       }
     });
 
@@ -204,9 +226,14 @@ export async function updateLessons(lessonsData) {
     const lessonsCollection = collection(db, "Lessons");
 
     for (const lesson of lessonsData) {
-      const lessonRef = doc(lessonsCollection, lesson.id);
+      const lessonRef = doc(lessonsCollection, lesson.lesson_id);
       const { ...lessonData } = lesson;
-      batch.update(lessonRef, lessonData);
+      const docSnap = await getDoc(lessonRef);
+      if (docSnap.exists()) {
+        batch.update(lessonRef, lessonData);
+      } else {
+        batch.set(lessonRef, lessonData);
+      }
     }
 
     await batch.commit();
@@ -255,16 +282,14 @@ export async function getCourseReviews(courseId) {
           (user.first_name || "") + " " + (user.last_name || "");
       }
     });
-console.log("User Map:", userMap);
+    console.log("User Map:", userMap);
 
     let reviews = [];
     reviewsSnapshot.forEach((doc) => {
       const data = doc.data();
       reviews.push({
         ...data,
-        userName:
-          userMap[data.user_id] ||
-          "Anonymous",
+        userName: userMap[data.user_id] || "Anonymous",
       });
     });
     return reviews;
@@ -273,32 +298,31 @@ console.log("User Map:", userMap);
     throw error;
   }
 }
-export async function updateEnrollments( userid, cartItems ) {
+export async function updateEnrollments(userid, cartItems) {
   const enrollmentRef = doc(db, "Enrollments", userid);
-const enrollmentSnap = await getDoc(enrollmentRef);
+  const enrollmentSnap = await getDoc(enrollmentRef);
 
-let existingCourses = [];
+  let existingCourses = [];
 
-if (enrollmentSnap.exists()) {
-  const data = enrollmentSnap.data();
-  existingCourses = data.courses || [];
+  if (enrollmentSnap.exists()) {
+    const data = enrollmentSnap.data();
+    existingCourses = data.courses || [];
+  }
+
+  // حذف التكرارات عن طريق ID
+  const newCourses = cartItems.filter(
+    (item) => !existingCourses.some((existing) => existing.id === item.id)
+  );
+
+  const updatedCourses = [...existingCourses, ...newCourses];
+
+  await setDoc(enrollmentRef, {
+    user_id: userid,
+    courses: updatedCourses,
+    timestamp: new Date(),
+  });
 }
-
-// حذف التكرارات عن طريق ID
-const newCourses = cartItems.filter(
-  (item) => !existingCourses.some((existing) => existing.id === item.id)
-);
-
-const updatedCourses = [...existingCourses, ...newCourses];
-
-await setDoc(enrollmentRef, {
-  user_id: userid,
-  courses: updatedCourses,
-  timestamp: new Date(),
-})
-
-}
-export async function addReview(userId , review) {
+export async function addReview(userId, review) {
   try {
     const reviewsCollection = collection(db, "Reviews");
     const newReviewRef = await addDoc(reviewsCollection, {
@@ -309,6 +333,55 @@ export async function addReview(userId , review) {
     return newReviewRef.id;
   } catch (error) {
     console.error("Error adding review:", error);
-    
   }
+}
+export async function getInstructorTransactions(instructorId) {
+  // 1. Get all courses for this instructor
+  const coursesSnapshot = await getDocs(collection(db, "Courses"));
+  const instructorCourses = [];
+  coursesSnapshot.forEach((doc) => {
+    const data = doc.data();
+    if (data.instructor_id === instructorId) {
+      instructorCourses.push({ ...data, id: data.course_id || doc.id });
+    }
+  });
+  const courseIds = instructorCourses.map((c) => c.id);
+
+  // 2. Get all users (for username)
+  const usersSnapshot = await getDocs(collection(db, "Users"));
+  const userMap = {};
+  usersSnapshot.forEach((doc) => {
+    const data = doc.data();
+    userMap[data.user_id] = (data.first_name || "") + " " + (data.last_name || "");
+  });
+
+  // 3. Get all orders
+  const ordersSnapshot = await getDocs(collection(db, "orders"));
+  const transactions = [];
+  ordersSnapshot.forEach((doc) => {
+    const order = doc.data();
+    const userName = userMap[order.user_id] || "Unknown";
+    const status = order.status || "Completed";
+    const paymentMethod = order.method || "PayPal";
+    const date = order.timestamp?.toDate ? order.timestamp.toDate() : order.timestamp;
+
+    // لكل كورس في الأوردر، لو هو من كورسات الانستراكتور
+    (order.items || []).forEach((item) => {
+      if (courseIds.includes(item.course_id)) {
+        transactions.push({
+          date: date,
+          amount: item.price,
+          transactionId: doc.id,
+          paymentMethod: paymentMethod,
+          status: status,
+          username: userName,
+          courseTitle: item.title,
+        });
+      }
+    });
+  });
+
+  // ترتيب حسب التاريخ تنازلي
+  transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
+  return transactions;
 }
