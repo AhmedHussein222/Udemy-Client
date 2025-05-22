@@ -698,7 +698,7 @@
 												<MenuItem
 													onClick={() => {
 														handleUserMenuClose();
-														handleNavigate("/userprofile");
+														handleNavigate("/MyLearning");
 													}}>
 													{t("My Learning")}
 												</MenuItem>
