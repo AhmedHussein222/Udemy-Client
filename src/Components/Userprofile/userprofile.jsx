@@ -3,15 +3,21 @@ import {
   Avatar, Box, List, ListItem, ListItemText, Typography, Divider, Paper,
   MenuItem, FormControl, InputLabel, OutlinedInput, InputAdornment, Button,
   TextField, RadioGroup, FormLabel, FormControlLabel, Radio, CircularProgress,
-  Snackbar, Alert
+  Snackbar, Alert,
+  DialogTitle,
+  Dialog,
+  DialogContent,
+  DialogActions,
+  DialogContentText
 } from '@mui/material';
 import { UserContext } from '../../context/UserContext';
 import { db,  storage } from '../../Firebase/firebase';
 import { doc, setDoc, getDoc, deleteDoc } from 'firebase/firestore';
 import { deleteUser, updatePassword, EmailAuthProvider, reauthenticateWithCredential } from 'firebase/auth';
-import { useNavigate } from 'react-router-dom';
+import { Form, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
+import { ref, getDownloadURL, deleteObject } from 'firebase/storage';
+import axios from 'axios';
 
 const drawerWidth = 250;
 
@@ -31,6 +37,27 @@ const Userprofile = () => {
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [snackbarSeverity, setSnackbarSeverity] = useState('success');
   const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [open, setOpen] = useState(false); 
+const handleOpen = () => {
+    setOpen(true);
+  };
+
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  const handleConfirmDelete = async () => {
+    try {
+      await closeAccount(); 
+      setOpen(false); 
+      navigate('/'); 
+    } catch (error) {
+      console.error('Error closing account:', error);
+      setOpen(false);
+   
+    }
+  };
   const [formData, setFormData] = useState({
     first_name: '',
     last_name: '',
@@ -46,8 +73,9 @@ const Userprofile = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
+  const [uploadimg, setuploadimg] = useState(null);
 
-  const handleImageChange = (e) => {
+  const  handleImageChange =async (e) => {
     const file = e.target.files[0];
     if (file) {
       const validImageTypes = ['image/jpeg', 'image/png', 'image/gif'];
@@ -70,6 +98,13 @@ const Userprofile = () => {
       };
       reader.readAsDataURL(file);
     }
+   const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', 'flutter_upload'); // Replace with your Cloudinary upload preset
+    const response = await axios.post('https://api.cloudinary.com/v1_1/dimwxding/image/upload', formData )
+    console.log(response.data);
+    const imageUrl = response.data.secure_url;
+    setuploadimg(imageUrl);
   };
 
   useEffect(() => {
@@ -166,10 +201,10 @@ const handleSavePhoto = async () => {
   let oldImagePath = null;
 
   try {
-    // 1. حذف الصورة القديمة (إذا كانت موجودة)
+  
     if (formData.profile_picture) {
       try {
-        // استخراج المسار من الـ URL (إذا كان رابطًا)
+   
         const urlParts = formData.profile_picture.split('/profile_picture/');
         oldImagePath = urlParts.length > 1 ? `profile_picture/${urlParts[1]}` : null;
         
@@ -183,20 +218,20 @@ const handleSavePhoto = async () => {
     }
 
     // 2. رفع الصورة الجديدة
-    const fileExtension = imageFile.name.split('.').pop();
-    const newImageRef = ref(storage, `profile_picture/${user.uid}-${Date.now()}.${fileExtension}`);
-    await uploadBytes(newImageRef, imageFile);
-    const imageUrl = await getDownloadURL(newImageRef);
+    // const fileExtension = imageFile.name.split('.').pop();
+    // const newImageRef = ref(storage, `profile_picture/${user.uid}-${Date.now()}.${fileExtension}`);
+    // await uploadBytes(newImageRef, imageFile);
+    // const imageUrl = await getDownloadURL(newImageRef);
 
   
     await setDoc(
       doc(db, 'Users', user.uid),
-      { profile_picture: imageUrl },
+      { profile_picture: uploadimg },
       { merge: true }
     );
 
    
-    setFormData((prev) => ({ ...prev, profile_picture: imageUrl }));
+    setFormData((prev) => ({ ...prev, profile_picture: uploadimg }));
     setSnackbarMessage(t('Profile photo updated successfully.'));
     setSnackbarSeverity('success');
     setOpenSnackbar(true);
@@ -324,14 +359,14 @@ const handleSavePhoto = async () => {
               value={formData.bio}
               onChange={handleChange}
             />
-            <TextField
+            {/* <TextField
               fullWidth
               label={t('Headline')}
               margin="normal"
               name="headline"
               value={formData.headline}
               onChange={handleChange}
-            />
+            /> */}
             <TextField
               select
               fullWidth
@@ -453,22 +488,63 @@ const handleSavePhoto = async () => {
           </>
         );
       case 'close':
-        return (
-          <>
-            <Typography variant="h4" gutterBottom>{t('Close Account')}</Typography>
-            <Typography color="error" gutterBottom>
-              {t('Warning: This will permanently delete your account.')}
-            </Typography>
-            <Button
-              variant="contained"
-              color="error"
-              onClick={closeAccount}
-              disabled={loading}
-            >
-              {loading ? <CircularProgress size={24} sx={{ color: '#fff' }} /> : t('Close My Account')}
-            </Button>
-          </>
-        );
+return (
+    <Box sx={{ textAlign: 'center', py: 3, maxWidth: 500, mx: 'auto' }}>
+      <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'text.primary', mb: 2 }}>
+        {t('Close Account')}
+      </Typography>
+      <Typography color="error" sx={{ mb: 3, fontSize: '1.1rem' }}>
+        {t('Warning: This will permanently delete your account.')}
+      </Typography>
+      <Button
+        variant="contained"
+        color="error"
+        onClick={handleOpen}
+        disabled={loading}
+        sx={{
+          padding: '10px 20px',
+          fontWeight: 'bold',
+          '&:hover': { backgroundColor: '#d32f2f' },
+        }}
+      >
+        {loading ? <CircularProgress size={24} sx={{ color: '#fff' }} /> : t('Close My Account')}
+      </Button>
+      <Dialog
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="confirm-delete-dialog"
+        sx={{ '& .MuiDialog-paper': { borderRadius: 2, padding: 2 } }}
+      >
+        <DialogTitle id="confirm-delete-dialog" sx={{ fontWeight: 'bold', color: 'error.main' }}>
+          {t('Confirm Account Deletion')}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText sx={{ color: 'text.primary', mb: 2 }}>
+            {t('Are you sure you want to permanently delete your account? This action cannot be undone.')}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions sx={{ justifyContent: 'center', gap: 2 }}>
+          <Button
+            onClick={handleClose}
+            variant="outlined"
+            color="primary"
+            sx={{ minWidth: 100 }}
+          >
+            {t('Cancel')}
+          </Button>
+          <Button
+            onClick={handleConfirmDelete}
+            variant="contained"
+            color="error"
+            sx={{ minWidth: 100 }}
+            disabled={loading}
+          >
+            {loading ? <CircularProgress size={20} sx={{ color: '#fff' }} /> : t('Delete')}
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Box>
+  );
       default:
         return null;
     }
