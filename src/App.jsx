@@ -34,13 +34,11 @@ import CourseDetails from "./Components/Coursedetails/CourseDetails";
 import Wishlist from "./Components/Wishlist/wishlist";
 import Reviews from "./Components/Instructor Dashboard/components/Reviews";
 import Revenue from "./Components/Instructor Dashboard/components/Revenue";
-
 import PaymentPage from "./Components/payment/test";
 import SubcategoryPage from "./Components/Courses/SubCourses";
 import CategoryPage from "./Components/Courses/CatCourses";
 import HomeAfterLogin from "./Components/HomeAfterLogin/HomeLogin";
 import Navbar from "./HomeAfterLoginComponents/NavBar";
-
 import Checkout from "./Components/checkout/checkout";
 import AuthGuard from "./Guards/AuthGuard";
 import Unauthorized from "./Pages/Unauthorized";
@@ -48,6 +46,8 @@ import CheckoutComponent from "./Components/checkout/checkout";
 import CourseCondent from "./Pages/courseContent";
 import Career from "./HomeComponents/Career/Career";
 import Home2 from "./HomeComponents/Home2/Home2";
+import MyLearning from "./Components/MyLearning/MyLearning";
+import { EnrolledCoursesProvider } from "./context/EnrolledCoursesContext";
 
 const router = createBrowserRouter([
 	{
@@ -61,7 +61,6 @@ const router = createBrowserRouter([
 			{ path: "/category/:categoryId", element: <CategoryPage /> },
 			{ path: "Home2", element: <HomeAfterLogin /> },
 			{ path: "HomeLogin", element: <Navbar /> },
-
 			{ path: "wishlist", element: <Wishlist /> },
 			{ path: "signup", element: <Signup /> },
 			{ path: "instructor-signup", element: <InsSignup /> },
@@ -70,11 +69,11 @@ const router = createBrowserRouter([
 			{ path: "search", element: <SearchResults /> },
 			{ path: "Welcomehome", element: <Welcomehome /> },
 			{ path: "checkout", element: <Checkout /> },
-			{path:"/my-learning/:id", element:<CourseCondent/>},
-			{path:"/career-accelerators", element:<Career/>},
+			{ path: "MyLearning", element: <MyLearning /> },
+			{ path: "/MyLearning/:id", element: <CourseCondent /> },
+			{ path: "/career-accelerators", element: <Career /> },
 			{ path: "", element: <Home /> },
-			{path:"/home2", element:<HomeAfterLogin/>},
-
+			{ path: "/home2", element: <HomeAfterLogin /> },
 		],
 	},
 	{ path: "/category/:id", element: <Category /> },
@@ -152,7 +151,9 @@ const App = () => {
 					<CourseProvider>
 						<CartProvider>
 							<WishlistProvider>
-								<RouterProvider router={router} />
+								<EnrolledCoursesProvider>
+									<RouterProvider router={router} />
+								</EnrolledCoursesProvider>
 							</WishlistProvider>
 						</CartProvider>
 					</CourseProvider>
