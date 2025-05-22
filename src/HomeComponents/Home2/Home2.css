@@ -131,6 +131,34 @@ h4{
   margin-right: 15px;
 }
 
+
+/* موبايل: نخليهم تحت بعض */
+@media (max-width: 768px) {
+
+  .focus-section{
+     width: 100%;
+  }
+  .right-preview {
+    display: none;
+  }
+
+  .left-options {
+    /* width: 50%; */
+    
+  }
+  .option-card{
+    /* flex-direction: column; */
+    width: 100%;
+    height: inherit;
+  }
+
+  .focus-grid {
+    flex-direction: column;
+  }
+}
+
+
+
 body, html, #root, .App {
   overflow: visible !important; 
 }
