@@ -6,17 +6,9 @@ import { useNavigate } from "react-router-dom";
 import {
 	Container,
 	Typography,
-	Grid,
-	Card,
-	CardContent,
-	CardMedia,
 	Box,
 	Button,
 	CircularProgress,
-	List,
-	ListItem,
-	ListItemText,
-	ListItemAvatar,
 	Avatar,
 	Divider,
 } from "@mui/material";
@@ -76,94 +68,94 @@ const MyLearning = () => {
 				</Typography>
 				<Box sx={{ width: "100%" }}>
 					{enrolledCourses.map((course, index) => (
-						<Box key={course.id} sx={{ mb: 2 }}>
-							<Box
-								sx={{
-									display: "flex",
-									alignItems: "flex-start",
-									py: 3,
-									px: 2,
-									position: "relative",
-									minHeight: "200px",
-									bgcolor: "background.paper",
-									borderRadius: 1,
-									"&:hover": {
-										bgcolor: "rgba(0, 0, 0, 0.04)",
-										cursor: "pointer",
-									},
-								}}
-								onClick={() =>
-									navigate(`/course/${course.id || course.course_id}`)
-								}>
-								<Avatar
-									variant="square"
-									sx={{ width: 200, height: 120, mr: 3 }}
-									src={course.thumbnail}
-									alt={course.title}>
-									<SchoolIcon />
-								</Avatar>
-								<Box sx={{ flexGrow: 1 }}>
-									<Typography variant="h6" gutterBottom>
-										{course.title}
-									</Typography>
-									<Typography variant="body2" color="text.secondary" paragraph>
-										{course.description}
-									</Typography>
-									<Typography
-										variant="body2"
-										sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-										By{" "}
+						<React.Fragment key={course.id || course.course_id}>
+							<Box sx={{ mb: 2 }}>
+								<Box
+									sx={{
+										display: "flex",
+										alignItems: "flex-start",
+										py: 3,
+										px: 2,
+										position: "relative",
+										minHeight: "200px",
+										bgcolor: "background.paper",
+										borderRadius: 1,
+										"&:hover": {
+											bgcolor: "rgba(0, 0, 0, 0.04)",
+											cursor: "pointer",
+										},
+									}}
+									onClick={() =>
+										navigate(`/course/${course.id || course.course_id}`)
+									}>
+									<Avatar
+										variant="square"
+										sx={{ width: 200, height: 120, mr: 3 }}
+										src={course.thumbnail}
+										alt={course.title}>
+										<SchoolIcon />
+									</Avatar>
+									<Box sx={{ flexGrow: 1 }}>
+										<Typography variant="h6" gutterBottom>
+											{course.title}
+										</Typography>
 										<Typography
-											component="span"
-											sx={{ color: "#5624d0", ml: 1 }}>
-											{course.instructor?.fullName || "Unknown Instructor"}
+											variant="body2"
+											color="text.secondary"
+											paragraph>
+											{course.description}
 										</Typography>
-									</Typography>
-									<Box sx={{ display: "flex", gap: 2, mb: 2 }}>
-										<Typography variant="body2" color="text.secondary">
-											{course.courseDetails?.totalLectures || 0} lectures
+										<Typography
+											variant="body2"
+											sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+											By{" "}
+											<Typography
+												component="span"
+												sx={{ color: "#5624d0", ml: 1 }}>
+												{course.instructor?.fullName || "Unknown Instructor"}
+											</Typography>
 										</Typography>
-										<Typography variant="body2" color="text.secondary">
-											{course.courseDetails?.totalHours || 0} total hours
+										<Box sx={{ display: "flex", gap: 2, mb: 2 }}>
+											<Typography variant="body2" color="text.secondary">
+												{course.courseDetails?.totalLectures || 0} lectures
+											</Typography>
+											<Typography variant="body2" color="text.secondary">
+												{course.courseDetails?.totalHours || 0} total hours
+											</Typography>
+										</Box>
+										<Button
+											variant="contained"
+											startIcon={<PlayCircleOutlineIcon />}
+											sx={{
+												backgroundColor: "#a435f0",
+												color: "white",
+												"&:hover": {
+													backgroundColor: "#8710d8",
+												},
+												position: "absolute",
+												bottom: 16,
+												right: 16,
+											}}
+											onClick={(e) => {
+												e.stopPropagation();
+												navigate(`/course/${course.id || course.course_id}`);
+											}}>
+											Start Learning
+										</Button>
+										<Typography
+											variant="caption"
+											color="text.secondary"
+											sx={{ position: "absolute", bottom: 16, left: 16 }}>
+											Enrolled on:{" "}
+											{new Date(
+												course.enrolledDate?.toDate()
+											).toLocaleDateString()}
 										</Typography>
 									</Box>
-									<Button
-										variant="contained"
-										startIcon={<PlayCircleOutlineIcon />}
-										sx={{
-											backgroundColor: "#a435f0",
-											color: "white",
-											"&:hover": {
-												backgroundColor: "#8710d8",
-											},
-											position: "absolute",
-											bottom: 16,
-											right: 16,
-										}}
-										onClick={(e) => {
-											e.stopPropagation();
-											navigate(`/course/${course.id || course.course_id}`);
-										}}>
-										Start Learning
-									</Button>
-									<Typography
-										variant="caption"
-										color="text.secondary"
-										sx={{ position: "absolute", bottom: 16, left: 16 }}>
-										Enrolled on:{" "}
-										{new Date(
-											course.enrolledDate?.toDate()
-										).toLocaleDateString()}
-									</Typography>
 								</Box>
-							</Box>{" "}
-							{index < enrolledCourses.length - 1 && (
-								<Divider
-									key={`divider-${course.id || course.course_id}`}
-									sx={{ mt: 2 }}
-								/>
-							)}
-						</Box>
+							</Box>
+							{index < enrolledCourses.length - 1 && <Divider sx={{ mt: 2 }} />}
+						</React.Fragment>
 					))}
 				</Box>
 			</Box>
