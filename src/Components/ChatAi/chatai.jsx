@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import {
-  Button,
+  Fab,
   Modal,
   Box,
   TextField,
@@ -12,7 +12,8 @@ import {
 } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
 import HistoryIcon from "@mui/icons-material/History";
-import { db, auth } from "../Firebase/firebase";
+import ChatIcon from "@mui/icons-material/Chat";
+import { db, auth } from "../../Firebase/firebase";
 import { collection, addDoc, onSnapshot, query, where, orderBy } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 
@@ -20,6 +21,7 @@ const ChatModal = () => {
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState("");
   const [chatHistory, setChatHistory] = useState([]);
+  const [pendingMessages, setPendingMessages] = useState([]);
   const [user, setUser] = useState(null);
   const [showHistory, setShowHistory] = useState(false);
   const chatContainerRef = useRef(null);
@@ -27,15 +29,15 @@ const ChatModal = () => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
-      console.log("Current user:", currentUser ? currentUser.uid : "No user"); 
+      console.log("Current user:", currentUser ? currentUser.uid : "No user");
     });
     return () => unsubscribe();
   }, []);
 
-
   useEffect(() => {
     if (!user) {
-      setChatHistory([]); 
+      setChatHistory([]);
+      setPendingMessages([]);
       return;
     }
 
@@ -51,22 +53,22 @@ const ChatModal = () => {
           id: doc.id,
           ...doc.data(),
         }));
-        console.log("Firestore history:", history); 
+        console.log("Firestore history:", history);
         setChatHistory(history);
+        setPendingMessages([]);
       },
       (error) => {
-        console.error("Firestore error:", error); 
+        console.error("Firestore error:", error);
       }
     );
     return () => unsubscribe();
   }, [user]);
 
- 
   useEffect(() => {
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
-  }, [chatHistory]);
+  }, [chatHistory, pendingMessages]);
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => {
@@ -78,7 +80,7 @@ const ChatModal = () => {
   const handleSendMessage = async () => {
     if (message.trim() === "") return;
     if (!user) {
-      alert(" you need to log in to send messages!");
+      alert("You need to log in to send messages!");
       return;
     }
 
@@ -89,14 +91,12 @@ const ChatModal = () => {
       timestamp: new Date(),
     };
 
-    setChatHistory((prev) => [...prev, { ...userMessage, id: `temp-${Date.now()}` }]);
+    setPendingMessages((prev) => [...prev, { ...userMessage, id: `pending-${Date.now()}` }]);
     setMessage("");
 
     try {
-     
-      const userDocRef = await addDoc(collection(db, "chatHistory"), userMessage);
+      await addDoc(collection(db, "chatHistory"), userMessage);
 
-     
       const aiResponse = await fetchChatResponse(message);
       const aiMessage = {
         role: "ai",
@@ -105,17 +105,16 @@ const ChatModal = () => {
         timestamp: new Date(),
       };
 
-
-      setChatHistory((prev) => [
-        ...prev.filter((msg) => msg.id !== `temp-${Date.now()}`), 
-        { ...userMessage, id: userDocRef.id }, 
-        { ...aiMessage, id: `temp-ai-${Date.now()}` }, 
+      setPendingMessages((prev) => [
+        ...prev,
+        { ...aiMessage, id: `pending-ai-${Date.now()}` },
       ]);
 
       await addDoc(collection(db, "chatHistory"), aiMessage);
     } catch (error) {
       console.error("Error sending message:", error);
-      alert("  error sending message, please try again later!");
+      alert("Error sending message, please try again later!");
+      setPendingMessages((prev) => prev.filter((msg) => msg.id !== `pending-${Date.now()}`));
     }
   };
 
@@ -136,17 +135,19 @@ const ChatModal = () => {
   };
 
   const chatContainerStyle = {
-    flex: showHistory ? 0.65 : 1, 
+    flex: showHistory ? 0.65 : 1,
     maxHeight: 450,
     overflowY: "auto",
     mb: 2,
     p: 2,
     bgcolor: "#fafafa",
     borderRadius: 2,
+    display: "flex",
+    flexDirection: "column",
   };
 
   const historyContainerStyle = {
-    flex: 0.35, 
+    flex: 0.35,
     maxHeight: 450,
     overflowY: "auto",
     p: 2,
@@ -155,17 +156,33 @@ const ChatModal = () => {
     display: showHistory ? "block" : "none",
   };
 
+  const fabStyle = {
+    position: "fixed",
+    bottom: 20,
+    right: 20,
+    backgroundColor: "#8000ff",
+    color: "white",
+    "&:hover": {
+      backgroundColor: "#6b00d6",
+    },
+  };
+
+
+  const displayedMessages = [...chatHistory, ...pendingMessages].sort(
+    (a, b) => a.timestamp - b.timestamp
+  );
+
   return (
     <div>
-      <Button variant="contained" sx={{backgroundColor:"#8000ff"}} onClick={handleOpen}>
-      Open AI Chat
-      </Button>
+      <Fab sx={fabStyle} onClick={handleOpen}>
+        <ChatIcon />
+      </Fab>
       <Modal open={open} onClose={handleClose}>
         <Box sx={modalStyle}>
           <Box sx={{ flex: 1, display: "flex", flexDirection: "column" }}>
             <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
               <Typography variant="h5" component="h2" sx={{ fontWeight: "bold" }}>
-              Ai Chat
+                AI Chat
               </Typography>
               <IconButton onClick={handleToggleHistory}>
                 <HistoryIcon />
@@ -173,11 +190,11 @@ const ChatModal = () => {
             </Box>
             {!user && (
               <Typography color="error" sx={{ mb: 2 }}>
-           You need to log in to use the chat feature!
+                You need to log in to use the chat feature!
               </Typography>
             )}
             <Box sx={chatContainerStyle} ref={chatContainerRef}>
-              {chatHistory.map((msg) => (
+              {displayedMessages.map((msg) => (
                 <Box
                   key={msg.id}
                   sx={{
@@ -186,9 +203,13 @@ const ChatModal = () => {
                     maxWidth: "70%",
                     bgcolor: msg.role === "user" ? "#8000ff" : "#e0e0e0",
                     color: msg.role === "user" ? "white" : "black",
-                    borderRadius: 3,
-                    alignSelf: msg.role === "user" ? "flex-end" : "flex-start",
+                    borderRadius:
+                      msg.role === "user"
+                        ? "15px 15px 15px 0" 
+                        : "15px 15px 0 15px", 
+                    alignSelf: msg.role === "user" ? "flex-start" : "flex-end", 
                     boxShadow: 1,
+                    mx: 1,
                   }}
                 >
                   <Typography variant="body1">{msg.content}</Typography>
@@ -206,23 +227,23 @@ const ChatModal = () => {
                 onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
                 disabled={!user}
               />
-              <IconButton sx={{color:"#8000ff" }}onClick={handleSendMessage} disabled={!user}>
+              <IconButton sx={{ color: "#8000ff" }} onClick={handleSendMessage} disabled={!user}>
                 <SendIcon />
               </IconButton>
             </Box>
           </Box>
-          <Box sx={historyContainerStyle} >
+          <Box sx={historyContainerStyle}>
             <Typography variant="h6" sx={{ mb: 2, fontWeight: "bold" }}>
-                Chat History
+              Chat History
             </Typography>
             <List>
-              {chatHistory.length === 0 ? (
+              {displayedMessages.length === 0 ? (
                 <Typography>No history found</Typography>
               ) : (
-                chatHistory
+                displayedMessages
                   .filter((msg) => msg.role === "user")
                   .map((msg) => {
-                    const response = chatHistory.find(
+                    const response = displayedMessages.find(
                       (res) =>
                         res.role === "ai" &&
                         res.timestamp > msg.timestamp &&
@@ -232,7 +253,7 @@ const ChatModal = () => {
                       <ListItem key={msg.id} sx={{ flexDirection: "column", alignItems: "flex-start" }}>
                         <ListItemText
                           primary={msg.content}
-                          secondary={response ? response.content : " No response yet"}
+                          secondary={response ? response.content : "No response yet"}
                           primaryTypographyProps={{ fontWeight: "medium" }}
                           secondaryTypographyProps={{ color: "text.secondary" }}
                         />
@@ -271,14 +292,14 @@ const fetchChatResponse = async (message) => {
     });
 
     if (!response.ok) {
-      throw new Error("فيه مشكلة في الـ API response");
+      throw new Error("There was a problem with the API response");
     }
 
     const data = await response.json();
     return data.choices[0].message.content;
   } catch (error) {
     console.error("Error fetching AI response:", error);
-    return "فيه مشكلة في الاتصال بالـ AI، جربي تاني!";
+    return "There was a problem connecting to the AI, please try again!";
   }
 };
 
