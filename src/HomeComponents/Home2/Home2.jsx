@@ -74,11 +74,6 @@ const CourseCard = ({ course }) => {
 	const navigate = useNavigate();
 	const timeoutRef = useRef(null);
 
-	const ratingValue = course.rating?.rate || 0;
-	const ratingCount = course.rating?.count || 0;
-	const isInCart = cartItems.find((item) => item.id === course.id);
-	const isInWishlist = wishlistItems.find((item) => item.id === course.id);
-
 	const handleMouseEnter = (event) => {
 		if (timeoutRef.current) clearTimeout(timeoutRef.current);
 		const cardElement = event.currentTarget;
@@ -137,129 +132,157 @@ const CourseCard = ({ course }) => {
 		};
 		addToCart(courseToAdd);
 	};
-
 	return (
-		<Card
-			sx={{
-				minWidth: 260,
-				maxWidth: 320,
-				width: "100%",
-				borderRadius: 2,
-				boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-				transition: "transform 0.3s ease, box-shadow 0.3s ease",
-				"&:hover": {
-					transform: "translateY(-6px)",
-					boxShadow: "0 8px 20px rgba(0,0,0,0.15)",
-				},
-				position: "relative",
-				cursor: "pointer",
-				m: 1,
-				overflow: "visible",
-				zIndex: 1,
-			}}
-			onClick={() => navigate(`/course-details/${course.id}`)}
+		<Box
+			key={course.id}
+			sx={{ position: "relative", width: 280, flex: "0 0 auto" }}
 			onMouseEnter={handleMouseEnter}
 			onMouseLeave={handleMouseLeave}>
-			<CardMedia
-				component="img"
-				height="180"
-				image={course.thumbnail}
-				alt={course.title}
-				sx={{ objectFit: "cover", borderRadius: "6px 6px 0 0" }}
-			/>
-			<IconButton
-				onClick={handleWishlistToggle}
+			<Card
+				onClick={(e) => {
+					if (e.target.closest("button")) return;
+					navigate(`/course/${course.id}`);
+				}}
 				sx={{
-					position: "absolute",
-					top: 8,
-					right: 8,
-					backgroundColor: "rgba(255, 255, 255, 0.8)",
-					"&:hover": {
-						backgroundColor: "rgba(255, 255, 255, 1)",
-					},
+					cursor: "pointer",
+					height: "420px",
+					display: "flex",
+					flexDirection: "column",
 				}}>
-				{isInWishlist ? (
-					<FavoriteIcon sx={{ color: "#a435f0" }} />
-				) : (
-					<FavoriteBorderIcon sx={{ color: "grey" }} />
-				)}
-			</IconButton>
-			<CardContent sx={{ padding: 2 }}>
-				<Typography variant="h6" fontWeight={600} noWrap>
-					{course.title}
-				</Typography>
-				<Typography
-					variant="body2"
-					color="text.secondary"
-					sx={{
-						mt: 0.5,
-						mb: 1,
-						overflow: "hidden",
-						textOverflow: "ellipsis",
-						display: "-webkit-box",
-						WebkitLineClamp: 2,
-						WebkitBoxOrient: "vertical",
-					}}>
-					{course.description}
-				</Typography>
-				<Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-					<Typography variant="body2" fontWeight={600} mr={1}>
-						{ratingValue}
-					</Typography>
-					<Rating value={ratingValue} readOnly precision={0.5} size="small" />
-					<Typography variant="body2" color="text.secondary" ml={1}>
-						({ratingCount.toLocaleString()})
-					</Typography>
-				</Box>
-				<Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-					{course.price === 0 ? (
-						<>
-							<Typography variant="h6" color="success.main" fontWeight={700}>
-								Free
-							</Typography>
-							{course.discount > 0 && (
-								<Typography
-									variant="body2"
-									color="text.secondary"
-									sx={{ textDecoration: "line-through" }}>
-									{(Number(course.price) + Number(course.discount)).toFixed(2)}{" "}
-									EGP
-								</Typography>
-							)}
-						</>
-					) : (
-						<>
-							<Typography variant="h6" fontWeight={700}>
-								{course.price} EGP
-							</Typography>
-							{course.discount > 0 && (
-								<Typography
-									variant="body2"
-									color="text.secondary"
-									sx={{ textDecoration: "line-through" }}>
-									{(Number(course.price) + Number(course.discount)).toFixed(2)}{" "}
-									EGP
-								</Typography>
-							)}
-						</>
-					)}
-				</Box>
-				{course.badge && (
+				{" "}
+				<img
+					src={course.thumbnail}
+					alt={course.title}
+					style={{
+						width: "100%",
+						height: "150px",
+						objectFit: "cover",
+						objectPosition: "center",
+						borderRadius: "8px 8px 0 0",
+						minHeight: "150px",
+						maxHeight: "150px",
+					}}
+				/>
+				<CardContent>
+					{" "}
 					<Typography
-						variant="caption"
+						gutterBottom
+						variant="h6"
+						component="div"
 						sx={{
-							mt: 1,
-							display: "inline-block",
-							bgcolor: "primary.main",
-							color: "white",
-							px: 1,
-							py: 0.5,
-							borderRadius: 1,
+							fontWeight: "bold",
+							color: "#000000",
+							width: "100%",
+							height: "72px",
+							wordBreak: "normal",
+							overflowWrap: "break-word",
+							whiteSpace: "normal",
+							display: "-webkit-box",
+							WebkitLineClamp: 3,
+							WebkitBoxOrient: "vertical",
+							overflow: "hidden",
+							mb: 1,
+							fontSize: "1rem",
+							lineHeight: "1.5",
 						}}>
-						{course.badge}
+						{course.title}
+					</Typography>{" "}
+					<Typography
+						variant="body2"
+						color="text.secondary"
+						sx={{
+							width: "100%",
+							minHeight: "84px",
+							maxHeight: "84px",
+							display: "block",
+							overflow: "hidden",
+							wordBreak: "normal",
+							overflowWrap: "break-word",
+							whiteSpace: "normal",
+							mb: 2,
+							lineHeight: "1.4",
+							fontSize: "0.875rem",
+							"& > *": {
+								display: "-webkit-box",
+								WebkitBoxOrient: "vertical",
+								WebkitLineClamp: 4,
+							},
+						}}>
+						{course.description}
 					</Typography>
-				)}
-			</CardContent>
+					{/* التقييم والسعر */}
+					{(() => {
+						const ratingValue = course.rating?.rate || 0;
+						const ratingCount = course.rating?.count || 0;
+						const price = Number(course.price) || 0;
+						const discount = Number(course.discount) || 0;
+
+						return (
+							<>
+								{" "}
+								<div
+									className="rating"
+									style={{
+										marginBottom: 16,
+										display: "flex",
+										alignItems: "center",
+										gap: 8,
+										height: "24px",
+									}}>
+									<span style={{ fontWeight: "bold" }}>
+										{ratingValue.toFixed(1)}
+									</span>
+									<span style={{ color: "#ffb400", fontSize: "18px" }}>
+										{"★".repeat(Math.round(ratingValue)) +
+											"☆".repeat(5 - Math.round(ratingValue))}
+									</span>
+									<span style={{ color: "#666" }}>
+										({ratingCount.toLocaleString()})
+									</span>
+								</div>
+								<div
+									className="pricing"
+									style={{
+										marginBottom: 8,
+										fontWeight: "bold",
+										height: "24px",
+									}}>
+									{price === 0 ? (
+										<>
+											<span style={{ color: "green" }}>Free</span>
+											{discount > 0 && (
+												<span
+													style={{
+														textDecoration: "line-through",
+														marginLeft: 8,
+														color: "#999",
+													}}>
+													{(price + discount).toFixed(2)} EGP
+												</span>
+											)}
+										</>
+									) : (
+										<>
+											<span>{price.toFixed(2)} EGP</span>
+											{discount > 0 && (
+												<span
+													style={{
+														textDecoration: "line-through",
+														marginLeft: 8,
+														color: "#999",
+													}}>
+													{(price + discount).toFixed(2)} EGP
+												</span>
+											)}
+										</>
+									)}
+								</div>
+							</>
+						);
+					})()}
+				</CardContent>
+			</Card>{" "}
+			{/* Popup on hover */}{" "}
 			{hovered && (
 				<Box
 					sx={{
@@ -280,7 +303,7 @@ const CourseCard = ({ course }) => {
 										transform: "rotate(45deg)",
 										borderLeft: "1px solid #ddd",
 										borderBottom: "1px solid #ddd",
-										zIndex: 1000,
+										zIndex: 0,
 									},
 							  }
 							: {
@@ -297,30 +320,31 @@ const CourseCard = ({ course }) => {
 										transform: "rotate(45deg)",
 										borderTop: "1px solid #ddd",
 										borderRight: "1px solid #ddd",
-										zIndex: 1000,
+										zIndex: 0,
 									},
 							  }),
 						width: "280px",
+						minWidth: "280px",
 						background: "white",
 						border: "1px solid #ddd",
 						borderRadius: "4px",
 						padding: "16px",
 						boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-						zIndex: 10000,
-						isolation: "isolate",
-						pointerEvents: "auto",
-						overflow: "hidden",
-						wordBreak: "break-word",
-						overflowWrap: "break-word",
+						zIndex: 99,
+						display: "flex",
+						flexDirection: "column",
 					}}>
+					{" "}
 					<Typography
 						variant="h6"
 						fontWeight="bold"
 						gutterBottom
 						sx={{
-							whiteSpace: "normal",
-							wordBreak: "break-word",
+							wordBreak: "normal",
+							width: "100%",
 							overflowWrap: "break-word",
+							whiteSpace: "normal",
+							display: "block",
 						}}>
 						{course.title}
 					</Typography>
@@ -328,14 +352,13 @@ const CourseCard = ({ course }) => {
 						variant="body2"
 						sx={{
 							mb: 1.5,
-							maxHeight: "80px",
-							overflow: "hidden",
-							whiteSpace: "normal",
-							wordBreak: "break-word",
+							wordBreak: "normal",
+							width: "100%",
 							overflowWrap: "break-word",
+							whiteSpace: "normal",
 						}}>
 						{course.description}
-					</Typography>
+					</Typography>{" "}
 					<Box
 						sx={{
 							display: "flex",
@@ -347,11 +370,17 @@ const CourseCard = ({ course }) => {
 							{course.price} EGP
 						</Typography>
 						<IconButton
-							onClick={handleWishlistToggle}
+							onClick={(e) => handleWishlistToggle(e, course)}
 							sx={{
-								color: isInWishlist ? "#8e2de2" : "grey.400",
+								color: wishlistItems.find((item) => item.id === course.id)
+									? "#8e2de2"
+									: "grey.400",
 							}}>
-							{isInWishlist ? <FavoriteIcon /> : <FavoriteBorderIcon />}
+							{wishlistItems.find((item) => item.id === course.id) ? (
+								<FavoriteIcon />
+							) : (
+								<FavoriteBorderIcon />
+							)}
 						</IconButton>
 					</Box>
 					<Button
@@ -359,9 +388,15 @@ const CourseCard = ({ course }) => {
 						color="primary"
 						size="small"
 						sx={{
-							background: isInCart ? "white" : "#8e2de2",
-							color: isInCart ? "#8e2de2" : "white",
-							border: isInCart ? "1px solid #8e2de2" : "none",
+							background: cartItems.find((item) => item.id === course.id)
+								? "white"
+								: "#8e2de2",
+							color: cartItems.find((item) => item.id === course.id)
+								? "#8e2de2"
+								: "white",
+							border: cartItems.find((item) => item.id === course.id)
+								? "1px solid #8e2de2"
+								: "none",
 							borderRadius: "2%",
 							display: "flex",
 							flexDirection: "row",
@@ -373,17 +408,24 @@ const CourseCard = ({ course }) => {
 							alignSelf: "center",
 							transition: "all 0.3s ease",
 							"&:hover": {
-								background: isInCart ? "white" : "#7016b3",
+								background: cartItems.find((item) => item.id === course.id)
+									? "white"
+									: "#7016b3",
 							},
 						}}
-						onClick={handleAddToCart}
+						onClick={(e) => {
+							e.stopPropagation();
+							handleAddToCart(course);
+						}}
 						fullWidth>
-						{isInCart ? "In Cart" : "Add to Cart"}
+						{cartItems.find((item) => item.id === course.id)
+							? "In Cart"
+							: "Add to Cart"}
 						<ShoppingCart />
 					</Button>
 				</Box>
 			)}
-		</Card>
+		</Box>
 	);
 };
 
