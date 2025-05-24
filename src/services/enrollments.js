@@ -1,9 +1,9 @@
 import { addDoc, collection, doc, getDoc, setDoc } from "firebase/firestore";
-import { db } from "../firebase"; // تأكد من مسار الاستيراد الصحيح
+import { db } from "../Firebase/firebase.js";
 
-export async function addOrder(user, cartItems, total, details) {
+export async function addOrder(userId, cartItems, total, details) {
   addDoc(collection(db, "orders"), {
-    user_id: user.uid,
+    user_id: userId,
     items: cartItems.map((item) => ({
       course_id: item.id,
       title: item.title,
@@ -16,7 +16,6 @@ export async function addOrder(user, cartItems, total, details) {
     timestamp: new Date(),
   });
 }
-
 
 export async function enrollCourse(userid, course) {
   const enrollmentRef = doc(db, "Enrollments", userid);
@@ -43,3 +42,30 @@ export async function enrollCourse(userid, course) {
     });
   }
 }
+export async function emptyCart(userid) {
+  setDoc(doc(db, "Carts", userid), { items: [] });
+}
+
+export const getEnrolledCourses = async (userId) => {
+  try {
+    const enrolledRef = doc(db, "Enrollments", userId);
+    const enrolledDoc = await getDoc(enrolledRef);
+
+    if (!enrolledDoc.exists()) {
+      return [];
+    }
+
+    const enrolledData = enrolledDoc.data();
+    const courses = enrolledData.courses || [];
+
+    // استخراج معرفات الكورسات فقط
+    const courseIds = courses
+      .filter((course) => course && course.course_id)
+      .map((course) => course.course_id);
+
+    return courseIds;
+  } catch (error) {
+    console.error("Error in getEnrolledCourses:", error);
+    throw error;
+  }
+};
