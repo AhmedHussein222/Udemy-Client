@@ -442,6 +442,8 @@ const handleSavePhoto = async () => {
             >
               {loading ? <CircularProgress size={24} sx={{ color: '#fff' }} /> : t('Save')}
             </Button>
+
+            {/* ai model */}
           </>
         );
       case 'security':
