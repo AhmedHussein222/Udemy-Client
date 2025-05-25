@@ -1,30 +1,33 @@
-import {
-    Box,
-    Button,
-    Checkbox,
-    FormControlLabel,
-    FormGroup,
-    Grid,
-    Stack,
-    TextField,
-    Typography,
-  } from '@mui/material';
+import {Box,Button,Checkbox,FormControlLabel,FormGroup,Grid,Stack,TextField,Typography,} from '@mui/material';
   import MailOutlineIcon from '@mui/icons-material/MailOutline';
   import React from 'react';
 import { grey } from '@mui/material/colors';
 import { useForm } from "react-hook-form";
+import { becomeInstructor } from '../../services/functions';
+import { errorModal, successModal } from '../../services/swal';
+import { useNavigate } from 'react-router-dom';
 
-  
-  function InsSignup() {
+function InsSignup() {
+    let navigate = useNavigate();
     const {register,  handleSubmit, formState: { errors }, } = useForm({
         defaultValues: {
-          fullname: "",
           email: "",
+          password: "",
         },
       });
       
-      const onSubmit = (data) => {
-        console.log("Form data:", data);
+      const onSubmit = async(data) => {
+         becomeInstructor(data.email, data.password).then((res) => {
+          switch (res) {
+            case true:
+              successModal("Success","You are now an instructor! Welcome to the community.")
+              navigate("/instructor/");
+              break;
+            case false:
+              errorModal("Error","An error occurred while becoming an instructor. Please try again.");
+              break;
+         
+          }})
       };
       
     
@@ -66,16 +69,7 @@ import { useForm } from "react-hook-form";
 
       <form onSubmit={handleSubmit(onSubmit)}>
   <Stack spacing={2}>
-    <TextField
-      fullWidth
-      size="medium"
-      label="Fullname"
-      variant="outlined"
-      {...register("fullname", { required: true, maxLength: 20 })}
-    />
-    {errors.fullname?.type === "required" && (
-   <Typography color='error'>Fullname is required.</Typography>
-    )}
+ 
 
   <TextField
        fullWidth
@@ -93,7 +87,16 @@ import { useForm } from "react-hook-form";
      {errors.email?.type === "pattern" && (
        <Typography color='error'>Email is not valid.</Typography>
      )}
-
+   <TextField
+      fullWidth
+      size="medium"
+      label="password"
+      variant="outlined"
+      {...register("password", { required: true,  })}
+    />
+    {errors.password?.type === "required" && (
+   <Typography color='error'>Password is required.</Typography>
+    )}
     <FormGroup>
       <FormControlLabel
         control={<Checkbox />}
@@ -107,16 +110,7 @@ import { useForm } from "react-hook-form";
       fullWidth
       variant="contained"
       startIcon={<MailOutlineIcon fontSize="small" />}
-      sx={{
-        backgroundColor: '#8000ff',
-        color: '#fff',
-        textTransform: 'none',
-        fontWeight: 'bold',
-        borderRadius: '4px',
-        py: 1.2,
-        mt: 1,
-        '&:hover': { backgroundColor: '#6a1b9a' },
-      }}
+      sx={{backgroundColor: '#8000ff',color: '#fff',textTransform: 'none',fontWeight: 'bold',borderRadius: '4px',py: 1.2,mt: 1,'&:hover': { backgroundColor: '#6a1b9a' },}}
     >
       Continue with email
     </Button>

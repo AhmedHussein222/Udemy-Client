@@ -108,7 +108,7 @@ export default function Footer() {
       if (savedLang) {
         i18n.changeLanguage(savedLang);
       }
-    }, []);
+    }, [i18n]);
 
       const translatedFooterLinks = footerLinks.map((section) => ({
     title: t(section.title),

@@ -45,9 +45,8 @@ const leftCards = [
 	{
 		id: 2,
 		img: logo2,
-		title: "Expert-led content",
-		description:
-			"Learn from industry professionals with real-world experience.",
+		title: "Certification programs",
+		description: "Earn credentials that boost your career prospects.",
 		previewImg: preview2,
 	},
 	{
@@ -60,8 +59,9 @@ const leftCards = [
 	{
 		id: 4,
 		img: logo4,
-		title: "Certification programs",
-		description: "Earn credentials that boost your career prospects.",
+		title: "Expert-led content",
+		description:
+			"Learn from industry professionals with real-world experience.",
 		previewImg: preview4,
 	},
 ];
@@ -503,6 +503,7 @@ const Home2 = () => {
 
 	return (
 		<>
+		{/* Learners are viewing */}
 			<section className="courses-section">
 				<h2 className="section-title">Learners are viewing</h2>
 
@@ -523,6 +524,7 @@ const Home2 = () => {
 				</div>
 			</section>
 
+		{/* Learning focused on your goals */}
 			<section className="focus-section">
 				<h2 className="section-title">Learning focused on your goals</h2>
 				<div className="focus-grid">
@@ -538,9 +540,9 @@ const Home2 = () => {
 								<div>
 									<h4>{card.title}</h4>
 									<p>{card.description}</p>
-									<span className="explore-link">
+									<a className="explore-link">
 										Explore course <ArrowForwardIos fontSize="small" />
-									</span>
+									</a>
 								</div>
 							</div>
 						))}

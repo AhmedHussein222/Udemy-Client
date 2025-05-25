@@ -3,7 +3,7 @@
   "Other sign up options": "Other sign up options",
   "Terms of Use": "Terms of Use",
   "Privacy Policy": "Privacy Policy",
-  "Don’t have an account?": "Don’t have an account?",
+  "Don't have an account?": "Don't have an account?",
   "Sign up": "Sign up",
   "Log in with your organization": "Log in with your organization",
   "Email": "Email",
@@ -256,5 +256,32 @@
     "status": "Status",
     "method": "Method",
     "completed": "Completed"
+  },
+  "courseContent": {
+    "overview": "Overview",
+    "courseContent": "Course content",
+    "reviews": "Reviews",
+    "notes": "Notes",
+    "addReview": "Add your review",
+    "yourRating": "Your Rating:",
+    "writeReview": "Write your review here...",
+    "submitReview": "Submit Review",
+    "noReviews": "No reviews yet for this course",
+    "wasHelpful": "Was this review helpful?",
+    "report": "Report",
+    "skillLevel": "Skill level:",
+    "lectures": "Lectures:",
+    "video": "Video:",
+    "languages": "Languages:",
+    "whatYouLearn": "What you'll learn",
+    "requirements": "Requirements",
+    "lastUpdated": "Last updated",
+    "preview": "Preview",
+    "noLessons": "No lessons available"
+  },
+  "notFound": {
+    "title": "Sorry, we couldn't find that page",
+    "message": "The page you're looking for doesn't exist or has been moved. Please check the link or return to the homepage.",
+    "backHome": "Back to Homepage"
   }
 }
