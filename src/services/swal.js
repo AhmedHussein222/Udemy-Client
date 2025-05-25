@@ -19,3 +19,13 @@ export const errorModal = (title = "Error", text = "An error occurred") => {
         timer: 1500,
       });
 };
+
+export const warningModal = (title = "Warning", text = "Please login first !") => {
+  Swal.fire({
+    title,
+    text,
+    icon: "warning",
+    confirmButtonText: "OK",
+    timer: 2000,
+  });
+}

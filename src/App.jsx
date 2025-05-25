@@ -1,200 +1,160 @@
 /** @format */
 
-import { CssBaseline } from "@mui/material";
+import createCache from "@emotion/cache";
+import { CacheProvider } from "@emotion/react";
+import { createTheme, CssBaseline, ThemeProvider } from "@mui/material";
+import { onAuthStateChanged } from "firebase/auth";
+import { useContext, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { createBrowserRouter, Outlet, RouterProvider } from "react-router-dom";
+import { prefixer } from "stylis";
+import rtlPlugin from "stylis-plugin-rtl";
+import Home from "./Components//Home/Home";
 import Cart from "./Components/Cart/Cart";
 import Category from "./Components/Category/Category";
+import  Checkout from "./Components/checkout/checkout";
+import CourseDetails from "./Components/Coursedetails/CourseDetails";
+import CategoryPage from "./Components/Courses/CatCourses";
+import SubcategoryPage from "./Components/Courses/SubCourses";
 import Footer from "./Components/Footer/Footer";
 import Header from "./Components/Header/Header";
-import SearchResults from "./Components/Search/SearchResults";
+import HomeAfterLogin from "./Components/HomeAfterLogin/HomeLogin";
 import CreateCourse from "./Components/Instructor Dashboard/components/CreateCourse/createcourse";
+import EditCourse from "./Components/Instructor Dashboard/components/Edit Course/edit";
+import InsHome from "./Components/Instructor Dashboard/components/Home/home";
+import InsMain from "./Components/Instructor Dashboard/components/Main/Main";
+import Revenue from "./Components/Instructor Dashboard/components/Revenue";
+import Reviews from "./Components/Instructor Dashboard/components/Reviews";
 import InsSignup from "./Components/Instructor Dashboard/InsSignup";
 import Welcomehome from "./Components/Instructor Dashboard/welcomehome";
 import Login from "./Components/LoginUsers/Login";
-import Signup from "./Components/SignUpStudents/Signup";
-import InsMain from "./Components/Instructor Dashboard/components/Main/Main";
-import { useEffect, useState } from "react";
-import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "./Firebase/firebase";
-import { useTranslation } from "react-i18next";
-import { CacheProvider } from "@emotion/react";
-import createCache from "@emotion/cache";
-import rtlPlugin from "stylis-plugin-rtl";
-import { prefixer } from "stylis";
-import { ThemeProvider, createTheme } from "@mui/material";
-import Userprofile from "./Components/Userprofile/userprofile";
-import { UserContext } from "./context/UserContext";
-import Home from "./Components//Home/Home";
-import InsHome from "./Components/Instructor Dashboard/components/Home/home";
-import EditCourse from "./Components/Instructor Dashboard/components/Edit Course/edit";
-import { CourseProvider } from "./context/CourseContext";
-import { CartProvider } from "./context/CartContext";
-import { WishlistProvider } from "./context/WishlistContext";
-import CourseDetails from "./Components/Coursedetails/CourseDetails";
-import Wishlist from "./Components/Wishlist/wishlist";
-import Reviews from "./Components/Instructor Dashboard/components/Reviews";
-import Revenue from "./Components/Instructor Dashboard/components/Revenue";
-import PaymentPage from "./Components/payment/test";
-import SubcategoryPage from "./Components/Courses/SubCourses";
-import CategoryPage from "./Components/Courses/CatCourses";
-import HomeAfterLogin from "./Components/HomeAfterLogin/HomeLogin";
-import Navbar from "./HomeAfterLoginComponents/NavBar";
-import Checkout from "./Components/checkout/checkout";
-import AuthGuard from "./Guards/AuthGuard";
-import Unauthorized from "./Pages/Unauthorized";
-import CheckoutComponent from "./Components/checkout/checkout";
-import CourseCondent from "./Pages/courseContent";
-import Career from "./HomeComponents/Career/Career";
-import Home2 from "./HomeComponents/Home2/Home2";
 import MyLearning from "./Components/MyLearning/MyLearning";
+import SearchResults from "./Components/Search/SearchResults";
+import Signup from "./Components/SignUpStudents/Signup";
+import Userprofile from "./Components/Userprofile/userprofile";
+import Wishlist from "./Components/Wishlist/wishlist";
+import { CartProvider } from "./context/CartContext";
+import { CourseProvider } from "./context/CourseContext";
 import { EnrolledCoursesProvider } from "./context/EnrolledCoursesContext";
-
+import { UserContext , UserProvider } from "./context/UserContext";
+import { WishlistProvider } from "./context/WishlistContext";
+import { auth } from "./Firebase/firebase";
+import AuthGuard from "./Guards/AuthGuard";
+import Navbar from "./HomeAfterLoginComponents/NavBar";
+import Career from "./HomeComponents/Career/Career";
+import CourseCondent from "./Pages/courseContent";
+import Unauthorized from "./Pages/Unauthorized";
 const router = createBrowserRouter([
-	{
-		path: "/",
-		element: <Main />,
-		children: [
+  {
+    path: "/",
+    element: <Main />,
+    children: [
+      { path: "", element: <HomeRoute /> }, 
 			{ path: "login", element: <Login /> },
-			{ path: "cart", element: <Cart /> },
-			{ path: "Userprofile", element: <Userprofile /> },
-			{ path: "/subcategory/:subcategoryId", element: <SubcategoryPage /> },
-			{ path: "/category/:categoryId", element: <CategoryPage /> },
-			{ path: "Home2", element: <HomeAfterLogin /> },
-			{ path: "HomeLogin", element: <Navbar /> },
-			{ path: "wishlist", element: <Wishlist /> },
-			{ path: "signup", element: <Signup /> },
-			{ path: "instructor-signup", element: <InsSignup /> },
-			{ path: "course-details/:id", element: <CourseDetails /> },
-			{ path: "course/:id", element: <CourseDetails /> },
-			{ path: "search", element: <SearchResults /> },
-			{ path: "Welcomehome", element: <Welcomehome /> },
-			{ path: "checkout", element: <Checkout /> },
-			{ path: "MyLearning", element: <MyLearning /> },
-			{ path: "/MyLearning/:id", element: <CourseCondent /> },
-			{ path: "/career-accelerators", element: <Career /> },
-			{ path: "", element: <Home /> },
-			{ path: "/home2", element: <HomeAfterLogin /> },
-		],
-	},
-	{ path: "/category/:id", element: <Category /> },
-	{ path: "t", element: <AuthGuard /> },
-
-	{
-		path: "instructor",
-
-		element: (
-			<AuthGuard allowedRoles={["instructor"]}>
-				<InsMain />
-			</AuthGuard>
-		),
-		children: [
-			{ path: "", element: <InsHome /> },
-			{ path: "courses", element: <InsHome /> },
-			{ path: "create", element: <CreateCourse /> },
-			{ path: "edit", element: <EditCourse /> },
-			{ path: "reviews", element: <Reviews /> },
-			{ path: "revenue", element: <Revenue /> },
-		],
-	},
-	{ path: "/unauthorized", element: <Unauthorized /> },
-	{ path: "/checkout", element: <CheckoutComponent /> },
+      { path: "cart", element: <Cart /> },
+      { path: "Userprofile", element: <Userprofile /> },
+      { path: "/subcategory/:subcategoryId", element: <SubcategoryPage /> },
+      { path: "/category/:categoryId", element: <CategoryPage /> },
+      { path: "Home2", element: <HomeAfterLogin /> },
+      { path: "HomeLogin", element: <Navbar /> },
+      { path: "wishlist", element: <Wishlist /> },
+      { path: "signup", element: <Signup /> },
+      { path: "instructor-signup", element: <InsSignup /> },
+      { path: "course-details/:id", element: <CourseDetails /> },
+      { path: "course/:id", element: <CourseDetails /> },
+      { path: "search", element: <SearchResults /> },
+      { path: "Welcomehome", element: <Welcomehome /> },
+      { path: "checkout", element: <Checkout /> },
+      { path: "MyLearning", element: <MyLearning /> },
+      { path: "/MyLearning/:id", element: <CourseCondent /> },
+      { path: "/career-accelerators", element: <Career /> },
+			{ path: "/category/:id", element: <Category /> },
+    ],
+  },
+  {
+    path: "instructor",
+    element: (
+      <AuthGuard allowedRoles={["instructor"]}>
+        <InsMain />
+      </AuthGuard>
+    ),
+    children: [
+      { path: "", element: <InsHome /> },
+      { path: "courses", element: <InsHome /> },
+      { path: "create", element: <CreateCourse /> },
+      { path: "edit", element: <EditCourse /> },
+      { path: "reviews", element: <Reviews /> },
+      { path: "revenue", element: <Revenue /> },
+    ],
+  },
+  { path: "/unauthorized", element: <Unauthorized /> },
 ]);
 
 function Main() {
-	return (
-		<>
-			<CssBaseline>
-				<Header />
-				<Outlet />
-				<Footer />
-			</CssBaseline>
-		</>
-	);
+  return (
+    <>
+      <CssBaseline>
+        <Header />
+        <Outlet />
+        <Footer />
+      </CssBaseline>
+    </>
+  );
+}
+function HomeRoute() {
+  const { user } = useContext(UserContext);
+  return user ? <HomeAfterLogin /> : <Home />;
 }
 
 const App = () => {
-	const { i18n } = useTranslation();
-	const direction = i18n.language === "ar" ? "rtl" : "ltr";
-	const [user, setUser] = useState(null);
+  const { i18n } = useTranslation();
+  const direction = i18n.language === "ar" ? "rtl" : "ltr";
+  const [user, setUser] = useState(null);
 
-	useEffect(() => {
-		const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-			if (firebaseUser) {
-				setUser(firebaseUser);
-			} else {
-				setUser(null);
-			}
-		});
-		document.body.dir = direction;
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      if (firebaseUser) {
+        setUser(firebaseUser);
+      } else {
+        setUser(null);
+      }
+    });
+    document.body.dir = direction;
 
-		return () => unsubscribe();
-	}, [direction]);
+    return () => unsubscribe();
+  }, [direction]);
 
-	const cache = createCache({
-		key: direction === "rtl" ? "muirtl" : "mui",
-		stylisPlugins: direction === "rtl" ? [prefixer, rtlPlugin] : [],
-	});
+  const cache = createCache({
+    key: direction === "rtl" ? "muirtl" : "mui",
+    stylisPlugins: direction === "rtl" ? [prefixer, rtlPlugin] : [],
+  });
 
-	const theme = createTheme({
-		direction,
-		typography: {
-			fontFamily:
-				direction === "rtl" ? "Cairo, sans-serif" : "Roboto, sans-serif",
-		},
-	});
+  const theme = createTheme({
+    direction,
+    typography: {
+      fontFamily:
+        direction === "rtl" ? "Cairo, sans-serif" : "Roboto, sans-serif",
+    },
+  });
 
-	return (
-		<CacheProvider value={cache}>
-			<ThemeProvider theme={theme}>
-				<CssBaseline />{" "}
-				<UserContext.Provider value={{ user }}>
-					<CourseProvider>
-						<CartProvider>
-							<WishlistProvider>
-								<EnrolledCoursesProvider>
-									<RouterProvider router={router} />
-								</EnrolledCoursesProvider>
-							</WishlistProvider>
-						</CartProvider>
-					</CourseProvider>
-				</UserContext.Provider>
-			</ThemeProvider>
-		</CacheProvider>
-	);
+  return (
+    <CacheProvider value={cache}>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />{" "}
+        <UserProvider>
+          <CourseProvider>
+            <CartProvider>
+              <WishlistProvider>
+                <EnrolledCoursesProvider>
+                  <RouterProvider router={router} />
+                </EnrolledCoursesProvider>
+              </WishlistProvider>
+            </CartProvider>
+          </CourseProvider>
+        </UserProvider>
+      </ThemeProvider>
+    </CacheProvider>
+  );
 };
 
 export default App;
-
-// import { BrowserRouter, Routes, Route } from 'react-router-dom';
-// import Layout from './Layout';
-// import Home from './Components/Home/Home';
-// import Cart from './Components/Cart/Cart';
-// import Signup from './Components/SignUpStudents/Signup';
-// import Login from './Components/LoginUsers/Login';
-// import InsSignup from './Components/InstructorSignup/InsSignup';
-// import Career from './HomeComponents/Career/Career'
-// // import Welcomehome from './Components/InstructorSignup/welcomehome';
-// import Sidebar from './Components/InstructorSignup/components/Drawer/sidebar';
-// import CreateCourse from './Components/InstructorSignup/components/CreateCourse/createcourse';
-
-// function App() {
-//   return (
-//     <BrowserRouter>
-//       <Routes>
-//         <Route path="/" element={<Layout />}>
-//           <Route index element={<Home />} />
-//           {/* <Route index element={<Welcomehome />} />  */}
-//           <Route path="cart" element={<Cart />} />
-//           <Route path="login" element={<Login />} />
-//           <Route path="signup" element={<Signup />} />
-//           <Route path="instructor-signup" element={<InsSignup />} />
-//           <Route path="sidebar" element={<Sidebar />} />
-//           <Route path="create-course" element={<CreateCourse />} />
-//           <Route path="career-accelerators" element={<Career />} />
-//         </Route>
-//       </Routes>
-//     </BrowserRouter>
-//   );
-// }
-
-// export default App;

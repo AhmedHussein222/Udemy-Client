@@ -165,8 +165,7 @@ const handleOpen = () => {
         ...formData,
         user_id: user.uid,
         email: user.email,
-        displayName: user.displayName || '',
-        photoURL: user.photoURL || '',
+        profile_picture: user.photoURL || '',
       });
 
       setSnackbarMessage(t('Profile saved successfully.'));

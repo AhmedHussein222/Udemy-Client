@@ -173,7 +173,7 @@ const InsMain = () => {
                 variant="body1"
                 onClick={() => nav("/")}
                 color={grey[700]}
-                sx={{ fontWeight: "bold" }}
+                sx={{ fontWeight: "bold"  , borderRadius : 1, cursor: "pointer" , ":hover": { backgroundColor: "#ede5f9" }}}
               >
                 {t("Student")}
               </Typography>
