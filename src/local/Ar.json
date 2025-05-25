@@ -3,7 +3,7 @@
   "Other sign up options": "خيارات تسجيل أخرى",
   "Terms of Use": "شروط الاستخدام",
   "Privacy Policy": "سياسة الخصوصية",
-  "Don’t have an account?": "ليس لديك حساب؟",
+  "Don't have an account?": "ليس لديك حساب؟",
   "Sign up": "سجّل الآن",
   "Log in with your organization": "تسجيل الدخول باستخدام حساب المؤسسة",
   "Email": "البريد الإلكتروني",
@@ -254,5 +254,32 @@
     "status": "الحالة",
     "method": "طريقة الدفع",
     "completed": "مكتمل"
+  },
+  "courseContent": {
+    "overview": "نظرة عامة",
+    "courseContent": "محتوى الدورة",
+    "reviews": "المراجعات",
+    "notes": "الملاحظات",
+    "addReview": "أضف مراجعتك",
+    "yourRating": "تقييمك:",
+    "writeReview": "اكتب مراجعتك هنا...",
+    "submitReview": "إرسال المراجعة",
+    "noReviews": "لا توجد مراجعات بعد لهذه الدورة",
+    "wasHelpful": "هل كانت هذه المراجعة مفيدة؟",
+    "report": "إبلاغ",
+    "skillLevel": "مستوى المهارة:",
+    "lectures": "المحاضرات:",
+    "video": "الفيديو:",
+    "languages": "اللغات:",
+    "whatYouLearn": "ماذا ستتعلم",
+    "requirements": "المتطلبات",
+    "lastUpdated": "آخر تحديث",
+    "preview": "معاينة",
+    "noLessons": "لا توجد دروس متاحة"
+  },
+  "notFound": {
+    "title": "عذراً، لم نتمكن من العثور على الصفحة",
+    "message": "يبدو أن الصفحة التي تبحث عنها غير موجودة أو تم نقلها. يرجى التحقق من الرابط أو العودة إلى الصفحة الرئيسية.",
+    "backHome": "العودة للصفحة الرئيسية"
   }
 }

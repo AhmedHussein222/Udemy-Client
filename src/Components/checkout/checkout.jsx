@@ -1,58 +1,29 @@
-import { Box, Card, TextField, Typography } from "@mui/material";
-import { styled } from "@mui/material/styles";
-import { addDoc, collection, doc, setDoc } from "firebase/firestore";
+import { Box, TextField, Typography } from "@mui/material";
 import { useContext, useEffect, useState } from "react";
-import Swal from "sweetalert2";
 import { CartContext } from "../../context/cart-context";
-import { auth, db } from "../../Firebase/firebase";
+import { auth } from "../../Firebase/firebase";
 import PayPalButton from "../payment/PayPalButton";
 import { updateEnrollments } from "../../Firebase/courses";
+import { addOrder, emptyCart } from "../../services/enrollments";
+import { errorModal, successModal } from "../../services/swal";
 
 const CheckoutComponent = () => {
-  const StyledCard = styled(Card)(({ theme }) => ({
-    maxWidth: 400,
-    margin: theme.spacing(2),
-    padding: theme.spacing(2),
-  }));
+
   const handleSuccess = async (details, cartItems) => {
     const user = auth.currentUser;
     console.log("User:", user);
 
     try {
-      await addDoc(collection(db, "orders"), {
-        user_id: user.uid,
-        items: cartItems.map((item) => ({
-          course_id: item.id,
-          title: item.title,
-          price: item.price,
-        })),
-        totalAmount: total,
-        paymentDetails: details,
-        paymentId: details.id,
-        method: "PayPal",
-        timestamp: new Date(),
-      });
+
+      await addOrder(user.uid, cartItems, total, details);
       await updateEnrollments( user.uid, cartItems );
- 
-  
-
-      await setDoc(doc(db, "Carts", user.uid), { items: [] });
-
-      await Swal.fire({
-        icon: "success",
-        title: "Payment Successful!",
-        text: "Courses have been added to your account",
-        confirmButtonText: "OK",
-      });
-
+      await emptyCart(user.uid);
+      successModal("Payment Successful!","Courses have been added to your account",)
+    
     } catch ({ message }) {
+
       console.error("Error saving payment:", message);
-      await Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: "An error occurred while save  the payment in firestore. Please try again",
-        confirmButtonText: "OK",
-      });
+      errorModal("Error","An error occurred while saving the payment in Firestore. Please try again");
     }
   };
   const { cartItems, getCartTotal } = useContext(CartContext);
@@ -130,7 +101,7 @@ const CheckoutComponent = () => {
             </Typography>
 
             <PayPalButton
-              amountval={total}
+              amountval={total.toFixed(2)}
               onSuccess={(details) => handleSuccess(details, cartItems)}
             />
           </Box>
@@ -165,7 +136,7 @@ const CheckoutComponent = () => {
                 <Box sx={{ flexGrow: 1 }}>
                   <Typography>{course.title}</Typography>
                 </Box>
-                <Typography>${course.price}</Typography>
+                <Typography>${course.price.toFixed(2)}</Typography>
               </Box>
             ))}
           </Box>
@@ -186,7 +157,7 @@ const CheckoutComponent = () => {
                 color="text.secondary"
                 sx={{ textDecoration: "line-through" }}
               >
-                ${getCartTotal()}
+                ${total.toFixed(2)}
               </Typography>
             </Box>
             <Box sx={{ display: "flex", justifyContent: "space-between" }}>
@@ -209,7 +180,7 @@ const CheckoutComponent = () => {
                 Total ({cartItems.length}{" "}
                 {cartItems.length === 1 ? "course" : "courses"}):
               </Typography>
-              <Typography variant="h6">${getCartTotal()}</Typography>
+              <Typography variant="h6">${total.toFixed(2)}</Typography>
             </Box>
             <Typography variant="caption" display="block" sx={{ marginTop: 2 }}>
               By completing your purchase, you agree to these{" "}
