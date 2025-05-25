@@ -38,6 +38,7 @@ import {
 } from "../../Firebase/firebase";
 import { CartContext } from "../../context/cart-context";
 import { WishlistContext } from "../../context/wishlist-context";
+import { errorModal } from "../../services/swal";
 
 const CourseSidebar = ({ course }) => {
 	const [courseData, setCourseData] = useState(null);
@@ -221,7 +222,7 @@ const CourseSidebar = ({ course }) => {
 		if (success) {
 			setIsInCart(true); // Update button state
 		} else {
-			alert("Failed to add to cart. Please log in or try again.");
+			errorModal("Error", "Failed to add to cart. Please try again.");
 		}
 	};
 

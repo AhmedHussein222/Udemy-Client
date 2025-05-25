@@ -64,10 +64,10 @@ function Signup() {
 				first_name,
 				last_name: last_name || "",
 				email: data.email,
-				password: data.password, // Store password in Firestore
+				password: data.password, 
 				createdAt: new Date(),
 				role: "student",
-				authUid: user.uid, // Store the auth UID for reference
+				user_id: user.uid, 
 			});
 
 			setSnackbarMessage("Registration successful! Redirecting...");

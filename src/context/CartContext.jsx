@@ -11,6 +11,7 @@ import {
 } from "firebase/firestore";
 import { UserContext } from "./UserContext";
 import { CartContext } from "./cart-context";
+import { warningModal } from "../services/swal";
 
 export const CartProvider = ({ children }) => {
 	const [cartItems, setCartItems] = useState([]);
@@ -48,7 +49,7 @@ export const CartProvider = ({ children }) => {
 
 	const addToCart = async (course) => {
 		if (!user) {
-			console.log("Please log in to add items to cart");
+			warningModal()
 			return false;
 		}
 
