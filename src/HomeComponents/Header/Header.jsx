@@ -34,7 +34,8 @@ import { CartContext } from "../../context/cart-context";
 import { signOut } from "firebase/auth";
 import { auth } from "../../Firebase/firebase";
 import { useWishlist } from "../../context/wishlist-context";
-
+import DesktopHeader from "./DesktopHeader";
+import MobileHeader from "./MobileHeader";
 const Header = () => {
 	const [openBusiness, setOpenBusiness] = useState(false);
 	const [openTeach, setOpenTeach] = useState(false);
