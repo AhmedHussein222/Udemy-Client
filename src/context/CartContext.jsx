@@ -55,10 +55,9 @@ export const CartProvider = ({ children }) => {
 
 		try {
 			setLoading(true);
-			// Check if course is already in cart
-			if (!cartItems.some((item) => item.id === course.id)) {
+			if (!cartItems.some((item) => item.id === course.course_id)) {
 				const newItem = {
-					id: course.id,
+					id: course.id || course.course_id, 
 					title: course.title,
 					price: course.price,
 					thumbnail: course.thumbnail,
@@ -79,7 +78,6 @@ export const CartProvider = ({ children }) => {
 					{ merge: true }
 				);
 
-				// Update local state
 				setCartItems((prev) => [...prev, newItem]);
 				return true; // Successfully added
 			}

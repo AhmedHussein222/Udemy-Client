@@ -86,7 +86,7 @@ const MyLearning = () => {
 										},
 									}}
 									onClick={() =>
-										navigate(`/course/${course.id || course.course_id}`)
+										navigate(`/MyLearning/${course.id || course.course_id}`)
 									}>
 									<Avatar
 										variant="square"

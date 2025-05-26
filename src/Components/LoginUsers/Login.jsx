@@ -45,7 +45,6 @@ function Login() {
  
       const userCredential = await signInWithEmailAndPassword(auth, data.email, data.password);
 
-      console.log("User logged in: ", userCredential.user);
       navigate("/", { state: { email: data.email } });
 
     } catch (error) {

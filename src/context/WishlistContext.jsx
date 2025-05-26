@@ -11,6 +11,7 @@ import {
 } from "firebase/firestore";
 import { UserContext } from "./UserContext";
 import { WishlistContext } from "./wishlist-context";
+import { warningModal } from "../services/swal";
 
 export const WishlistProvider = ({ children }) => {
 	const [wishlistItems, setWishlistItems] = useState([]);
@@ -48,7 +49,9 @@ export const WishlistProvider = ({ children }) => {
 
 	const addToWishlist = async (course) => {
 		if (!user) {
-			console.log("Please log in to add items to wishlist");
+			warningModal("warning",
+				"You need to be logged in to add items to your wishlist."
+			);
 			return false;
 		}
 

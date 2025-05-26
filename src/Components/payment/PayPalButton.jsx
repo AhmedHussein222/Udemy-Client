@@ -28,7 +28,6 @@ const PayPalButton = ({ onSuccess, amountval  }) => {
         }}
 
         onApprove={async (data, actions) => {
-          console.log("PayPal Button Approved:", data, actions);
           try {
             const details = await actions.order.capture();
             await Swal.fire({

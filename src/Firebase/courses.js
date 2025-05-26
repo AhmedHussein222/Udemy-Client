@@ -5,6 +5,7 @@ import {
   getDoc,
   getDocs,
   query,
+  serverTimestamp,
   setDoc,
   updateDoc,
   where,
@@ -209,7 +210,7 @@ export async function getInstructorReviews(instructorId) {
         const data = doc.data();
         reviews.push({
           ...data,
-          userName: userMap[data.user_id] ,
+          userName: userMap[data.user_id],
         });
       }
     });
@@ -282,7 +283,6 @@ export async function getCourseReviews(courseId) {
           (user.first_name || "") + " " + (user.last_name || "");
       }
     });
-    console.log("User Map:", userMap);
 
     let reviews = [];
     reviewsSnapshot.forEach((doc) => {
@@ -299,28 +299,54 @@ export async function getCourseReviews(courseId) {
   }
 }
 export async function updateEnrollments(userid, cartItems) {
-  const enrollmentRef = doc(db, "Enrollments", userid);
-  const enrollmentSnap = await getDoc(enrollmentRef);
+  try {
+    if (!userid || !cartItems || !Array.isArray(cartItems)) {
+      throw new Error("Invalid input parameters");
+    }
 
-  let existingCourses = [];
+    const enrollmentRef = doc(db, "Enrollments", userid);
+    const enrollmentSnap = await getDoc(enrollmentRef);
 
-  if (enrollmentSnap.exists()) {
-    const data = enrollmentSnap.data();
-    existingCourses = data.courses || [];
+    let existingCourses = [];
+
+    if (enrollmentSnap.exists()) {
+      const data = enrollmentSnap.data();
+      existingCourses = data.courses || [];
+    }
+
+    const newCourses = cartItems
+      .filter((item) => item)
+      .filter(
+        (item) => !existingCourses.some((existing) => existing.id === item.id)
+      )
+      .map((course) => ({
+        id: course.id || "",
+        title: course.title || "",
+        instructor_id: course.instructor_id || "",
+        instructor_name: course.instructor_name || "",
+        thumbnail: course.thumbnail || "",
+        enrolled_at: new Date(),
+        progress: 0,
+        completed_lessons: [],
+        last_accessed: new Date(),
+      }));
+
+    const updatedCourses = [...existingCourses, ...newCourses];
+
+    console.log("Updated Courses:", updatedCourses);
+
+    const enrollmentData = {
+      user_id: userid,
+      courses: updatedCourses,
+      timestamp: serverTimestamp(),
+    };
+
+    await setDoc(enrollmentRef, enrollmentData, { merge: true });
+    return true;
+  } catch (error) {
+    console.error("Error updating enrollments:", error);
+    throw error;
   }
-
-  // حذف التكرارات عن طريق ID
-  const newCourses = cartItems.filter(
-    (item) => !existingCourses.some((existing) => existing.id === item.id)
-  );
-
-  const updatedCourses = [...existingCourses, ...newCourses];
-
-  await setDoc(enrollmentRef, {
-    user_id: userid,
-    courses: updatedCourses,
-    timestamp: new Date(),
-  });
 }
 export async function addReview(userId, review) {
   try {
@@ -352,7 +378,8 @@ export async function getInstructorTransactions(instructorId) {
   const userMap = {};
   usersSnapshot.forEach((doc) => {
     const data = doc.data();
-    userMap[data.user_id] = (data.first_name || "") + " " + (data.last_name || "");
+    userMap[data.user_id] =
+      (data.first_name || "") + " " + (data.last_name || "");
   });
 
   // 3. Get all orders
@@ -363,7 +390,9 @@ export async function getInstructorTransactions(instructorId) {
     const userName = userMap[order.user_id] || "Unknown";
     const status = order.status || "Completed";
     const paymentMethod = order.method || "PayPal";
-    const date = order.timestamp?.toDate ? order.timestamp.toDate() : order.timestamp;
+    const date = order.timestamp?.toDate
+      ? order.timestamp.toDate()
+      : order.timestamp;
 
     // لكل كورس في الأوردر، لو هو من كورسات الانستراكتور
     (order.items || []).forEach((item) => {
