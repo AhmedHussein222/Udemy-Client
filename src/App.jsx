@@ -1,5 +1,4 @@
 /** @format */
-
 import createCache from "@emotion/cache";
 import { CacheProvider } from "@emotion/react";
 import { createTheme, CssBaseline, ThemeProvider } from "@mui/material";
@@ -19,7 +18,6 @@ import SubcategoryPage from "./Components/Courses/SubCourses";
 import Footer from "./Components/Footer/Footer";
 import Header from "./Components/Header/Header";
 import HomeAfterLogin from "./Components/HomeAfterLogin/HomeLogin";
-import CreateCourse from "./Components/Instructor Dashboard/components/CreateCourse/createcourse";
 import EditCourse from "./Components/Instructor Dashboard/components/Edit Course/edit";
 import InsHome from "./Components/Instructor Dashboard/components/Home/home";
 import InsMain from "./Components/Instructor Dashboard/components/Main/Main";
@@ -34,7 +32,6 @@ import Signup from "./Components/SignUpStudents/Signup";
 import Userprofile from "./Components/Userprofile/userprofile";
 import Wishlist from "./Components/Wishlist/wishlist";
 import { CartProvider } from "./context/CartContext";
-import { CourseProvider } from "./context/CourseContext";
 import { EnrolledCoursesProvider } from "./context/EnrolledCoursesContext";
 import { UserContext , UserProvider } from "./context/UserContext";
 import { WishlistProvider } from "./context/WishlistContext";
@@ -43,7 +40,8 @@ import AuthGuard from "./Guards/AuthGuard";
 import Navbar from "./HomeAfterLoginComponents/NavBar";
 import Career from "./HomeComponents/Career/Career";
 import CourseCondent from "./Pages/courseContent";
-import Unauthorized from "./Pages/Unauthorized";
+import NotFound from "./Pages/NotFound";
+import CourseGuard from "./Guards/CourseGuard";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -55,7 +53,7 @@ const router = createBrowserRouter([
       { path: "Userprofile", element: <Userprofile /> },
       { path: "/subcategory/:subcategoryId", element: <SubcategoryPage /> },
       { path: "/category/:categoryId", element: <CategoryPage /> },
-      { path: "Home2", element: <HomeAfterLogin /> },
+      { path: "Home2", element: <Home /> },
       { path: "HomeLogin", element: <Navbar /> },
       { path: "wishlist", element: <Wishlist /> },
       { path: "signup", element: <Signup /> },
@@ -66,9 +64,15 @@ const router = createBrowserRouter([
       { path: "Welcomehome", element: <Welcomehome /> },
       { path: "checkout", element: <Checkout /> },
       { path: "MyLearning", element: <MyLearning /> },
-      { path: "/MyLearning/:id", element: <CourseCondent /> },
+      { path: "/MyLearning/:id", element: 
+        <CourseGuard>
+          <CourseCondent />
+
+        </CourseGuard>
+     },
       { path: "/career-accelerators", element: <Career /> },
 			{ path: "/category/:id", element: <Category /> },
+      {path:"*", element: <NotFound />},
     ],
   },
   {
@@ -81,13 +85,13 @@ const router = createBrowserRouter([
     children: [
       { path: "", element: <InsHome /> },
       { path: "courses", element: <InsHome /> },
-      { path: "create", element: <CreateCourse /> },
       { path: "edit", element: <EditCourse /> },
       { path: "reviews", element: <Reviews /> },
       { path: "revenue", element: <Revenue /> },
     ],
   },
-  { path: "/unauthorized", element: <Unauthorized /> },
+  {path:"*", element: <NotFound />},
+
 ]);
 
 function Main() {
@@ -102,26 +106,19 @@ function Main() {
   );
 }
 function HomeRoute() {
-  const { user } = useContext(UserContext);
-  return user ? <HomeAfterLogin /> : <Home />;
+  return <Home />;
+  //  user ? <HomeAfterLogin /> :
+    
 }
 
 const App = () => {
   const { i18n } = useTranslation();
   const direction = i18n.language === "ar" ? "rtl" : "ltr";
-  const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      if (firebaseUser) {
-        setUser(firebaseUser);
-      } else {
-        setUser(null);
-      }
-    });
+   
     document.body.dir = direction;
 
-    return () => unsubscribe();
   }, [direction]);
 
   const cache = createCache({
@@ -132,17 +129,15 @@ const App = () => {
   const theme = createTheme({
     direction,
     typography: {
-      fontFamily:
-        direction === "rtl" ? "Cairo, sans-serif" : "Roboto, sans-serif",
+      fontFamily: direction === "rtl" ? "Cairo, sans-serif" : "Roboto, sans-serif",
     },
   });
 
   return (
     <CacheProvider value={cache}>
       <ThemeProvider theme={theme}>
-        <CssBaseline />{" "}
+        <CssBaseline />
         <UserProvider>
-          <CourseProvider>
             <CartProvider>
               <WishlistProvider>
                 <EnrolledCoursesProvider>
@@ -150,7 +145,6 @@ const App = () => {
                 </EnrolledCoursesProvider>
               </WishlistProvider>
             </CartProvider>
-          </CourseProvider>
         </UserProvider>
       </ThemeProvider>
     </CacheProvider>

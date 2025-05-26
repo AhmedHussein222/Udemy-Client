@@ -102,7 +102,6 @@ const handleOpen = () => {
     formData.append('file', file);
     formData.append('upload_preset', 'flutter_upload'); // Replace with your Cloudinary upload preset
     const response = await axios.post('https://api.cloudinary.com/v1_1/dimwxding/image/upload', formData )
-    console.log(response.data);
     const imageUrl = response.data.secure_url;
     setuploadimg(imageUrl);
   };

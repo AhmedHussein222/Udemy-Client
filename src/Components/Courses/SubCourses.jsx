@@ -106,7 +106,6 @@ const SubcategoryPage = () => {
 	// السعر بعد الخصم
 	const discountedPrice = totalPriceSelected - discountValue;
 
-	console.log(totalPriceSelected);
 
 	useEffect(() => {
 		const fetchCourses = async () => {
@@ -125,7 +124,6 @@ const SubcategoryPage = () => {
 						ratingsMap[courseId] = [rating];
 					}
 				});
-				console.log("Review Course IDs:", Object.keys(ratingsMap));
 
 				const averageRatings = {};
 				Object.keys(ratingsMap).forEach((courseId) => {
