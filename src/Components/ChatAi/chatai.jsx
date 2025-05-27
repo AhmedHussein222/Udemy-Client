@@ -1,15 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import {
-  Fab,
-  Modal,
-  Box,
-  TextField,
-  Typography,
-  IconButton,
-  List,
-  ListItem,
-  ListItemText,
-} from "@mui/material";
+import {Fab,Modal,Box,TextField,Typography,IconButton,List,ListItem,ListItemText,} from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
 import HistoryIcon from "@mui/icons-material/History";
 import ChatIcon from "@mui/icons-material/Chat";
@@ -118,54 +108,13 @@ const ChatModal = () => {
     }
   };
 
-  const modalStyle = {
-    position: "absolute",
-    top: "50%",
-    left: "50%",
-    transform: "translate(-50%, -50%)",
-    width: 1000,
-    maxWidth: "95%",
-    bgcolor: "background.paper",
-    boxShadow: 24,
-    p: 4,
-    borderRadius: 3,
-    display: "flex",
-    flexDirection: "row",
-    maxHeight: "85vh",
-  };
+  const modalStyle = {position: "absolute",top: "50%",left: "50%",transform: "translate(-50%, -50%)",width: 1000,maxWidth: "95%",bgcolor: "background.paper",boxShadow: 24,p: 4,borderRadius: 3,display: "flex",flexDirection: "row",maxHeight: "85vh",};
 
-  const chatContainerStyle = {
-    flex: showHistory ? 0.65 : 1,
-    maxHeight: 450,
-    overflowY: "auto",
-    mb: 2,
-    p: 2,
-    bgcolor: "#fafafa",
-    borderRadius: 2,
-    display: "flex",
-    flexDirection: "column",
-  };
+  const chatContainerStyle = {flex: showHistory ? 0.65 : 1,maxHeight: 450,overflowY: "auto",mb: 2,p: 2,bgcolor: "#fafafa",borderRadius: 2,display: "flex",flexDirection: "column",};
 
-  const historyContainerStyle = {
-    flex: 0.35,
-    maxHeight: 450,
-    overflowY: "auto",
-    p: 2,
-    bgcolor: "#f5f5f5",
-    borderLeft: "1px solid #e0e0e0",
-    display: showHistory ? "block" : "none",
-  };
+  const historyContainerStyle = {maxHeight: 450,flex: 0.35,overflowY: "auto",p: 2,bgcolor: "#f5f5f5",borderLeft: "1px solid #e0e0e0",display: showHistory ? "block" : "none",};
 
-  const fabStyle = {
-    position: "fixed",
-    bottom: 20,
-    right: 20,
-    backgroundColor: "#8000ff",
-    color: "white",
-    "&:hover": {
-      backgroundColor: "#6b00d6",
-    },
-  };
+  const fabStyle = {position: "fixed",bottom: 20,right: 20,backgroundColor: "#8000ff",color: "white","&:hover": {  backgroundColor: "#6b00d6",},};
 
 
   const displayedMessages = [...chatHistory, ...pendingMessages].sort(
@@ -197,21 +146,7 @@ const ChatModal = () => {
               {displayedMessages.map((msg) => (
                 <Box
                   key={msg.id}
-                  sx={{
-                    mb: 1.5,
-                    p: 1.5,
-                    maxWidth: "70%",
-                    bgcolor: msg.role === "user" ? "#8000ff" : "#e0e0e0",
-                    color: msg.role === "user" ? "white" : "black",
-                    borderRadius:
-                      msg.role === "user"
-                        ? "15px 15px 15px 0" 
-                        : "15px 15px 0 15px", 
-                    alignSelf: msg.role === "user" ? "flex-start" : "flex-end", 
-                    boxShadow: 1,
-                    mx: 1,
-                  }}
-                >
+                  sx={{ mb: 1.5, p: 1.5, maxWidth: "70%", bgcolor: msg.role === "user" ? "#8000ff" : "#e0e0e0", color: msg.role === "user" ? "white" : "black", borderRadius:   msg.role === "user"     ? "15px 15px 15px 0"      : "15px 15px 0 15px",  alignSelf: msg.role === "user" ? "flex-start" : "flex-end",  boxShadow: 1, mx: 1, }} >
                   <Typography variant="body1">{msg.content}</Typography>
                 </Box>
               ))}

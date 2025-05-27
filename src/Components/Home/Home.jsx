@@ -11,7 +11,7 @@ import ChatModal from '../ChatAi/chatai';
 
 const Home = () => {
   return (
-    <div>
+    <>
       <ChatModal />
       <Home1 />
       <NavBar />
@@ -19,7 +19,7 @@ const Home = () => {
       <Home2/>
       <AcceleratorSection/>
       <Home3/>
-    </div>
+    </>
   );
 };
 
