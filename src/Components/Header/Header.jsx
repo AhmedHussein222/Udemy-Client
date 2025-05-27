@@ -280,73 +280,74 @@ const Header = () => {
 									closeAllMenus={closeAllMenus}
 									t={t}
 								/>
-								<Box
-									onMouseEnter={() => setOpenBusiness(true)}
-									onMouseLeave={() => setOpenBusiness(false)}
-									sx={{ position: "relative" }}>
-									<Typography sx={linkStyle}>{t("Udemy Business")}</Typography>
-									{openBusiness && (
-										<Box sx={popoverStyle}>
-											<Typography
-												variant="h6"
-												fontWeight="bold"
-												sx={{ color: "#001a33" }}>
-												{t(
-													"Get your team access to over 27,000 top Udemy courses, anytime, anywhere."
-												)}
-											</Typography>
-											<Button
-												variant="contained"
-												size="small"
-												sx={businessBtnStyle}>
-												{t("Try Udemy Business")}
-											</Button>
-										</Box>
-									)}
-								</Box>
-								{userData?.role !== "instructor" ? (
-									<Box
-										onMouseEnter={() => setOpenTeach(true)}
-										onMouseLeave={() => setOpenTeach(false)}
-										sx={{ position: "relative" }}>
-										<Typography
-											onClick={() => handleNavigate("/Welcomehome")}
-											sx={linkStyle}>
-											{t("Teach on Udemy")}
-										</Typography>
-										{openTeach && (
-											<Box sx={popoverStyle}>
-												<Typography
-													variant="h6"
-													fontWeight="bold"
-													sx={{ color: "#001a33" }}>
-													{t(
-														"Turn what you know into an opportunity and reach millions around the world."
-													)}
-												</Typography>
-												<Button
-													onClick={() => handleNavigate("/Welcomehome")}
-													variant="contained"
-													sx={teachBtnStyle}>
-													{t("Learn more")}
-												</Button>
-											</Box>
-										)}
-									</Box>
-								) : (
-									<Typography
-										onClick={() => handleNavigate("/instructor")}
-										sx={linkStyle}>
-										{t("instructor")}
-									</Typography>
-								)}
 							</Box>
+
 							<SearchBar
 								searchQuery={searchQuery}
 								setSearchQuery={setSearchQuery}
 								handleSearch={handleSearch}
 								t={t}
 							/>
+							<Box
+								onMouseEnter={() => setOpenBusiness(true)}
+								onMouseLeave={() => setOpenBusiness(false)}
+								sx={{ position: "relative" }}>
+								<Typography sx={linkStyle}>{t("Udemy Business")}</Typography>
+								{openBusiness && (
+									<Box sx={popoverStyle}>
+										<Typography
+											variant="h6"
+											fontWeight="bold"
+											sx={{ color: "#001a33" }}>
+											{t(
+												"Get your team access to over 27,000 top Udemy courses, anytime, anywhere."
+											)}
+										</Typography>
+										<Button
+											variant="contained"
+											size="small"
+											sx={businessBtnStyle}>
+											{t("Try Udemy Business")}
+										</Button>
+									</Box>
+								)}
+							</Box>
+							{userData?.role !== "instructor" ? (
+								<Box
+									onMouseEnter={() => setOpenTeach(true)}
+									onMouseLeave={() => setOpenTeach(false)}
+									sx={{ position: "relative" }}>
+									<Typography
+										onClick={() => handleNavigate("/Welcomehome")}
+										sx={linkStyle}>
+										{t("Teach on Udemy")}
+									</Typography>
+									{openTeach && (
+										<Box sx={popoverStyle}>
+											<Typography
+												variant="h6"
+												fontWeight="bold"
+												sx={{ color: "#001a33" }}>
+												{t(
+													"Turn what you know into an opportunity and reach millions around the world."
+												)}
+											</Typography>
+											<Button
+												onClick={() => handleNavigate("/Welcomehome")}
+												variant="contained"
+												sx={teachBtnStyle}>
+												{t("Learn more")}
+											</Button>
+										</Box>
+									)}
+								</Box>
+							) : (
+								<Typography
+									onClick={() => handleNavigate("/instructor")}
+									sx={linkStyle}>
+									{t("instructor")}
+								</Typography>
+							)}
 							<Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
 								{user ? (
 									<>
