@@ -91,7 +91,7 @@ function Cart() {
 								onClick={() => navigate("/")}>
 								<CardMedia
 									component="img"
-									image="/src/assets/empty-shopping-cart-v2-2x.webp"
+									src="../../assets/empty-shopping-cart-v2-2x.webp"
 									alt="Cart empty"
 									sx={{
 										mt: 6,
