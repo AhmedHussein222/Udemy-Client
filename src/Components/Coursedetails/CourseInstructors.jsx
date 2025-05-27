@@ -11,6 +11,7 @@ import ReviewsIcon from '@mui/icons-material/Reviews';
 import VideoLibraryIcon from '@mui/icons-material/VideoLibrary';
 import PeopleIcon from '@mui/icons-material/People';
 import { db, doc, getDoc, collection, query, where, getDocs } from '../../Firebase/firebase';
+import { Link } from 'react-router-dom'; // Import Link for navigation
 
 const ReviewCard = ({ review, courseTitle }) => {
   const formatDate = (isoString) => {
@@ -78,7 +79,7 @@ const ReviewCard = ({ review, courseTitle }) => {
   );
 };
 
-const InstructorCard = ({ instructor }) => {
+const InstructorCard = ({ instructor, instructorId }) => {
   return (
     <Box sx={{ mb: 4 }}>
       <Typography variant="h6" fontWeight="bold" sx={{ mb: 0.5 }}>
@@ -96,11 +97,17 @@ const InstructorCard = ({ instructor }) => {
         }}
       >
         <Box sx={{ flexShrink: 0 }}>
-          <Avatar
-            src={instructor.image}
-            alt={instructor.name}
-            sx={{ width: 80, height: 80 }}
-          />
+          <Link to={`/instructor/${instructorId}`} style={{ textDecoration: 'none' }}>
+            <Avatar
+              src={instructor.image}
+              alt={instructor.name}
+              sx={{
+                width: 80,
+                height: 80,
+                '&:hover': { cursor: 'pointer', opacity: 0.8 }, // Add hover effect for better UX
+              }}
+            />
+          </Link>
         </Box>
 
         <Box sx={{ flexGrow: 1 }}>
@@ -168,7 +175,7 @@ const CourseInstructors = ({ course }) => {
       }
 
       try {
-        // جلب بيانات المدرب من Users
+        // Fetch instructor data from Users
         const instructorRef = doc(db, 'Users', course.instructor_id);
         const instructorSnap = await getDoc(instructorRef);
 
@@ -180,7 +187,7 @@ const CourseInstructors = ({ course }) => {
 
         const instructorData = instructorSnap.data();
 
-        // جلب عدد الكورسات
+        // Fetch number of courses
         const coursesQuery = query(
           collection(db, 'Courses'),
           where('instructor_id', '==', course.instructor_id)
@@ -188,7 +195,7 @@ const CourseInstructors = ({ course }) => {
         const coursesSnap = await getDocs(coursesQuery);
         const totalCourses = coursesSnap.size;
 
-        // جلب عدد الطلاب و الـ reviews لكل الكورسات
+        // Fetch total students and reviews for all courses
         let totalStudents = 0;
         let allReviews = [];
 
@@ -196,7 +203,7 @@ const CourseInstructors = ({ course }) => {
           const courseId = courseDoc.id;
           const courseTitle = courseDoc.data().title || 'Unknown Course';
 
-          // جلب عدد الطلاب من Enrollments
+          // Fetch number of students from Enrollments
           const enrollmentsQuery = query(
             collection(db, 'Enrollments'),
             where('course_id', '==', courseId)
@@ -204,20 +211,20 @@ const CourseInstructors = ({ course }) => {
           const enrollmentsSnap = await getDocs(enrollmentsQuery);
           totalStudents += enrollmentsSnap.size;
 
-          // جلب الـ reviews من Reviews
+          // Fetch reviews from Reviews
           const reviewsQuery = query(
             collection(db, 'Reviews'),
             where('course_id', '==', courseId)
           );
           const reviewsSnap = await getDocs(reviewsQuery);
 
-          // جلب بيانات المستخدم لكل review
+          // Fetch user data for each review
           const courseReviews = await Promise.all(
             reviewsSnap.docs.map(async (reviewDoc) => {
               const reviewData = reviewDoc.data();
               let userName = 'Anonymous';
 
-              // جلب اسم المستخدم من Users
+              // Fetch user name from Users
               if (reviewData.user_id) {
                 const userRef = doc(db, 'Users', reviewData.user_id);
                 const userSnap = await getDoc(userRef);
@@ -241,20 +248,21 @@ const CourseInstructors = ({ course }) => {
           allReviews = [...allReviews, ...courseReviews];
         }
 
-        // حساب متوسط الـ rating من الـ reviews
+        // Calculate average rating from reviews
         const totalRatings = allReviews.reduce((sum, review) => sum + review.rating, 0);
         const averageRating = allReviews.length > 0 ? (totalRatings / allReviews.length).toFixed(1) : null;
 
-        // تكوين object المدرب
+        // Construct instructor object
         setInstructor({
           name: `${instructorData.first_name || ''} ${instructorData.last_name || ''}`.trim() || 'Unknown Instructor',
           title: instructorData.title || 'Instructor',
           image: instructorData.profile_picture || '',
-          rating: averageRating, // استخدام متوسط الـ ratings من الـ reviews
-          reviews: allReviews.length, // عدد الـ reviews الكلي
-          totalCourses, // عدد الكورسات
-          totalStudents, // عدد الطلاب
+          rating: averageRating,
+          reviews: allReviews.length,
+          totalCourses,
+          totalStudents,
           bio: instructorData.bio || 'No bio available',
+          id: course.instructor_id, // Add instructor ID to the object
         });
 
         setReviews(allReviews);
@@ -282,11 +290,11 @@ const CourseInstructors = ({ course }) => {
   }
 
   return (
-    <Box id="instructor" sx={{ mb: 4,width: '100%' }}>
+    <Box id="instructor" sx={{ mb: 4, width: '100%' }}>
       <Typography variant="h5" fontWeight="bold" sx={{ mb: 2 }}>
         Instructor
       </Typography>
-      <InstructorCard instructor={instructor} />
+      <InstructorCard instructor={instructor} instructorId={instructor.id} />
       <Typography variant="h6" fontWeight="bold" sx={{ mb: 2 }}>
         Instructor Reviews
       </Typography>

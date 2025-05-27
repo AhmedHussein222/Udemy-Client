@@ -42,6 +42,7 @@ import Career from "./HomeComponents/Career/Career";
 import CourseCondent from "./Pages/courseContent";
 import NotFound from "./Pages/NotFound";
 import CourseGuard from "./Guards/CourseGuard";
+import InstructorProfile from "./Components/InstructorProfile/instructorprofile";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -58,8 +59,8 @@ const router = createBrowserRouter([
       { path: "wishlist", element: <Wishlist /> },
       { path: "signup", element: <Signup /> },
       { path: "instructor-signup", element: <InsSignup /> },
-      { path: "course-details/:id", element: <CourseDetails /> },
       { path: "course/:id", element: <CourseDetails /> },
+      { path: "instructor/:id", element: <InstructorProfile /> },
       { path: "search", element: <SearchResults /> },
       { path: "Welcomehome", element: <Welcomehome /> },
       { path: "checkout", element: <Checkout /> },

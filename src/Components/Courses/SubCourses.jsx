@@ -348,7 +348,7 @@ const SubcategoryPage = () => {
 					{selectedCourses.map((course, idx) => (
 						<React.Fragment key={idx}>
 							<Link
-								to={`/course-details/${course.id}`}
+								to={`/course/${course.id}`}
 								style={{ textDecoration: "none", color: "inherit" }}
 								key={course.id}>
 								<Box
@@ -485,7 +485,7 @@ const SubcategoryPage = () => {
 										fontWeight: "bold",
 										borderRadius: "4px",
 									}}
-									onClick={() => navigate(`/course-details/${course.id}`)} // Fix navigation path
+									onClick={() => navigate(`/course/${course.id}`)} // Fix navigation path
 								>
 									{course.title}
 								</button>
@@ -507,7 +507,7 @@ const SubcategoryPage = () => {
 										whiteSpace: "normal",
 										flexShrink: 0,
 									}}
-									onClick={() => navigate(`/course-details/${course.id}`)}>
+									onClick={() => navigate(`/course/${course.id}`)}>
 									{" "}
 									// Fix navigation path
 									{course.title}
@@ -626,7 +626,7 @@ const SubcategoryPage = () => {
 						.map((course, index) => (
 							<Box
 								key={`filtered-${index}`}
-								onClick={() => navigate(`/course-details/${course.id}`)} // Fix navigation path
+								onClick={() => navigate(`/course/${course.id}`)} // Fix navigation path
 								sx={{
 									width: 300,
 									border: "1px solid #ccc",

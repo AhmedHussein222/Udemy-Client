@@ -103,7 +103,7 @@ const CourseCard = ({ course, isHovered, onHover, onLeave }) => {
 						boxShadow: 3,
 					},
 				}}
-				onClick={() => navigate(`/course-details/${course.id}`)}>
+				onClick={() => navigate(`/course/${course.id}`)}>
 				<CardMedia
 					component="img"
 					height="180"
