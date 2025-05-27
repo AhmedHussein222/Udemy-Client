@@ -1,19 +1,19 @@
-import React, { useEffect, useState, useContext, useCallback } from "react";
-import Skeleton from "@mui/material/Skeleton";
-import { db } from "../../Firebase/firebase";
-import { collection, getDocs, query, where } from "firebase/firestore";
-import Card from "@mui/material/Card";
+import { ShoppingCart } from "@mui/icons-material";
+import FavoriteIcon from '@mui/icons-material/Favorite';
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import { Accordion, AccordionDetails, AccordionSummary, Button, IconButton } from "@mui/material";
 import Box from "@mui/material/Box";
+import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
+import Skeleton from "@mui/material/Skeleton";
 import Typography from "@mui/material/Typography";
+import { collection, getDocs, query, where } from "firebase/firestore";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ShoppingCart } from "@mui/icons-material";
-import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
-import FavoriteIcon from '@mui/icons-material/Favorite';
-import "./NavBar.css";
 import { CartContext } from "../../context/cart-context";
 import { WishlistContext } from "../../context/wishlist-context";
+import { db } from "../../Firebase/firebase";
+import "./NavBar.css";
 
 const NavBar = () => {
   const { addToCart, cartItems } = useContext(CartContext);

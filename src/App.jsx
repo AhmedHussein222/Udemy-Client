@@ -106,8 +106,8 @@ function Main() {
   );
 }
 function HomeRoute() {
-  return <Home />;
-  //  user ? <HomeAfterLogin /> :
+  const { user } = useContext(UserContext);
+  return    user ? <HomeAfterLogin /> :<Home />
     
 }
 
