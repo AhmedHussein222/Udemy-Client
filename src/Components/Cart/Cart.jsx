@@ -20,11 +20,12 @@ import { useTranslation } from "react-i18next";
 import { CartContext } from "../../context/cart-context";
 import { WishlistContext } from "../../context/wishlist-context";
 import { useNavigate } from "react-router-dom";
+import emptyCartImage from "../../assets/empty-shopping-cart-v2-2x.webp"; // Import image
 
 function Cart() {
 	const { t } = useTranslation();
 	const navigate = useNavigate();
-		const { cartItems, loading, removeFromCart } =		useContext(CartContext);
+	const { cartItems, loading, removeFromCart } = useContext(CartContext);
 	const { saveForLater, addToWishlist } = useContext(WishlistContext);
 	const [couponCode, setCouponCode] = useState("");
 
@@ -80,59 +81,60 @@ function Cart() {
 							border: "none",
 							boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
 							borderRadius: "8px",
-						}}>
-							<Box 
-								sx={{ 
-									cursor: "pointer",
-									'&:hover': {
-										bgcolor: "#f7f9fa"
-									}
-								}} 
-								onClick={() => navigate("/")}>
-								<CardMedia
-									component="img"
-									src="../../assets/empty-shopping-cart-v2-2x.webp"
-									alt="Cart empty"
-									sx={{
-										mt: 6,
-										mb: 2,
-										width: "200px",
-										objectFit: "contain",
-										mx: "auto"
-									}}
-								/>
-								<CardContent sx={{ textAlign: "center", pb: 4 }}>
-									<Typography
-										variant="h6"
-										sx={{
-											fontFamily: "Roboto, sans-serif",
-											color: "#1c1d1f",
-											mb: 2,
-											fontWeight: 700,
-										}}>
-										{t("Your cart is empty. Keep shopping to find a course!")}
-									</Typography>
-									<Button
-										variant="contained"
-										onClick={(e) => {
-											e.stopPropagation();
-											navigate("/");
-										}}
-										sx={{
-											bgcolor: "#a435f0",
-											color: "#fff",
-											textTransform: "none",
-											fontFamily: "Roboto, sans-serif",
-											fontWeight: 600,
-											borderRadius: "4px",
-											px: 4,
-											py: 1.5,
-											"&:hover": { bgcolor: "#8710d8" },
-										}}>
-										{t("Keep shopping")}
-									</Button>
-								</CardContent>
-							</Box>
+							bgcolor: "#fff", // Ensure card has a clear background
+							cursor: "pointer",
+							"&:hover": {
+								bgcolor: "#f1f3f4", // Slightly darker hover for clarity
+							},
+						}}
+						onClick={() => navigate("/")}>
+						<CardMedia
+							component="img"
+							src={emptyCartImage} // Use imported image
+							alt="Cart empty"
+							sx={{
+								mt: 6,
+								mb: 2,
+								width: "200px",
+								objectFit: "contain",
+								mx: "auto",
+							}}
+							onError={(e) => {
+								e.target.src =
+									"https://via.placeholder.com/200?text=Empty+Cart"; // Fallback
+							}}
+						/>
+						<CardContent sx={{ textAlign: "center", pb: 4 }}>
+							<Typography
+								variant="h6"
+								sx={{
+									fontFamily: "Roboto, sans-serif",
+									color: "#1c1d1f",
+									mb: 2,
+									fontWeight: 700,
+								}}>
+								{t("Your cart is empty. Keep shopping to find a course!")}
+							</Typography>
+							<Button
+								variant="contained"
+								onClick={(e) => {
+									e.stopPropagation();
+									navigate("/");
+								}}
+								sx={{
+									bgcolor: "#a435f0",
+									color: "#fff",
+									textTransform: "none",
+									fontFamily: "Roboto, sans-serif",
+									fontWeight: 600,
+									borderRadius: "4px",
+									px: 4,
+									py: 1.5,
+									"&:hover": { bgcolor: "#8710d8" },
+								}}>
+								{t("Keep shopping")}
+							</Button>
+						</CardContent>
 					</Card>
 				</Stack>
 			) : (
@@ -177,6 +179,7 @@ function Cart() {
 										borderRadius: "8px",
 										minHeight: "220px",
 										width: "100%",
+										bgcolor: "#fff",
 									}}>
 									<CardContent sx={{ height: "100%", p: 3 }}>
 										<Grid container spacing={2} sx={{ height: "100%" }}>
@@ -343,7 +346,13 @@ function Cart() {
 																	color: "#1c1d1f",
 																	fontWeight: 700,
 																}}>
-																{t("E£")} {Number(item.discount ? (item.price - (item.price * item.discount / 100)) : item.price).toFixed(2)}
+																{t("E£")}{" "}
+																{Number(
+																	item.discount
+																		? item.price -
+																				(item.price * item.discount) / 100
+																		: item.price
+																).toFixed(2)}
 															</Typography>
 														</Stack>
 														{item.price && item.discount && (
@@ -439,6 +448,7 @@ function Cart() {
 									border: "none",
 									boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
 									borderRadius: "8px",
+									bgcolor: "#fff",
 								}}>
 								<CardContent sx={{ p: 3 }}>
 									<Typography
@@ -459,7 +469,17 @@ function Cart() {
 											fontWeight: 700,
 											mb: 2,
 										}}>
-										{t("E£")} {cartItems.reduce((total, item) => total + (item.discount ? (item.price - (item.price * item.discount / 100)) : item.price), 0).toFixed(2)}
+										{t("E£")}{" "}
+										{cartItems
+											.reduce(
+												(total, item) =>
+													total +
+													(item.discount
+														? item.price - (item.price * item.discount) / 100
+														: item.price),
+												0
+											)
+											.toFixed(2)}
 									</Typography>
 									<Button
 										variant="contained"

@@ -394,6 +394,7 @@ const SearchResults = () => {
 									onClick={() => navigate(`/course-details/${course.id}`)}
 									sx={{
 										height: "100%",
+										width:400,
 										display: "flex",
 										flexDirection: "column",
 										transition: "all 0.3s ease",
