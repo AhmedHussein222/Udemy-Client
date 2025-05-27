@@ -6,26 +6,28 @@ import PayPalButton from "../payment/PayPalButton";
 import { updateEnrollments } from "../../Firebase/courses";
 import { addOrder, emptyCart } from "../../services/enrollments";
 import { errorModal, successModal } from "../../services/swal";
+import { useNavigate } from "react-router-dom";
 
 const CheckoutComponent = () => {
 
-  const handleSuccess = async (details, cartItems) => {
-    const user = auth.currentUser;
-    console.log("User:", user);
-
-    try {
-
-      await addOrder(user.uid, cartItems, total, details);
-      await updateEnrollments( user.uid, cartItems );
-      await emptyCart(user.uid);
-      successModal("Payment Successful!","Courses have been added to your account",)
+  const navigate = useNavigate();
+  const handleSuccess = async (userid,details, cartItems) => {
+  
     
+    try {
+      
+      await addOrder(userid, cartItems, total, details);
+      await updateEnrollments( userid, cartItems );
+      await emptyCart(userid);
+      successModal("Payment Successful!","Courses have been added to your account",)
+      navigate("/");
     } catch ({ message }) {
 
       console.error("Error saving payment:", message);
       errorModal("Error","An error occurred while saving the payment in Firestore. Please try again");
     }
   };
+
   const { cartItems, getCartTotal } = useContext(CartContext);
 
   let [total, setTotal] = useState(0);
@@ -102,7 +104,7 @@ const CheckoutComponent = () => {
 
             <PayPalButton
               amountval={total.toFixed(2)}
-              onSuccess={(details) => handleSuccess(details, cartItems)}
+              onSuccess={(details) => handleSuccess(auth?.currentUser?.uid,details, cartItems)}
             />
           </Box>
 

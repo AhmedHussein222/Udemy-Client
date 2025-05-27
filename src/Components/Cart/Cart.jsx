@@ -23,8 +23,8 @@ import { useNavigate } from "react-router-dom";
 
 function Cart() {
 	const { t } = useTranslation();
-	const navigate = useNavigate();	const { cartItems, loading, removeFromCart } =
-		useContext(CartContext);
+	const navigate = useNavigate();
+		const { cartItems, loading, removeFromCart } =		useContext(CartContext);
 	const { saveForLater, addToWishlist } = useContext(WishlistContext);
 	const [couponCode, setCouponCode] = useState("");
 

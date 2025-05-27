@@ -88,7 +88,6 @@ const CourseContent = ({ course }) => {
   };
 
   const handleOpenModal = async (videoUrl, lessonId) => {
-    console.log('Attempting to open modal with video URL:', videoUrl);
     if (!videoUrl) {
       setVideoError('No video URL provided for this lesson.');
       setOpenModal(true);

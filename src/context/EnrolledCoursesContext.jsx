@@ -1,14 +1,7 @@
 /** @format */
 
 import { createContext, useContext, useState, useEffect } from "react";
-import {
-	doc,
-	getDoc,
-	collection,
-	query,
-	where,
-	getDocs,
-} from "firebase/firestore";
+import {doc,getDoc,collection,query,where,getDocs,} from "firebase/firestore";
 import { db } from "../Firebase/firebase";
 import { UserContext } from "./UserContext";
 
@@ -133,9 +126,7 @@ export const EnrolledCoursesProvider = ({ children }) => {
 export const useEnrolledCourses = () => {
 	const context = useContext(EnrolledCoursesContext);
 	if (!context) {
-		throw new Error(
-			"useEnrolledCourses must be used within an EnrolledCoursesProvider"
-		);
+		throw new Error("useEnrolledCourses must be used within an EnrolledCoursesProvider");
 	}
 	return context;
 };

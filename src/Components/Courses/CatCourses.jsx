@@ -93,7 +93,6 @@ const CategoryPage = () => {
 
   const discountedPrice = totalPriceSelected - discountValue;
 
-  console.log(totalPriceSelected);
 
   useEffect(() => {
     const fetchCourses = async () => {
