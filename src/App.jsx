@@ -1,23 +1,17 @@
-/** @format */
 import createCache from "@emotion/cache";
 import { CacheProvider } from "@emotion/react";
 import { createTheme, CssBaseline, ThemeProvider } from "@mui/material";
-import { onAuthStateChanged } from "firebase/auth";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { createBrowserRouter, Outlet, RouterProvider } from "react-router-dom";
 import { prefixer } from "stylis";
 import rtlPlugin from "stylis-plugin-rtl";
-import Home from "./Components//Home/Home";
-import Cart from "./Components/Cart/Cart";
+import Cart from "./Pages/Cart";
 import Category from "./Components/Category/Category";
-import  Checkout from "./Components/checkout/checkout";
-import CourseDetails from "./Components/Coursedetails/CourseDetails";
 import CategoryPage from "./Components/Courses/CatCourses";
 import SubcategoryPage from "./Components/Courses/SubCourses";
 import Footer from "./Components/Footer/Footer";
 import Header from "./Components/Header/Header";
-import HomeAfterLogin from "./Components/HomeAfterLogin/HomeLogin";
 import EditCourse from "./Components/Instructor Dashboard/components/Edit Course/edit";
 import InsHome from "./Components/Instructor Dashboard/components/Home/home";
 import InsMain from "./Components/Instructor Dashboard/components/Main/Main";
@@ -35,13 +29,19 @@ import { CartProvider } from "./context/CartContext";
 import { EnrolledCoursesProvider } from "./context/EnrolledCoursesContext";
 import { UserContext , UserProvider } from "./context/UserContext";
 import { WishlistProvider } from "./context/WishlistContext";
-import { auth } from "./Firebase/firebase";
 import AuthGuard from "./Guards/AuthGuard";
 import Navbar from "./HomeAfterLoginComponents/NavBar";
 import Career from "./HomeComponents/Career/Career";
 import CourseCondent from "./Pages/courseContent";
 import NotFound from "./Pages/NotFound";
 import CourseGuard from "./Guards/CourseGuard";
+import InstructorProfile from "./Pages/instructorprofile";
+import Home from "./Pages/Home";
+import HomeAfterLogin from "./Pages/HomeLogin";
+import CourseDetails from "./Pages/CourseDetails";
+import CheckoutComponent from "./Pages/checkout";
+import Unauthorized from './Pages/Unauthorized';
+
 const router = createBrowserRouter([
   {
     path: "/",
@@ -57,12 +57,12 @@ const router = createBrowserRouter([
       { path: "HomeLogin", element: <Navbar /> },
       { path: "wishlist", element: <Wishlist /> },
       { path: "signup", element: <Signup /> },
+      { path: "instructor/:id", element: <InstructorProfile/>},
       { path: "instructor-signup", element: <InsSignup /> },
-      { path: "course-details/:id", element: <CourseDetails /> },
       { path: "course/:id", element: <CourseDetails /> },
       { path: "search", element: <SearchResults /> },
       { path: "Welcomehome", element: <Welcomehome /> },
-      { path: "checkout", element: <Checkout /> },
+      { path: "checkout", element: <CheckoutComponent /> },
       { path: "MyLearning", element: <MyLearning /> },
       { path: "/MyLearning/:id", element: 
         <CourseGuard>
@@ -72,9 +72,10 @@ const router = createBrowserRouter([
      },
       { path: "/career-accelerators", element: <Career /> },
 			{ path: "/category/:id", element: <Category /> },
+			{ path: "/unauthorized", element: <Unauthorized /> },
       {path:"*", element: <NotFound />},
     ],
-  },
+  }, 
   {
     path: "instructor",
     element: (
@@ -85,6 +86,7 @@ const router = createBrowserRouter([
     children: [
       { path: "", element: <InsHome /> },
       { path: "courses", element: <InsHome /> },
+      { path: "create", element: <EditCourse /> },
       { path: "edit", element: <EditCourse /> },
       { path: "reviews", element: <Reviews /> },
       { path: "revenue", element: <Revenue /> },
@@ -110,7 +112,6 @@ function HomeRoute() {
   return    user ? <HomeAfterLogin /> :<Home />
     
 }
-
 const App = () => {
   const { i18n } = useTranslation();
   const direction = i18n.language === "ar" ? "rtl" : "ltr";

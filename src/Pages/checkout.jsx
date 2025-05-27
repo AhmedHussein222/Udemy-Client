@@ -1,11 +1,11 @@
 import { Box, TextField, Typography } from "@mui/material";
 import { useContext, useEffect, useState } from "react";
-import { CartContext } from "../../context/cart-context";
-import { auth } from "../../Firebase/firebase";
-import PayPalButton from "../payment/PayPalButton";
-import { updateEnrollments } from "../../Firebase/courses";
-import { addOrder, emptyCart } from "../../services/enrollments";
-import { errorModal, successModal } from "../../services/swal";
+import { CartContext } from "../context/cart-context";
+import { auth } from "../Firebase/firebase";
+import PayPalButton from "../Components/payment/PayPalButton";
+import { updateEnrollments } from "../Firebase/courses";
+import { addOrder, emptyCart } from "../services/enrollments";
+import { errorModal, successModal } from "../services/swal";
 import { useNavigate } from "react-router-dom";
 
 const CheckoutComponent = () => {

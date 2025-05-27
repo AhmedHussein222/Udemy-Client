@@ -118,7 +118,7 @@ const Navbar = () => {
   );
 
   return (
-    <nav>
+    <nav style={{ backgroundColor:"black"}}>
       <Box onMouseLeave={handleMouseLeave}>
         {/* Top Navbar */}
         <Box sx={{ backgroundColor: "white", boxShadow: 3, padding: 2 }}>

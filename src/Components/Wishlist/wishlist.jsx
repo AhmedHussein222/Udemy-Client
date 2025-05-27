@@ -249,7 +249,7 @@ function Wishlist() {
 									onMouseLeave={handlePopoverClose}>
 									<Box>
 										<Link
-											to={`/course-details/${course.id}`}
+											to={`/course/${course.id}`}
 											style={{ textDecoration: "none", color: "inherit" }}>
 											<CardMedia
 												component="img"

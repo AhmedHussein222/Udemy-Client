@@ -19,7 +19,6 @@ const ChatModal = () => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
-      console.log("Current user:", currentUser ? currentUser.uid : "No user");
     });
     return () => unsubscribe();
   }, []);
