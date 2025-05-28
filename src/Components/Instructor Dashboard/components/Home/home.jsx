@@ -15,13 +15,15 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import { deleteCourse, getInsCourses } from "../../../../Firebase/courses";
+import { auth } from "../../../../Firebase/firebase";
 
 function Home() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [courses, setCourses] = React.useState([]);
   useEffect(() => {
-    getInsCourses("2")
+  
+    getInsCourses(auth.currentUser?.uid)
       .then((res) => {
         setCourses(res);
       })

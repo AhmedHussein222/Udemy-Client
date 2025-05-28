@@ -3,23 +3,15 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Box, CircularProgress, Typography } from "@mui/material";
-import {
-	db,
-	doc,
-	getDoc,
-	collection,
-	query,
-	where,
-	getDocs,
-} from "../../Firebase/firebase";
-import CourseHeader from "./CourseHeader";
-import CourseSidebar from "./CourseSidebar";
-import WhatYoullLearn from "./WhatYoullLearn";
-import CourseContent from "./CourseContent";
-import CourseRequirements from "./CourseRequirments";
-import CourseDescription from "./CourseDescritption";
-import CourseInstructors from "./CourseInstructors";
-import CourseReviews from "./CourseReviews";
+import {db,doc,getDoc,collection,query,where,getDocs,} from "../Firebase/firebase";
+import CourseHeader from "../Components/Coursedetails/CourseHeader";
+import CourseSidebar from "../Components/Coursedetails/CourseSidebar";
+import WhatYoullLearn from "../Components/Coursedetails/WhatYoullLearn";
+import CourseContent from "../Components/Coursedetails/CourseContent";
+import CourseRequirements from "../Components/Coursedetails/CourseRequirments";
+import CourseDescription from "../Components/Coursedetails/CourseDescritption";
+import CourseInstructors from "../Components/Coursedetails/CourseInstructors";
+import CourseReviews from "../Components/Coursedetails/CourseReviews";
 
 const CourseDetails = () => {
 	const { id } = useParams();

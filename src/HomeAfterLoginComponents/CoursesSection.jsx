@@ -5,18 +5,7 @@ import { collection, getDocs } from "firebase/firestore";
 import { db } from "../Firebase/firebase.js";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
-import {
-	Card,
-	CardMedia,
-	CardContent,
-	Typography,
-	Container,
-	Box,
-	IconButton,
-	Rating,
-	Popover,
-	Button,
-} from "@mui/material";
+import {Card,CardMedia,CardContent,Typography,Container,Box,IconButton,Rating,Popover,Button,} from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import FavoriteIcon from "@mui/icons-material/Favorite";
@@ -103,7 +92,7 @@ const CourseCard = ({ course, isHovered, onHover, onLeave }) => {
 						boxShadow: 3,
 					},
 				}}
-				onClick={() => navigate(`/course-details/${course.id}`)}>
+				onClick={() => navigate(`/course/${course.id}`)}>
 				<CardMedia
 					component="img"
 					height="180"

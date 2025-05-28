@@ -407,7 +407,7 @@ const SearchResults = () => {
 						{searchResults.courses.slice(0, 3).map((course) => (
 							<Grid item xs={12} sm={6} md={4} key={course.id}>
 								<Card
-									onClick={() => navigate(`/course-details/${course.id}`)}
+									onClick={() => navigate(`/course/${course.id}`)}
 									sx={{
 										height: "100%",
 										width: 320,
