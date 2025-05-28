@@ -37,7 +37,7 @@ const SearchResults = () => {
 	const location = useLocation();
 	const navigate = useNavigate();
 	const searchQuery = new URLSearchParams(location.search).get("q");
-	useTranslation();
+	const { t } = useTranslation();
 	const { addToCart, cartItems } = useContext(CartContext);
 	const { addToWishlist, removeFromWishlist, wishlistItems } =
 		useContext(WishlistContext);
@@ -70,8 +70,9 @@ const SearchResults = () => {
 			}, 0);
 			const courseToAdd = {
 				id: course.id,
+				course_id: course.id, // Match CartProvider structure
 				title: course.title || "",
-				price: course.price || 0,
+				price: parseFloat(course.price || 0),
 				thumbnail: course.thumbnail || "",
 				instructor_name: course.instructor_name || "Unknown Instructor",
 				description: course.description || "",
@@ -80,10 +81,16 @@ const SearchResults = () => {
 				lectures: lessons.length,
 				addedAt: new Date().toISOString(),
 				badge: course.badge || "",
-				discount: course.discount || 0,
+				discount: parseFloat(course.discount || 0),
 			};
 
-			await addToCart(courseToAdd);
+			const success = await addToCart(courseToAdd);
+			if (!success) {
+				// Assuming warningModal is imported and configured
+				// import { warningModal } from "../../services/swal";
+				// warningModal(t("Course is already in your cart!"));
+				console.log("Course is already in cart");
+			}
 		} catch (error) {
 			console.error("Error adding to cart:", error);
 		}
@@ -270,7 +277,7 @@ const SearchResults = () => {
 	if (!searchQuery) {
 		return (
 			<Container sx={{ py: 4, textAlign: "center" }}>
-				<Typography variant="h5">Please enter a search term</Typography>
+				<Typography variant="h5">{t("Please enter a search term")}</Typography>
 			</Container>
 		);
 	}
@@ -281,7 +288,7 @@ const SearchResults = () => {
 		return (
 			<Container sx={{ py: 4, textAlign: "center" }}>
 				<Typography variant="h5">
-					No results found for "{searchQuery}"
+					{t('No results found for "{0}"', searchQuery)}
 				</Typography>
 			</Container>
 		);
@@ -289,19 +296,28 @@ const SearchResults = () => {
 
 	return (
 		<Container sx={{ py: 4 }}>
-			<Typography variant="h5" sx={{ mb: 3 }}>
-				Search results for "{searchQuery}" ({totalResults} results)
+			<Typography variant="h5" sx={{ mb: 3, fontWeight: 700 }}>
+				{t('Search Results for "{0}" ({1} results)', [
+					searchQuery,
+					totalResults,
+				])}
 			</Typography>
 
 			{searchResults.instructors.length > 0 && (
 				<>
-					<Typography variant="h6" sx={{ mt: 4, mb: 2 }}>
-						Instructors ({searchResults.instructors.length})
+					<Typography variant="h6" sx={{ mt: 4, mb: 2, fontWeight: 600 }}>
+						{t("Instructors ({0})", searchResults.instructors.length)}
 					</Typography>
 					<Grid container spacing={3}>
 						{searchResults.instructors.map((instructor) => (
 							<Grid item xs={12} md={6} key={instructor.id}>
-								<Card sx={{ display: "flex", height: "100%" }}>
+								<Card
+									sx={{
+										display: "flex",
+										height: "100%",
+										bgcolor: "#fff",
+										boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+									}}>
 									<Box
 										sx={{
 											p: 2,
@@ -316,7 +332,7 @@ const SearchResults = () => {
 												sx={{ width: 64, height: 64, mr: 2 }}
 											/>
 											<Box>
-												<Typography variant="h6">
+												<Typography variant="h6" sx={{ fontWeight: 600 }}>
 													{instructor.first_name} {instructor.last_name}
 												</Typography>
 												<Typography
@@ -343,19 +359,19 @@ const SearchResults = () => {
 												/>
 												<Typography variant="body2">
 													{instructor.rating.toFixed(1)} (
-													{instructor.reviewsCount} reviews)
+													{instructor.reviewsCount} {t("reviews")})
 												</Typography>
 											</Box>
 											<Box sx={{ display: "flex", alignItems: "center" }}>
 												<VideoLibraryIcon sx={{ fontSize: 16, mr: 0.5 }} />
 												<Typography variant="body2">
-													{instructor.coursesCount} courses
+													{instructor.coursesCount} {t("courses")}
 												</Typography>
 											</Box>
 											<Box sx={{ display: "flex", alignItems: "center" }}>
 												<PeopleIcon sx={{ fontSize: 16, mr: 0.5 }} />
 												<Typography variant="body2">
-													{instructor.studentsCount} students
+													{instructor.studentsCount} {t("students")}
 												</Typography>
 											</Box>
 										</Stack>
@@ -371,7 +387,7 @@ const SearchResults = () => {
 												color="primary"
 												onClick={() => navigate(`/instructor/${instructor.id}`)}
 												sx={{ textTransform: "none" }}>
-												View Profile
+												{t("View Profile")}
 											</Button>
 										</Box>
 									</Box>
@@ -384,30 +400,33 @@ const SearchResults = () => {
 
 			{searchResults.courses.length > 0 && (
 				<>
-					<Typography variant="h6" sx={{ mt: 4, mb: 2 }}>
-						Courses ({searchResults.courses.length})
+					<Typography variant="h6" sx={{ mt: 4, mb: 2, fontWeight: 600 }}>
+						{t("Courses ({0})", searchResults.courses.length)}
 					</Typography>
-					<Grid container spacing={3}>
-						{searchResults.courses.map((course) => (
-							<Grid item xs={12} sm={6} md={4} lg={3} key={course.id}>
+					<Grid container spacing={2} justifyContent="center">
+						{searchResults.courses.slice(0, 3).map((course) => (
+							<Grid item xs={12} sm={6} md={4} key={course.id}>
 								<Card
 									onClick={() => navigate(`/course-details/${course.id}`)}
 									sx={{
 										height: "100%",
-										width:400,
+										width: 320,
+										mx: "auto",
 										display: "flex",
 										flexDirection: "column",
+										bgcolor: "#fff",
+										boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
 										transition: "all 0.3s ease",
 										cursor: "pointer",
 										"&:hover": {
 											transform: "translateY(-4px)",
-											boxShadow: 3,
+											boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
 										},
 									}}>
 									<CardMedia
 										component="img"
-										height="150"
-										image={course.thumbnail}
+										sx={{ height: 150, objectFit: "cover" }}
+										image={course.thumbnail || "/placeholder-image.jpg"}
 										alt={course.title}
 									/>
 									<CardContent
@@ -415,10 +434,11 @@ const SearchResults = () => {
 											flexGrow: 1,
 											display: "flex",
 											flexDirection: "column",
+											p: 2,
 										}}>
 										<Typography
 											variant="h6"
-											sx={{ fontSize: "1rem", mb: 1 }}
+											sx={{ fontSize: "1rem", mb: 1, fontWeight: 600 }}
 											noWrap>
 											{course.title}
 										</Typography>
@@ -462,7 +482,7 @@ const SearchResults = () => {
 													({course.rating.count})
 												</Typography>
 											</Box>
-										)}{" "}
+										)}
 										<Box sx={{ mt: "auto" }}>
 											<Box
 												sx={{
@@ -475,16 +495,20 @@ const SearchResults = () => {
 													variant="h6"
 													color="primary.main"
 													sx={{ fontWeight: "bold" }}>
-													${course.price}
+													${parseFloat(course.price || 0).toFixed(2)}
 												</Typography>
-												{course.original_price && (
+												{course.discount > 0 && (
 													<Typography
 														variant="body2"
 														sx={{
 															textDecoration: "line-through",
 															color: "text.secondary",
 														}}>
-														${course.original_price}
+														$
+														{(
+															(course.price * 100) /
+															(100 - course.discount)
+														).toFixed(2)}
 													</Typography>
 												)}
 												<IconButton
@@ -522,8 +546,8 @@ const SearchResults = () => {
 													py: 1,
 												}}>
 												{cartItems.some((item) => item.id === course.id)
-													? "In Cart"
-													: "Add to Cart"}
+													? t("In Cart")
+													: t("Add to Cart")}
 											</Button>
 										</Box>
 									</CardContent>
