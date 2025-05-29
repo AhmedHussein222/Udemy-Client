@@ -55,7 +55,18 @@ export async function enrollCourse(userid, course) {
   );
 
   if (!alreadyEnrolled) {
-    const updatedCourses = [...existingCourses, course];
+    const updatedCourses = [...existingCourses, 
+      {
+        id: course.id || "",
+        title: course.title || "",
+        instructor_id: course.instructor_id || "",
+        instructor_name: course.instructor_name || "",
+        thumbnail: course.thumbnail || "",
+        enrolled_at: new Date(),
+        progress: 0,
+        completed_lessons: [],
+        last_accessed: new Date(),
+      }];
 
     await setDoc(enrollmentRef, {
       user_id: userid,

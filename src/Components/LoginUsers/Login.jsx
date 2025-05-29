@@ -6,7 +6,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
-import { auth , provider } from "../../Firebase/firebase";
+import { auth , db, doc, getDoc, provider, setDoc } from "../../Firebase/firebase";
 import { errorModal } from "../../services/swal";
 
 function Login() {
@@ -15,17 +15,31 @@ function Login() {
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const navigate = useNavigate();
-  const handleGoogleLogin = async () => {
-    try {
-      await signInWithPopup(auth, provider);
+  const googleSignUp = async () => {
+		try {
+			const result = await signInWithPopup(auth, provider);
+			const user = result.user;
+	
+			const userDocRef = doc(db, "Users", user.uid);
+			const userDoc = await getDoc(userDocRef);
+	
+			if (!userDoc.exists()) {
+				await setDoc(userDocRef, {
+					user_id: user.uid,
+					first_name: user.displayName,
+					email: user.email,
+					profile_picture: user.photoURL,
+					created_at: new Date(),
+					gender:"male",
+					role:"student"
+				});
+				navigate("/");
+			}
       navigate("/");
-    } catch (error) {
-      errorModal(
-        "Login Failed",
-        error.message || "An error occurred during Google login. Please try again."
-      );
-    }
-  };
+		} catch (error) {
+			errorModal("Sign-Up Failed", error.message || "An error occurred during Google sign-in. Please try again.");
+		}
+	};
   const {
     register,
     handleSubmit,
@@ -199,7 +213,7 @@ function Login() {
                   borderRadius: "8px",
                   borderColor: "#8000ff",
                 }}
-                onClick={handleGoogleLogin}
+                onClick={googleSignUp}
               >
                 <Box 
                   component="img"
