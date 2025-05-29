@@ -41,6 +41,7 @@ import HomeAfterLogin from "./Pages/HomeLogin";
 import CourseDetails from "./Pages/CourseDetails";
 import CheckoutComponent from "./Pages/checkout";
 import Unauthorized from './Pages/Unauthorized';
+import ForgotPassword from "./Components/LoginUsers/ForgotPassword";
 
 const router = createBrowserRouter([
   {
@@ -49,6 +50,7 @@ const router = createBrowserRouter([
     children: [
       { path: "", element: <HomeRoute /> }, 
 			{ path: "login", element: <Login /> },
+			{ path: "forgot-password", element: <ForgotPassword /> },
       { path: "cart", element: <Cart /> },
       { path: "Userprofile", element: <Userprofile /> },
       { path: "/subcategory/:subcategoryId", element: <SubcategoryPage /> },

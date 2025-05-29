@@ -283,5 +283,18 @@
     "title": "Sorry, we couldn't find that page",
     "message": "The page you're looking for doesn't exist or has been moved. Please check the link or return to the homepage.",
     "backHome": "Back to Homepage"
-  }
+  },
+  "Reset your password": "Reset your password",
+  "Enter your email address and we'll send you a link to reset your password.": "Enter your email address and we'll send you a link to reset your password.",
+  "Send reset link": "Send reset link",
+  "Back to login": "Back to login",
+  "Password reset email sent. Please check your inbox.": "Password reset email sent. Please check your inbox.",
+  "Error sending reset email. Please try again.": "Error sending reset email. Please try again.",
+  "Account Not Found": "Account Not Found",
+  "No account found with this email address.": "No account found with this email address.",
+  "Email Sent": "Email Sent",
+  "Sending...": "Sending...",
+  "Continue with Google": "Continue with Google",
+  "Successfully logged in with Google": "Successfully logged in with Google",
+  "Failed to login with Google. Please try again.": "Failed to login with Google. Please try again."
 }

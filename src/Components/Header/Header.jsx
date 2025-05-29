@@ -379,7 +379,7 @@ const Header = () => {
 										</IconButton>
 										<IconButton onClick={handleUserMenuClick}>
 											<Avatar
-												src={userData?.profile_picture}
+												src={userData?.profile_picture || user?.photoURL}
 												sx={{ width: 32, height: 32, bgcolor: "#8000ff" }}>
 												{user.email?.[0].toUpperCase()}
 											</Avatar>
