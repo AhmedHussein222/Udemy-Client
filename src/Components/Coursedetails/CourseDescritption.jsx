@@ -6,7 +6,7 @@ const CourseDescription = ({ course }) => {
   const [expanded, setExpanded] = useState(false);
   const description = course?.description || 'No description available';
 
-  // تقسيم الوصف لجزء قصير (أول 100 كلمة كمثال)
+
   const getShortDescription = (text) => {
     if (!text || text === 'No description available') return text;
     const words = text.split(' ');
