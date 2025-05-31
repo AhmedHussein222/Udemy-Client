@@ -21,7 +21,6 @@ const EditCourse = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { user } = useContext(UserContext);
-  user;
   const location = useLocation();
   const course = location.state?.course || null;
 
@@ -121,7 +120,7 @@ const EditCourse = () => {
           });
       } else {
         const course_id = v4();
-        await addCourse({ ...courseData, course_id, instructor_id: "2" });
+        await addCourse({ ...courseData, course_id, instructor_id: user.uid });
         await addLessons(curriculumData, course_id);
         successModal("Course created successfully");
         navigate("/instructor/");

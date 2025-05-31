@@ -281,5 +281,18 @@
     "title": "عذراً، لم نتمكن من العثور على الصفحة",
     "message": "يبدو أن الصفحة التي تبحث عنها غير موجودة أو تم نقلها. يرجى التحقق من الرابط أو العودة إلى الصفحة الرئيسية.",
     "backHome": "العودة للصفحة الرئيسية"
-  }
+  },
+  "Reset your password": "إعادة تعيين كلمة المرور",
+  "Enter your email address and we'll send you a link to reset your password.": "أدخل عنوان بريدك الإلكتروني وسنرسل لك رابطاً لإعادة تعيين كلمة المرور.",
+  "Send reset link": "إرسال رابط إعادة التعيين",
+  "Back to login": "العودة لتسجيل الدخول",
+  "Password reset email sent. Please check your inbox.": "تم إرسال رابط إعادة تعيين كلمة المرور. يرجى التحقق من بريدك الوارد.",
+  "Error sending reset email. Please try again.": "خطأ في إرسال البريد الإلكتروني. يرجى المحاولة مرة أخرى.",
+  "Account Not Found": "لم يتم العثور على الحساب",
+  "No account found with this email address.": "لم يتم العثور على حساب بهذا البريد الإلكتروني.",
+  "Email Sent": "تم إرسال البريد",
+  "Sending...": "جارٍ الإرسال...",
+  "Continue with Google": "المتابعة باستخدام Google",
+  "Successfully logged in with Google": "تم تسجيل الدخول بنجاح باستخدام Google",
+  "Failed to login with Google. Please try again.": "فشل تسجيل الدخول باستخدام Google. يرجى المحاولة مرة أخرى."
 }

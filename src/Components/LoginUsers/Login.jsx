@@ -1,21 +1,13 @@
-import {
-  Box,
-  Button,
-  Grid,
-  Stack,
-  TextField,
-  Typography,
-  Snackbar
-} from '@mui/material';
-import MailOutlineIcon from '@mui/icons-material/MailOutline';
-import { grey } from '@mui/material/colors';
-import { useForm } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
+import MailOutlineIcon from "@mui/icons-material/MailOutline";
+import {Box,Button,Grid,Snackbar,Stack,TextField,Typography,} from "@mui/material";
+import { grey } from "@mui/material/colors";
+import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 import { useState } from "react";
-import { signInWithEmailAndPassword } from "firebase/auth"; 
-import { auth } from "../../Firebase/firebase"; 
-import { Link } from "react-router-dom";
-import { useTranslation } from 'react-i18next';
+import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
+import { Link, useNavigate } from "react-router-dom";
+import { auth , db, doc, getDoc, provider, setDoc } from "../../Firebase/firebase";
+import { errorModal } from "../../services/swal";
 
 function Login() {
   const [firebaseError, setFirebaseError] = useState("");
@@ -23,8 +15,36 @@ function Login() {
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const navigate = useNavigate();
-
-  const { register, handleSubmit, formState: { errors } } = useForm({
+  const googleSignUp = async () => {
+		try {
+			const result = await signInWithPopup(auth, provider);
+			const user = result.user;
+	
+			const userDocRef = doc(db, "Users", user.uid);
+			const userDoc = await getDoc(userDocRef);
+	
+			if (!userDoc.exists()) {
+				await setDoc(userDocRef, {
+					user_id: user.uid,
+					first_name: user.displayName,
+					email: user.email,
+					profile_picture: user.photoURL,
+					created_at: new Date(),
+					gender:"male",
+					role:"student"
+				});
+				navigate("/");
+			}
+      navigate("/");
+		} catch (error) {
+			errorModal("Sign-Up Failed", error.message || "An error occurred during Google sign-in. Please try again.");
+		}
+	};
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
     defaultValues: {
       email: "",
       password: "",
@@ -42,15 +62,12 @@ function Login() {
     }
 
     try {
- 
-      const userCredential = await signInWithEmailAndPassword(auth, data.email, data.password);
-
+      await signInWithEmailAndPassword(auth, data.email, data.password);
       navigate("/", { state: { email: data.email } });
-
     } catch (error) {
       setSnackbarMessage("Error logging in. Please check your credentials.");
       setOpenSnackbar(true);
-      setFirebaseError(error.message); 
+      setFirebaseError(error.message);
       console.error(error);
     }
 
@@ -61,45 +78,54 @@ function Login() {
     setOpenSnackbar(false);
   };
 
-
-   const { t } = useTranslation();
+  const { t } = useTranslation();
 
   return (
     <Box sx={{ flexGrow: 1, p: { xs: 2, md: 4 } }}>
-      <Grid container spacing={4} alignItems="center" justifyContent={'space-around'}>
-        <Grid item xs={12} lg={6} sx={{ textAlign: 'center' }}>
+      <Grid
+        container
+        spacing={4}
+        alignItems="center"
+        justifyContent={"space-around"}
+      >
+        <Grid item xs={12} lg={6} sx={{ textAlign: "center" }}>
           <Box
             component="img"
             src="https://frontends.udemycdn.com/components/auth/desktop-illustration-x1.webp"
             alt="Illustration"
             sx={{
-              width: '100%',
+              width: "100%",
               maxWidth: 600,
-              height: 'auto',
-              mx: 'auto'
+              height: "auto",
+              mx: "auto",
             }}
           />
         </Grid>
 
         <Grid item xs={12} lg={6}>
-          <Box sx={{ maxWidth: 500, mx: 'auto', px: 2 }}>
-            <Typography variant="h4" gutterBottom fontWeight="bold" textAlign="center">
-             {t('Log in to continue your learning journey')}
+          <Box sx={{ maxWidth: 500, mx: "auto", px: 2 }}>
+            <Typography
+              variant="h4"
+              gutterBottom
+              fontWeight="bold"
+              textAlign="center"
+            >
+              {t("Log in to continue your learning journey")}
             </Typography>
 
             <form onSubmit={handleSubmit(onSubmit)}>
               <Stack spacing={2}>
                 <TextField
                   fullWidth
-               label={t("Email")}
+                  label={t("Email")}
                   variant="outlined"
                   error={!!errors.email}
                   helperText={
                     errors.email?.type === "required"
                       ? "Email is required."
                       : errors.email?.type === "pattern"
-                        ? "Email is not valid."
-                        : ""
+                      ? "Email is not valid."
+                      : ""
                   }
                   {...register("email", {
                     required: true,
@@ -109,7 +135,7 @@ function Login() {
 
                 <TextField
                   fullWidth
-                   label={t("Password")}
+                  label={t("Password")}
                   type="password"
                   variant="outlined"
                   error={!!errors.password}
@@ -127,18 +153,18 @@ function Login() {
                   variant="contained"
                   startIcon={<MailOutlineIcon fontSize="small" />}
                   sx={{
-                    backgroundColor: '#8000ff',
-                    color: '#fff',
-                    textTransform: 'none',
-                    fontWeight: 'bold',
-                    borderRadius: '4px',
+                    backgroundColor: "#8000ff",
+                    color: "#fff",
+                    textTransform: "none",
+                    fontWeight: "bold",
+                    borderRadius: "4px",
                     py: 1.2,
                     mt: 1,
-                    '&:hover': { backgroundColor: '#6a1b9a' },
+                    "&:hover": { backgroundColor: "#6a1b9a" },
                   }}
                   disabled={loading}
                 >
-               {loading ? t("Loading...") : t("Continue with email")}
+                  {loading ? t("Loading...") : t("Continue with email")}
                 </Button>
 
                 {firebaseError && (
@@ -155,17 +181,17 @@ function Login() {
               onClose={handleCloseSnackbar}
               message={snackbarMessage}
               anchorOrigin={{
-                vertical: 'top',
-                horizontal: 'center',
+                vertical: "top",
+                horizontal: "center",
               }}
             />
 
             <Typography
               variant="body1"
               align="center"
-              sx={{ mt: 4, fontWeight: 'bold' }}
+              sx={{ mt: 4, fontWeight: "bold" }}
             >
-             {t('Other sign up options')}
+              {t("Other sign up options")}
             </Typography>
 
             <Stack
@@ -178,17 +204,19 @@ function Login() {
               <Button
                 variant="outlined"
                 sx={{
-                  textTransform: 'none',
-                  display: 'flex',
-                  alignItems: 'center',
+                  textTransform: "none",
+                  display: "flex",
+                  alignItems: "center",
                   gap: 1,
                   px: 2,
                   py: 1,
-                  borderRadius: '8px',
-                  borderColor: '#8000ff',
+                  borderRadius: "8px",
+                  borderColor: "#8000ff",
                 }}
+                onClick={googleSignUp}
               >
-                <img
+                <Box 
+                  component="img"
                   src="https://static.cdnlogo.com/logos/g/38/google-icon.svg"
                   alt="Google"
                   style={{ width: 20, height: 20 }}
@@ -198,14 +226,14 @@ function Login() {
               <Button
                 variant="outlined"
                 sx={{
-                  textTransform: 'none',
-                  display: 'flex',
-                  alignItems: 'center',
+                  textTransform: "none",
+                  display: "flex",
+                  alignItems: "center",
                   gap: 1,
                   px: 2,
                   py: 1,
-                  borderRadius: '8px',
-                  borderColor: '#8000ff',
+                  borderRadius: "8px",
+                  borderColor: "#8000ff",
                 }}
               >
                 <img
@@ -218,14 +246,14 @@ function Login() {
               <Button
                 variant="outlined"
                 sx={{
-                  textTransform: 'none',
-                  display: 'flex',
-                  alignItems: 'center',
+                  textTransform: "none",
+                  display: "flex",
+                  alignItems: "center",
                   gap: 1,
                   px: 2,
                   py: 1,
-                  borderRadius: '8px',
-                  borderColor: '#8000ff',
+                  borderRadius: "8px",
+                  borderColor: "#8000ff",
                 }}
               >
                 <img
@@ -236,18 +264,14 @@ function Login() {
               </Button>
             </Stack>
 
-            <Typography
-              variant="subtitle2"
-              align="center"
-              sx={{ mb: 3 }}
-            >
-              {t('By signing up, you agree to our')}{' '}
-              <a href="#" style={{ color: '#8000ff' }}>
-                {t('Terms of Use')}
-              </a>{' '}
-              {t('and')}{' '}
-              <a href="#" style={{ color: '#8000ff' }}>
-                {t('Privacy Policy')}
+            <Typography variant="subtitle2" align="center" sx={{ mb: 3 }}>
+              {t("By signing up, you agree to our")}{" "}
+              <a href="#" style={{ color: "#8000ff" }}>
+                {t("Terms of Use")}
+              </a>{" "}
+              {t("and")}{" "}
+              <a href="#" style={{ color: "#8000ff" }}>
+                {t("Privacy Policy")}
               </a>
               .
             </Typography>
@@ -256,14 +280,17 @@ function Login() {
               sx={{
                 p: 2,
                 backgroundColor: grey[100],
-                textAlign: 'center',
+                textAlign: "center",
                 borderRadius: 1,
               }}
             >
               <Typography variant="body2">
-                {t('Don’t have an account?')}{' '}
-                <Link to="/signup" style={{ color: '#8000ff', fontWeight: 'bold' }}>
-                  {t('Sign up')}
+                {t("Don’t have an account?")}{" "}
+                <Link
+                  to="/signup"
+                  style={{ color: "#8000ff", fontWeight: "bold" }}
+                >
+                  {t("Sign up")}
                 </Link>
               </Typography>
             </Box>
@@ -272,15 +299,15 @@ function Login() {
               sx={{
                 p: 2,
                 backgroundColor: grey[100],
-                textAlign: 'center',
+                textAlign: "center",
                 borderRadius: 1,
                 borderTopColor: grey[100],
                 borderTop: 1,
               }}
             >
               <Typography variant="body2">
-                <a href="#" style={{ color: '#8000ff', fontWeight: 'bold' }}>
-                 {t('Log in with your organization')}
+                <a href="#" style={{ color: "#8000ff", fontWeight: "bold" }}>
+                  {t("Log in with your organization")}
                 </a>
               </Typography>
             </Box>

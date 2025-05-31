@@ -1,32 +1,44 @@
-/** @format */
-
-import {
-	Box,
-	Button,
-	Checkbox,
-	FormControlLabel,
-	FormGroup,
-	Grid,
-	Stack,
-	TextField,
-	Typography,
-} from "@mui/material";
 import MailOutlineIcon from "@mui/icons-material/MailOutline";
-import React, { useState } from "react";
+import {Box,Button,Checkbox,FormControlLabel,FormGroup,Grid,Snackbar,Stack,TextField,Typography,} from "@mui/material";
 import { green, grey } from "@mui/material/colors";
+import { createUserWithEmailAndPassword, fetchSignInMethodsForEmail, signInWithPopup } from "firebase/auth";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { auth, db } from "../../Firebase/firebase";
-import { Link, useNavigate } from "react-router-dom";
-import { doc, setDoc } from "firebase/firestore";
-import { fetchSignInMethodsForEmail } from "firebase/auth";
-import { Snackbar } from "@mui/material";
 import { useTranslation } from "react-i18next";
+import { Link, useNavigate } from "react-router-dom";
+import { auth, db, provider } from "../../Firebase/firebase";
+import { errorModal } from "../../services/swal";
 
 function Signup() {
 	const [firebaseError, setFirebaseError] = useState("");
 	const [loading, setLoading] = useState(false);
 	const navigate = useNavigate();
+	const googleSignUp = async () => {
+		try {
+			const result = await signInWithPopup(auth, provider);
+			const user = result.user;
+	
+			const userDocRef = doc(db, "Users", user.uid);
+			const userDoc = await getDoc(userDocRef);
+	
+			if (!userDoc.exists()) {
+				await setDoc(userDocRef, {
+					user_id: user.uid,
+					first_name: user.displayName,
+					email: user.email,
+					profile_picture: user.photoURL,
+					created_at: new Date(),
+					gender:"male",
+					role:"student"
+				});
+				navigate("/");
+			}
+	
+		} catch (error) {
+			errorModal("Sign-Up Failed", error.message || "An error occurred during Google sign-in. Please try again.");
+		}
+	};
 
 	const {
 		register,
@@ -34,7 +46,7 @@ function Signup() {
 		formState: { errors },
 	} = useForm({
 		defaultValues: {
-			fullname: "",
+			fullname: "", 
 			email: "",
 			password: "",
 		},
@@ -245,6 +257,7 @@ function Signup() {
 							mt={2}
 							mb={3}>
 							<Button
+								onClick={googleSignUp}
 								variant="outlined"
 								sx={{
 									textTransform: "none",
@@ -256,7 +269,8 @@ function Signup() {
 									borderRadius: "8px",
 									borderColor: "#8000ff",
 								}}>
-								<img
+								<Box
+									component="img"
 									src="https://static.cdnlogo.com/logos/g/38/google-icon.svg"
 									alt="Google"
 									style={{ width: 20, height: 20 }}

@@ -11,9 +11,9 @@ import {
   DialogContentText
 } from '@mui/material';
 import { UserContext } from '../../context/UserContext';
-import { db,  storage } from '../../Firebase/firebase';
+import { auth, db,  storage } from '../../Firebase/firebase';
 import { doc, setDoc, getDoc, deleteDoc } from 'firebase/firestore';
-import { deleteUser, updatePassword, EmailAuthProvider, reauthenticateWithCredential } from 'firebase/auth';
+import { deleteUser, updatePassword, EmailAuthProvider, reauthenticateWithCredential, signOut } from 'firebase/auth';
 import { Form, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ref, getDownloadURL, deleteObject } from 'firebase/storage';
@@ -311,6 +311,7 @@ const handleSavePhoto = async () => {
       setSnackbarMessage(t('Account closed and data deleted successfully.'));
       setSnackbarSeverity('success');
       setOpenSnackbar(true);
+      signOut(auth);
       navigate('/');
     } catch (error) {
       console.error('Error closing account:', error);
