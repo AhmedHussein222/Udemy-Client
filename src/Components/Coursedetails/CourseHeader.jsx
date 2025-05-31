@@ -1,15 +1,15 @@
 import React from 'react';
-import { Box, Typography, Chip, Rating, Link } from '@mui/material';
+import { Box, Typography, Chip, Rating, Link, CircularProgress } from '@mui/material';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import LanguageIcon from '@mui/icons-material/Language';
 import SubtitlesIcon from '@mui/icons-material/Subtitles';
 
 const CourseHeader = ({ course }) => {
-  // إذا كان course غير موجود، اعرض UI بديل
+ 
   if (!course) {
     return (
-      <Box sx={{ bgcolor: '#1c1d1f', color: 'white', py: 8 }}>
-        <Typography>Loading course data...</Typography>
+      <Box sx={{ bgcolor: '#1c1d1f', color: 'white', py: 8, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <CircularProgress sx={{ color: 'white' }} />
       </Box>
     );
   }
@@ -21,7 +21,7 @@ const CourseHeader = ({ course }) => {
           <Typography
             variant="h4"
             fontWeight="bold"
-            sx={{ mb: 1, fontSize: { xs: '1.5rem', sm: '2rem' } }}
+            sx={{ mb: 1, fontSize: { xs: '1.5rem', sm: '2rem' }, color: 'white' }}
           >
             {course.title}
           </Typography>
@@ -59,29 +59,29 @@ const CourseHeader = ({ course }) => {
             <Typography variant="body2" sx={{ color: 'grey.300' }}>
               ({course.rating?.count ? course.rating.count.toLocaleString() : '0'} ratings)
             </Typography>
-           <Typography variant="body2" sx={{ color: 'grey.300' }}>
-  ({course.studentCount ? course.studentCount.toLocaleString() : '0'} students)
-</Typography>
+            <Typography variant="body2" sx={{ color: 'grey.300' }}>
+              ({course.studentCount ? course.studentCount.toLocaleString() : '0'} students)
+            </Typography>
           </Box>
 
-        <Typography variant="body2" sx={{ mb: 2 }}>
-  Created by{' '}
-  {course.instructors?.length > 0 ? (
-    course.instructors.map((instructor, i) => (
-      <Link
-        key={i}
-        href="#instructor"
-        underline="always"
-        sx={{ fontWeight: 'bold', color: 'white' }}
-      >
-        {instructor}
-        {i < course.instructors.length - 1 ? ', ' : ''}
-      </Link>
-    ))
-  ) : (
-    'Unknown instructor'
-  )}
-</Typography>
+          <Typography variant="body2" sx={{ mb: 2 }}>
+            Created by{' '}
+            {course.instructors?.length > 0 ? (
+              course.instructors.map((instructor, i) => (
+                <Link
+                  key={i}
+                  // href="#instructor"
+                  underline="always"
+                  sx={{ fontWeight: 'bold', color: 'white' }}
+                >
+                  {instructor}
+                  {i < course.instructors.length - 1 ? ', ' : ''}
+                </Link>
+              ))
+            ) : (
+              'Unknown instructor'
+            )}
+          </Typography>
 
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, color: 'grey.300' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>

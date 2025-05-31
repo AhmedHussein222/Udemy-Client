@@ -1,33 +1,40 @@
 /** @format */
 
-import { Box, CircularProgress, Typography } from "@mui/material";
-import { useEffect, useState } from "react";
+import  { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import { Box, CircularProgress, Typography, Fab } from "@mui/material";
+import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
+import { db, doc, getDoc, collection, query, where, getDocs } from "../Firebase/firebase";
+import CourseHeader from "../Components/Coursedetails/CourseHeader";
+import CourseSidebar from "../Components/Coursedetails/CourseSidebar";
+import WhatYoullLearn from "../Components/Coursedetails/WhatYoullLearn";
 import CourseContent from "../Components/Coursedetails/CourseContent";
 import CourseDescription from "../Components/Coursedetails/CourseDescritption";
-import CourseHeader from "../Components/Coursedetails/CourseHeader";
 import CourseInstructors from "../Components/Coursedetails/CourseInstructors";
 import CourseRequirements from "../Components/Coursedetails/CourseRequirments";
 import CourseReviews from "../Components/Coursedetails/CourseReviews";
-import CourseSidebar from "../Components/Coursedetails/CourseSidebar";
-import WhatYoullLearn from "../Components/Coursedetails/WhatYoullLearn";
-import {
-  collection,
-  db,
-  doc,
-  getDoc,
-  getDocs,
-  query,
-  where,
-} from "../Firebase/firebase";
 
 const CourseDetails = () => {
   const { id } = useParams();
   const [courseData, setCourseData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showBackToTop, setShowBackToTop] = useState(false);
+
+  // Handle scroll to show/hide back-to-top button
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowBackToTop(window.scrollY > 300); // Show button after scrolling 300px
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   useEffect(() => {
+    // Force scroll to top when component mounts
+    window.scrollTo(0, 0);
+
     const fetchCourse = async () => {
       try {
         const docRef = doc(db, "Courses", id);
@@ -35,13 +42,6 @@ const CourseDetails = () => {
 
         if (docSnap.exists()) {
           const courseData = { id: docSnap.id, ...docSnap.data() };
-
-          // Check if course is published
-          if (!courseData.is_published) {
-            setError("This course is not available.");
-            setLoading(false);
-            return;
-          }
 
           if (courseData.instructor_id) {
             const instructorRef = doc(db, "Users", courseData.instructor_id);
@@ -84,6 +84,14 @@ const CourseDetails = () => {
     fetchCourse();
   }, [id]);
 
+  // Function to scroll to top
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
+
   if (loading) {
     return (
       <Box sx={{ p: 4, textAlign: "center" }}>
@@ -109,7 +117,7 @@ const CourseDetails = () => {
   }
 
   return (
-    <Box sx={{ minHeight: "100vh", bgcolor: "white" }}>
+    <Box sx={{ minHeight: "100vh", bgcolor: "white", position: "relative" }}>
       <CourseHeader course={courseData} />
       <Box
         sx={{
@@ -152,6 +160,26 @@ const CourseDetails = () => {
           </Box>
         </Box>
       </Box>
+
+      {/* Back to Top Button */}
+      {showBackToTop && (
+        <Fab
+          color="primary"
+          size="small"
+          onClick={scrollToTop}
+          sx={{
+            position: "fixed",
+            bottom: 32,
+            right: 32,
+            zIndex: 1000,
+            bgcolor: "#a435f0",
+            "&:hover": { bgcolor: "#8e2ed6" },
+          }}
+          aria-label="Back to top"
+        >
+          <ArrowUpwardIcon fontSize="small" />
+        </Fab>
+      )}
     </Box>
   );
 };
