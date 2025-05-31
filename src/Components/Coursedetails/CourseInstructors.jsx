@@ -5,13 +5,14 @@ import {
   Avatar,
   Rating,
   Divider,
+  CircularProgress,
 } from '@mui/material';
 import StarIcon from '@mui/icons-material/Star';
 import ReviewsIcon from '@mui/icons-material/Reviews';
 import VideoLibraryIcon from '@mui/icons-material/VideoLibrary';
 import PeopleIcon from '@mui/icons-material/People';
 import { db, doc, getDoc, collection, query, where, getDocs } from '../../Firebase/firebase';
-import { Link } from 'react-router-dom'; // Import Link for navigation
+import { Link } from 'react-router-dom';
 
 const ReviewCard = ({ review, courseTitle }) => {
   const formatDate = (isoString) => {
@@ -23,7 +24,6 @@ const ReviewCard = ({ review, courseTitle }) => {
       });
     } catch (e) {
       console.log('Invalid timestamp:', isoString);
-      e
       return 'Unknown date';
     }
   };
@@ -105,7 +105,7 @@ const InstructorCard = ({ instructor, instructorId }) => {
               sx={{
                 width: 80,
                 height: 80,
-                '&:hover': { cursor: 'pointer', opacity: 0.8 }, // Add hover effect for better UX
+                '&:hover': { cursor: 'pointer', opacity: 0.8 },
               }}
             />
           </Link>
@@ -263,7 +263,7 @@ const CourseInstructors = ({ course }) => {
           totalCourses,
           totalStudents,
           bio: instructorData.bio || 'No bio available',
-          id: course.instructor_id, // Add instructor ID to the object
+          id: course.instructor_id,
         });
 
         setReviews(allReviews);
@@ -279,7 +279,11 @@ const CourseInstructors = ({ course }) => {
   }, [course]);
 
   if (loading) {
-    return <Typography>Loading instructor data...</Typography>;
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100px' }}>
+        <CircularProgress sx={{ color: '#1976d2' }} />
+      </Box>
+    );
   }
 
   if (error) {

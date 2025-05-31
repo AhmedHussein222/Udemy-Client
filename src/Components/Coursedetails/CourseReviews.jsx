@@ -7,6 +7,7 @@ import {
   Avatar,
   Button,
   Divider,
+  CircularProgress,
 } from '@mui/material';
 import StarIcon from '@mui/icons-material/Star';
 import { db, collection, query, where, getDocs, doc, getDoc } from '../../Firebase/firebase';
@@ -105,8 +106,6 @@ const CourseReviews = ({ course }) => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-   
-   
     const fetchReviews = async () => {
       if (!course?.id) {
         setError('No course ID provided');
@@ -184,7 +183,11 @@ const CourseReviews = ({ course }) => {
   }, [course]);
 
   if (loading) {
-    return <Typography>Loading reviews...</Typography>;
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100px' }}>
+        <CircularProgress sx={{ color: '#1976d2' }} />
+      </Box>
+    );
   }
 
   if (error) {

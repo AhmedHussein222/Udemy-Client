@@ -1,22 +1,34 @@
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom"; // Added Link import
-import {Box,Container,Typography,Avatar,Chip,IconButton,Grid,Card,CardContent,CardMedia,Paper,} from "@mui/material";
+import { useParams, Link } from "react-router-dom";
+import {
+  Box,
+  Container,
+  Typography,
+  Avatar,
+  Chip,
+  IconButton,
+  Grid,
+  Card,
+  CardContent,
+  CardMedia,
+  Paper,
+  CircularProgress,
+} from "@mui/material";
 import { Link as LinkIcon, Facebook, Twitter, YouTube } from "@mui/icons-material";
 import { db, doc, getDoc, collection, query, where, getDocs } from "../Firebase/firebase.js";
 
 export default function InstructorProfile() {
-  const { id } = useParams(); // Get the instructor ID from the URL
+  const { id } = useParams();
   const [instructor, setInstructor] = useState(null);
-  const [courses, setCourses] = useState([]); // State for courses
-  const [totalReviews, setTotalReviews] = useState(0); // State for total reviews
-  const [totalLearners, setTotalLearners] = useState(0); // State for total learners
+  const [courses, setCourses] = useState([]);
+  const [totalReviews, setTotalReviews] = useState(0);
+  const [totalLearners, setTotalLearners] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchInstructorData = async () => {
       try {
-        // Fetch instructor data from the Users collection using the ID from the URL
         const instructorRef = doc(db, "Users", id);
         const instructorSnap = await getDoc(instructorRef);
 
@@ -29,7 +41,6 @@ export default function InstructorProfile() {
         const instructorData = instructorSnap.data();
         setInstructor(instructorData);
 
-        // Fetch courses for this instructor from the Courses collection
         const coursesQuery = query(
           collection(db, "Courses"),
           where("instructor_id", "==", id)
@@ -40,33 +51,29 @@ export default function InstructorProfile() {
           id: doc.id,
           title: doc.data().title || "Untitled Course",
           thumbnail: doc.data().thumbnail || "https://via.placeholder.com/200x120",
-          price: doc.data().price ,
+          price: doc.data().price,
         }));
         setCourses(coursesData);
 
-        // Compute total reviews and total learners
         let reviewsCount = 0;
         let learnersCount = 0;
 
-        // Iterate over each course to fetch reviews and enrollments
         for (const course of coursesSnap.docs) {
           const courseId = course.id;
 
-          // Fetch reviews for the current course
           const reviewsQuery = query(
             collection(db, "Reviews"),
             where("course_id", "==", courseId)
           );
           const reviewsSnap = await getDocs(reviewsQuery);
-          reviewsCount += reviewsSnap.size; // Add the number of reviews for this course
+          reviewsCount += reviewsSnap.size;
 
-          // Fetch enrollments for the current course
           const enrollmentsQuery = query(
             collection(db, "Enrollments"),
             where("course_id", "==", courseId)
           );
           const enrollmentsSnap = await getDocs(enrollmentsQuery);
-          learnersCount += enrollmentsSnap.size; // Add the number of enrollments for this course
+          learnersCount += enrollmentsSnap.size;
         }
 
         setTotalReviews(reviewsCount);
@@ -84,8 +91,18 @@ export default function InstructorProfile() {
 
   if (loading) {
     return (
-      <Box sx={{ minHeight: "100vh", bgcolor: "grey.50", display: "flex", justifyContent: "center", alignItems: "center" }}>
-        <Typography>Loading...</Typography>
+      <Box
+        sx={{
+          minHeight: "100vh",
+          bgcolor: "grey.50",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          flexDirection: "column",
+          gap: 2,
+        }}
+      >
+        <CircularProgress color="primary" />
       </Box>
     );
   }
@@ -109,7 +126,6 @@ export default function InstructorProfile() {
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "grey.50" }}>
       <Container maxWidth="xl" sx={{ py: 4 }}>
-        {/* Header Section */}
         <Paper
           sx={{
             background: "linear-gradient(135deg, #f3e8ff 0%, #dbeafe 100%)",
@@ -118,8 +134,7 @@ export default function InstructorProfile() {
             mb: 4,
           }}
         >
-          <Grid container spacing={8} alignItems="flex-start" sx={{justifyContent: "space-between"}}>
-            {/* Left Content */}
+          <Grid container spacing={8} alignItems="flex-start" sx={{ justifyContent: "space-between" }}>
             <Grid item xs={12} lg={7}>
               <Box sx={{ mb: 2 }}>
                 <Typography
@@ -166,8 +181,6 @@ export default function InstructorProfile() {
                   }}
                 />
               </Box>
-
-              {/* Stats */}
               <Grid container spacing={4} sx={{ mt: 4 }}>
                 <Grid item>
                   <Typography
@@ -199,8 +212,6 @@ export default function InstructorProfile() {
                 </Grid>
               </Grid>
             </Grid>
-
-            {/* Right Content - Profile & Social */}
             <Grid item xs={12} lg={5}>
               <Paper
                 sx={{
@@ -226,22 +237,19 @@ export default function InstructorProfile() {
                 >
                   {instructor.first_name.charAt(0) + instructor.last_name.charAt(0)}
                 </Avatar>
-
-                {/* Social Links */}
                 <Box sx={{ display: "flex", gap: 1 }}>
                   <IconButton
                     sx={{
                       bgcolor: "white",
                       border: "1px solid",
                       borderColor: "grey.300",
-                       color: "primary.main",
+                      color: "primary.main",
                       "&:hover": {
                         bgcolor: "grey.50",
                         color: "primary.dark",
                       },
                     }}
-                    href={instructor.links.linkedin }
-                 
+                    href={instructor.links.linkedin}
                   >
                     <LinkIcon fontSize="small" />
                   </IconButton>
@@ -250,14 +258,13 @@ export default function InstructorProfile() {
                       bgcolor: "white",
                       border: "1px solid",
                       borderColor: "grey.300",
-                       color: "primary.main",
+                      color: "primary.main",
                       "&:hover": {
                         bgcolor: "grey.50",
-                          color: "primary.dark",
+                        color: "primary.dark",
                       },
                     }}
-                    href={instructor.links.facebook }
-        
+                    href={instructor.links.facebook}
                   >
                     <Facebook fontSize="small" />
                   </IconButton>
@@ -266,14 +273,13 @@ export default function InstructorProfile() {
                       bgcolor: "white",
                       border: "1px solid",
                       borderColor: "grey.300",
-                       color: "primary.main",
+                      color: "primary.main",
                       "&:hover": {
                         bgcolor: "grey.50",
-                          color: "primary.dark",
+                        color: "primary.dark",
                       },
                     }}
-                    href={instructor.links.instagram }
-                   
+                    href={instructor.links.instagram}
                   >
                     <Twitter fontSize="small" />
                   </IconButton>
@@ -289,7 +295,6 @@ export default function InstructorProfile() {
                       },
                     }}
                     href={instructor.links.youtube}
-                  
                   >
                     <YouTube fontSize="small" />
                   </IconButton>
@@ -298,8 +303,6 @@ export default function InstructorProfile() {
             </Grid>
           </Grid>
         </Paper>
-
-        {/* About Me Section */}
         <Paper
           sx={{
             borderRadius: 2,
@@ -334,8 +337,6 @@ export default function InstructorProfile() {
             </Typography>
           </Box>
         </Paper>
-
-        {/* My Courses Section */}
         <Paper
           sx={{
             borderRadius: 2,
@@ -354,7 +355,6 @@ export default function InstructorProfile() {
           >
             My courses ({courses.length})
           </Typography>
-
           {courses.length > 0 ? (
             <Grid container spacing={3}>
               {courses.map((course) => (
@@ -403,7 +403,7 @@ export default function InstructorProfile() {
                         >
                           {course.title}
                         </Typography>
-                           <Typography
+                        <Typography
                           variant="body1"
                           className="course-title"
                           sx={{
