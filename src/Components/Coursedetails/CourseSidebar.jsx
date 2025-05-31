@@ -397,23 +397,7 @@ const CourseSidebar = ({ course }) => {
 					</IconButton>
 				</Box>
 
-				<Button
-					variant="outlined"
-					color="inherit"
-					fullWidth
-					sx={{
-						borderColor: "grey.800",
-						color: "grey.800",
-						fontWeight: "bold",
-						py: 1.5,
-						mb: 2,
-						textTransform: "none",
-						"&:hover": { bgcolor: "grey.50", borderColor: "grey.800" },
-					}}
-					aria-label="Buy now">
-					Buy now
-				</Button>
-
+				
 				<Typography variant="body2" align="center" sx={{ mb: 3 }}>
 					30-Day Money-Back Guarantee
 				</Typography>

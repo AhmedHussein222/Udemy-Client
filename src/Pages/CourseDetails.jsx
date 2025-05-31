@@ -1,141 +1,159 @@
 /** @format */
 
-import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
 import { Box, CircularProgress, Typography } from "@mui/material";
-import {db,doc,getDoc,collection,query,where,getDocs,} from "../Firebase/firebase";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import CourseContent from "../Components/Coursedetails/CourseContent";
+import CourseDescription from "../Components/Coursedetails/CourseDescritption";
 import CourseHeader from "../Components/Coursedetails/CourseHeader";
+import CourseInstructors from "../Components/Coursedetails/CourseInstructors";
+import CourseRequirements from "../Components/Coursedetails/CourseRequirments";
+import CourseReviews from "../Components/Coursedetails/CourseReviews";
 import CourseSidebar from "../Components/Coursedetails/CourseSidebar";
 import WhatYoullLearn from "../Components/Coursedetails/WhatYoullLearn";
-import CourseContent from "../Components/Coursedetails/CourseContent";
-import CourseRequirements from "../Components/Coursedetails/CourseRequirments";
-import CourseDescription from "../Components/Coursedetails/CourseDescritption";
-import CourseInstructors from "../Components/Coursedetails/CourseInstructors";
-import CourseReviews from "../Components/Coursedetails/CourseReviews";
+import {
+  collection,
+  db,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  where,
+} from "../Firebase/firebase";
 
 const CourseDetails = () => {
-	const { id } = useParams();
-	const [courseData, setCourseData] = useState(null);
-	const [loading, setLoading] = useState(true);
-	const [error, setError] = useState(null);
+  const { id } = useParams();
+  const [courseData, setCourseData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-	useEffect(() => {
-		const fetchCourse = async () => {
-			try {
-				const docRef = doc(db, "Courses", id);
-				const docSnap = await getDoc(docRef);
+  useEffect(() => {
+    const fetchCourse = async () => {
+      try {
+        const docRef = doc(db, "Courses", id);
+        const docSnap = await getDoc(docRef);
 
-				if (docSnap.exists()) {
-					const courseData = { id: docSnap.id, ...docSnap.data() };
+        if (docSnap.exists()) {
+          const courseData = { id: docSnap.id, ...docSnap.data() };
 
-					if (courseData.instructor_id) {
-						const instructorRef = doc(db, "Users", courseData.instructor_id);
-						const instructorSnap = await getDoc(instructorRef);
-						if (instructorSnap.exists()) {
-							const instructorData = instructorSnap.data();
-							const fullName = `${instructorData.first_name || ""} ${
-								instructorData.last_name || ""
-							}`.trim();
-							courseData.instructors = [fullName || "Unknown instructor"];
-							courseData.instructor_name = fullName || "Unknown instructor";
-						} else {
-							courseData.instructors = ["Unknown instructor"];
-							courseData.instructor_name = "Unknown instructor";
-						}
-					} else {
-						courseData.instructors = ["No instructor assigned"];
-						courseData.instructor_name = "No instructor assigned";
-					}
+          // Check if course is published
+          if (!courseData.is_published) {
+            setError("This course is not available.");
+            setLoading(false);
+            return;
+          }
 
-					const enrollmentsQuery = query(
-						collection(db, "Enrollments"),
-						where("course_id", "==", id)
-					);
-					const enrollmentsSnap = await getDocs(enrollmentsQuery);
-					courseData.studentCount = enrollmentsSnap.size;
+          if (courseData.instructor_id) {
+            const instructorRef = doc(db, "Users", courseData.instructor_id);
+            const instructorSnap = await getDoc(instructorRef);
+            if (instructorSnap.exists()) {
+              const instructorData = instructorSnap.data();
+              const fullName = `${instructorData.first_name || ""} ${
+                instructorData.last_name || ""
+              }`.trim();
+              courseData.instructors = [fullName || "Unknown instructor"];
+              courseData.instructor_name = fullName || "Unknown instructor";
+            } else {
+              courseData.instructors = ["Unknown instructor"];
+              courseData.instructor_name = "Unknown instructor";
+            }
+          } else {
+            courseData.instructors = ["No instructor assigned"];
+            courseData.instructor_name = "No instructor assigned";
+          }
 
-					setCourseData(courseData);
-				} else {
-					setError("Course not found");
-				}
-			} catch (err) {
-				console.error("Error fetching course:", err);
-				setError("Something went wrong");
-			} finally {
-				setLoading(false);
-			}
-		};
+          const enrollmentsQuery = query(
+            collection(db, "Enrollments"),
+            where("course_id", "==", id)
+          );
+          const enrollmentsSnap = await getDocs(enrollmentsQuery);
+          courseData.studentCount = enrollmentsSnap.size;
 
-		fetchCourse();
-	}, [id]);
+          setCourseData(courseData);
+        } else {
+          setError("Course not found");
+        }
+      } catch (err) {
+        console.error("Error fetching course:", err);
+        setError("Something went wrong");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-	if (loading) {
-		return (
-			<Box sx={{ p: 4, textAlign: "center" }}>
-				<CircularProgress />
-			</Box>
-		);
-	}
+    fetchCourse();
+  }, [id]);
 
-	if (error) {
-		return (
-			<Box sx={{ p: 4 }}>
-				<Typography color="error">{error}</Typography>
-			</Box>
-		);
-	}
+  if (loading) {
+    return (
+      <Box sx={{ p: 4, textAlign: "center" }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
 
-	if (!courseData) {
-		return (
-			<Box sx={{ p: 4 }}>
-				<Typography>No course data available</Typography>
-			</Box>
-		);
-	}
+  if (error) {
+    return (
+      <Box sx={{ p: 4 }}>
+        <Typography color="error">{error}</Typography>
+      </Box>
+    );
+  }
 
-	return (
-		<Box sx={{ minHeight: "100vh", bgcolor: "white" }}>
-			<CourseHeader course={courseData} />
-			<Box
-				sx={{
-					maxWidth: "1280px",
-					mx: "auto",
-					px: { xs: 2, sm: 3, lg: 4 },
-					py: 4,
-				}}>
-				<Box
-					sx={{
-						display: "flex",
-						flexDirection: { xs: "column", lg: "row" },
-						gap: 4,
-						alignItems: "flex-start",
-					}}>
-					{/* Main Content */}
-					<Box sx={{ flex: 1 }}>
-						<WhatYoullLearn course={courseData} />
-						<CourseContent course={courseData} />
-						<CourseRequirements course={courseData} />
-						<CourseDescription course={courseData} />
-						<CourseInstructors course={courseData} />
-						<CourseReviews course={courseData} />
-					</Box>
+  if (!courseData) {
+    return (
+      <Box sx={{ p: 4 }}>
+        <Typography>No course data available</Typography>
+      </Box>
+    );
+  }
 
-					{/* Sticky Sidebar */}
-					<Box
-						sx={{
-							width: "350px",
-							flexShrink: 0,
-							display: { xs: "none", lg: "block" },
-							position: "sticky",
-							top: 32,
-							alignSelf: "flex-start",
-						}}>
-						<CourseSidebar course={courseData} />
-					</Box>
-				</Box>
-			</Box>
-		</Box>
-	);
+  return (
+    <Box sx={{ minHeight: "100vh", bgcolor: "white" }}>
+      <CourseHeader course={courseData} />
+      <Box
+        sx={{
+          maxWidth: "1280px",
+          mx: "auto",
+          px: { xs: 2, sm: 3, lg: 4 },
+          py: 4,
+        }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: { xs: "column", lg: "row" },
+            gap: 4,
+            alignItems: "flex-start",
+          }}
+        >
+          {/* Main Content */}
+          <Box sx={{ flex: 1 }}>
+            <WhatYoullLearn course={courseData} />
+            <CourseContent course={courseData} />
+            <CourseRequirements course={courseData} />
+            <CourseDescription course={courseData} />
+            <CourseInstructors course={courseData} />
+            <CourseReviews course={courseData} />
+          </Box>
+
+          {/* Sticky Sidebar */}
+          <Box
+            sx={{
+              width: "350px",
+              flexShrink: 0,
+              display: { xs: "none", lg: "block" },
+              position: "sticky",
+              top: 32,
+              alignSelf: "flex-start",
+            }}
+          >
+            <CourseSidebar course={courseData} />
+          </Box>
+        </Box>
+      </Box>
+    </Box>
+  );
 };
 
 export default CourseDetails;
