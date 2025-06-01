@@ -28,6 +28,7 @@ import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import CloseIcon from "@mui/icons-material/Close";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import SchoolIcon from "@mui/icons-material/School";
 import {
   db,
   doc,
@@ -39,6 +40,7 @@ import {
 } from "../../Firebase/firebase";
 import { CartContext } from "../../context/cart-context";
 import { WishlistContext } from "../../context/wishlist-context";
+import { UserContext } from "../../context/UserContext";
 import { errorModal } from "../../services/swal";
 
 const CourseSidebar = ({ course }) => {
@@ -47,6 +49,7 @@ const CourseSidebar = ({ course }) => {
   const [openModal, setOpenModal] = useState(false);
   const [videoError, setVideoError] = useState(null);
   const [isInCart, setIsInCart] = useState(false);
+  const [isEnrolled, setIsEnrolled] = useState(false);
   const {
     addToCart,
     loading: cartLoading,
@@ -54,6 +57,7 @@ const CourseSidebar = ({ course }) => {
   } = useContext(CartContext);
   const { addToWishlist, removeFromWishlist, wishlistItems } =
     useContext(WishlistContext);
+  const { user } = useContext(UserContext);
 
   const isWishlisted = wishlistItems.some((item) => item.id === course?.id);
 
@@ -65,13 +69,33 @@ const CourseSidebar = ({ course }) => {
     return `${hours} hr ${mins} min`;
   };
 
-  // Check if course is already in cart on mount or when cartItems/course changes
+  // Check if course is in cart on mount or when cartItems/course changes
   useEffect(() => {
     if (course?.id && cartItems) {
       const isCourseInCart = cartItems.some((item) => item.id === course.id);
       setIsInCart(isCourseInCart);
     }
   }, [course?.id, cartItems]);
+
+  // Check enrollment status
+  useEffect(() => {
+    const checkEnrollmentStatus = async () => {
+      if (!course?.id || !user?.uid) return;
+
+      try {
+        const enrollmentsRef = doc(db, "Enrollments", user.uid);
+        const enrollmentsDoc = await getDoc(enrollmentsRef);
+        if (enrollmentsDoc.exists()) {
+          const enrollments = enrollmentsDoc.data().courses || [];
+          setIsEnrolled(enrollments.some((c) => c.id === course.id));
+        }
+      } catch (error) {
+        console.error("Error checking enrollment status:", error);
+      }
+    };
+
+    checkEnrollmentStatus();
+  }, [course?.id, user?.uid]);
 
   useEffect(() => {
     const fetchCourseData = async () => {
@@ -221,10 +245,66 @@ const CourseSidebar = ({ course }) => {
 
     const success = await addToCart(courseToAdd);
     if (success) {
-      setIsInCart(true); // Update button state
+      setIsInCart(true);
     } else {
       errorModal("Error", "Failed to add to cart. Please try again.");
     }
+  };
+
+  const buttonText = () => {
+    if (isEnrolled) return "Enrolled";
+    if (cartLoading) return "Adding...";
+    if (isInCart) return "Added to Cart";
+    if (courseData?.price === 0) return "Enroll Now - Free";
+    return "Add to Cart";
+  };
+
+  const buttonProps = () => {
+    if (isEnrolled) {
+      return {
+        startIcon: <CheckCircleIcon />,
+        sx: {
+          bgcolor: "#4caf50",
+          color: "white",
+          "&:hover": { bgcolor: "#388e3c" },
+        },
+        disabled: true,
+      };
+    }
+
+    if (courseData?.price === 0) {
+      return {
+        startIcon: <SchoolIcon />,
+        sx: {
+          bgcolor: "#4caf50",
+          color: "white",
+          "&:hover": { bgcolor: "#388e3c" },
+        },
+        disabled: false,
+      };
+    }
+
+    if (isInCart) {
+      return {
+        startIcon: <CheckCircleIcon />,
+        sx: {
+          bgcolor: "#f5f5f5",
+          color: "#6a1b9a",
+          "&:hover": { bgcolor: "#f0f0f0" },
+        },
+        disabled: true,
+      };
+    }
+
+    return {
+      startIcon: <ShoppingCartIcon />,
+      sx: {
+        bgcolor: "#a435f0",
+        color: "white",
+        "&:hover": { bgcolor: "#8710d8" },
+      },
+      disabled: false,
+    };
   };
 
   if (!courseData) {
@@ -378,55 +458,49 @@ const CourseSidebar = ({ course }) => {
           <Button
             variant="contained"
             fullWidth
+            {...buttonProps()}
+            onClick={handleAddToCart}
             sx={{
-              bgcolor: isInCart ? "#4caf50" : "#a435f0",
-              "&:hover": { bgcolor: isInCart ? "#388e3c" : "#8710d8" },
+              ...buttonProps().sx,
               fontWeight: "bold",
               py: 1.5,
               textTransform: "none",
             }}
-            startIcon={isInCart ? <CheckCircleIcon /> : <ShoppingCartIcon />}
-            onClick={handleAddToCart}
-            disabled={cartLoading || isInCart}
-            aria-label={isInCart ? "Course added to cart" : "Add to cart"}
           >
-            {cartLoading
-              ? "Adding..."
-              : isInCart
-              ? "Added to Cart"
-              : "Add to Cart"}
+            {buttonText()}
           </Button>
-          <IconButton
-            onClick={handleWishlistToggle}
-            sx={{
-              bgcolor: "#f5f5f5",
-              "&:hover": { bgcolor: "#e0e0e0" },
-              color: isWishlisted ? "#a435f0" : "inherit",
-            }}
-            aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
-          >
-            {isWishlisted ? <FavoriteIcon /> : <FavoriteBorderIcon />}
-          </IconButton>
+          {!isEnrolled && (
+            <IconButton
+              onClick={handleWishlistToggle}
+              sx={{
+                bgcolor: "#f5f5f5",
+                "&:hover": { bgcolor: "#e0e0e0" },
+                color: isWishlisted ? "#a435f0" : "inherit",
+              }}
+            >
+              {isWishlisted ? <FavoriteIcon /> : <FavoriteBorderIcon />}
+            </IconButton>
+          )}
         </Box>
-
-        <Button
-          variant="outlined"
-          color="inherit"
-          fullWidth
-          sx={{
-            borderColor: "grey.800",
-            color: "grey.800",
-            fontWeight: "bold",
-            py: 1.5,
-            mb: 2,
-            textTransform: "none",
-            "&:hover": { bgcolor: "grey.50", borderColor: "grey.800" },
-          }}
-          aria-label="Buy now"
-        >
-          Buy now
-        </Button>
-
+        {!isEnrolled && (
+          <Button
+            variant="outlined"
+            color="inherit"
+            fullWidth
+            sx={{
+              borderColor: "grey.800",
+              color: "grey.800",
+              fontWeight: "bold",
+              py: 1.5,
+              mb: 2,
+              textTransform: "none",
+              "&:hover": { bgcolor: "grey.50", borderColor: "grey.800" },
+            }}
+            aria-label="Buy now"
+          >
+            Buy now
+          </Button>
+        )}
         <Typography variant="body2" align="center" sx={{ mb: 3 }}>
           30-Day Money-Back Guarantee
         </Typography>
@@ -459,7 +533,9 @@ const CourseSidebar = ({ course }) => {
                 <DownloadIcon sx={{ fontSize: 16, color: "grey.600" }} />
               </ListItemIcon>
               <ListItemText
-                primary={`${courseData.resourceCount || 0} downloadable resources`}
+                primary={`${
+                  courseData.resourceCount || 0
+                } downloadable resources`}
                 primaryTypographyProps={{ variant: "body2" }}
               />
             </ListItem>

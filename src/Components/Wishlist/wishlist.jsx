@@ -19,18 +19,23 @@ import FavoriteIcon from "@mui/icons-material/Favorite";
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
 import DeleteIcon from "@mui/icons-material/Delete";
 import StarIcon from "@mui/icons-material/Star";
-import React, { useState, useRef, useEffect } from "react";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import React, { useState, useRef, useEffect, useContext } from "react";
 import { grey } from "@mui/material/colors";
 import { useWishlist } from "../../context/wishlist-context";
 import { useCart } from "../../context/cart-context";
+import { UserContext } from "../../context/UserContext";
 import { useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { db, doc, getDoc } from "../../Firebase/firebase";
 
 function Wishlist() {
 	const { t } = useTranslation();
 	const navigate = useNavigate();
 	const { wishlistItems, removeFromWishlist } = useWishlist();
 	const { addToCart, cartItems } = useCart();
+	const { user } = useContext(UserContext);
+	const [enrolledCourses, setEnrolledCourses] = useState([]);
 	const [notification, setNotification] = useState({
 		open: false,
 		message: "",
@@ -123,6 +128,45 @@ function Wishlist() {
 	};
 
 	useEffect(() => {
+		const fetchEnrolledCourses = async () => {
+			if (user?.id) {
+				const userDoc = doc(db, "users", user.id);
+				const userSnapshot = await getDoc(userDoc);
+
+				if (userSnapshot.exists()) {
+					setEnrolledCourses(userSnapshot.data().enrolledCourses || []);
+				} else {
+					setEnrolledCourses([]);
+				}
+			} else {
+				setEnrolledCourses([]);
+			}
+		};
+
+		fetchEnrolledCourses();
+	}, [user]);
+
+	useEffect(() => {
+		const checkEnrollmentStatus = async () => {
+			if (!user?.uid) {
+				setEnrolledCourses([]);
+				return;
+			}
+			try {
+				const enrollmentsRef = doc(db, "Enrollments", user.uid);
+				const enrollmentsDoc = await getDoc(enrollmentsRef);
+				if (enrollmentsDoc.exists()) {
+					const enrollments = enrollmentsDoc.data().courses || [];
+					setEnrolledCourses(enrollments.map((c) => c.id));
+				}
+			} catch (error) {
+				console.error("Error checking enrollment status:", error);
+			}
+		};
+		checkEnrollmentStatus();
+	}, [user]);
+
+	useEffect(() => {
 		return () => {
 			if (closeTimeoutRef.current) {
 				clearTimeout(closeTimeoutRef.current);
@@ -132,6 +176,55 @@ function Wishlist() {
 
 	const open = Boolean(anchorEl);
 	const id = open ? "course-popover" : undefined;
+
+	const renderCourseButton = (course) => {
+		const isEnrolled = enrolledCourses.includes(course.id);
+		const isInCart = cartItems.some((item) => item.id === course.id);
+
+		return (
+			<Button
+				variant="contained"
+				fullWidth
+				startIcon={isEnrolled ? <CheckCircleIcon /> : <AddShoppingCartIcon />}
+				onClick={(e) => {
+					e.preventDefault();
+					e.stopPropagation();
+					if (!isEnrolled) {
+						handleMoveToCart(course);
+					}
+				}}
+				disabled={isEnrolled}
+				sx={{
+					bgcolor: isEnrolled
+						? "#4caf50"
+						: isInCart
+						? "#f5f5f5"
+						: course.price === 0
+						? "#4caf50"
+						: "#a435f0",
+					color: isInCart ? "#6a1b9a" : "white",
+					textTransform: "none",
+					flex: 1,
+					"&:hover": {
+						bgcolor: isEnrolled
+							? "#388e3c"
+							: isInCart
+							? "#f0f0f0"
+							: course.price === 0
+							? "#388e3c"
+							: "#8710d8",
+					},
+				}}>
+				{isEnrolled
+					? "Enrolled"
+					: isInCart
+					? "In Cart"
+					: course.price === 0
+					? "Enroll Free"
+					: "Add to Cart"}
+			</Button>
+		);
+	};
 
 	if (!wishlistItems) {
 		return (
@@ -380,30 +473,8 @@ function Wishlist() {
 											{selectedCourse.description}
 										</Typography>
 										<Box display="flex" gap={1}>
-											<Button
-												variant="contained"
-												sx={{
-													backgroundColor: "purple",
-													color: "white",
-													textTransform: "none",
-													flex: 1,
-													"&:hover": {
-														backgroundColor: "#5e2a9e",
-													},
-												}}
-												startIcon={<AddShoppingCartIcon />}
-												onClick={(e) => {
-													e.preventDefault();
-													e.stopPropagation();
-													handleMoveToCart(selectedCourse);
-												}}
-												disabled={cartItems.some(
-													(item) => item.id === selectedCourse.id
-												)}>
-												{cartItems.some((item) => item.id === selectedCourse.id)
-													? t("In Cart")
-													: t("Add to Cart")}
-											</Button>
+											{" "}
+											{renderCourseButton(selectedCourse)}
 											<IconButton
 												onClick={(event) => {
 													event.preventDefault();

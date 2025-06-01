@@ -1,25 +1,37 @@
 /** @format */
-
-import FavoriteIcon from "@mui/icons-material/Favorite";
-import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
+import React, { useState, useEffect, useContext } from "react";
 import {
   Box,
-  Button,
   Card,
   CardContent,
   CardMedia,
+  Typography,
+  Grid,
+  Stack,
+  Button,
+  Rating,
   Chip,
   CircularProgress,
-  Grid,
   IconButton,
-  Rating,
-  Stack,
-  Typography,
 } from "@mui/material";
-import { grey, purple } from "@mui/material/colors";
-import { useEffect, useState } from "react";
-import { collection, db, getDocs, query, where } from "../../Firebase/firebase";
+import { purple, grey } from "@mui/material/colors";
+import {
+  db,
+  collection,
+  getDocs,
+  doc,
+  getDoc,
+  query,
+  where,
+} from "../../Firebase/firebase";
 import { useWishlist } from "../../context/wishlist-context";
+import { CartContext } from "../../context/cart-context";
+import { UserContext } from "../../context/UserContext";
+import FavoriteIcon from "@mui/icons-material/Favorite";
+import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
+import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import SchoolIcon from "@mui/icons-material/School";
 
 function Category() {
   const categories = [
@@ -28,17 +40,21 @@ function Category() {
     "IT & Software",
     "Design",
     "Marketing",
-  ]; // Add your categories here
+  ];
   const [courses, setCourses] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("Development");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [enrolledCourses, setEnrolledCourses] = useState([]);
   const { wishlistItems, addToWishlist, removeFromWishlist } = useWishlist();
+  const { cartItems, addToCart, enrollCourse } = useContext(CartContext);
+  const { user } = useContext(UserContext);
 
   const handleCategoryChange = (category) => {
     setSelectedCategory(category);
   };
 
+  // Fetch courses
   useEffect(() => {
     const fetchCourses = async () => {
       setLoading(true);
@@ -65,6 +81,114 @@ function Category() {
     fetchCourses();
   }, [selectedCategory]);
 
+  // Check enrollment status
+  useEffect(() => {
+    const checkEnrollmentStatus = async () => {
+      if (!user?.uid) {
+        setEnrolledCourses([]);
+        return;
+      }
+      try {
+        const enrollmentsRef = doc(db, "Enrollments", user.uid);
+        const enrollmentsDoc = await getDoc(enrollmentsRef);
+        if (enrollmentsDoc.exists()) {
+          const enrollments = enrollmentsDoc.data().courses || [];
+          setEnrolledCourses(enrollments.map((c) => c.id));
+        }
+      } catch (error) {
+        console.error("Error checking enrollment status:", error);
+      }
+    };
+    checkEnrollmentStatus();
+  }, [user]);
+
+  const handleEnrollFreeCourse = async (course) => {
+    if (!user?.uid) return;
+    try {
+      await enrollCourse(user.uid, {
+        ...course,
+        enrolled_at: new Date(),
+        progress: 0,
+        completed_lessons: [],
+        last_accessed: new Date(),
+      });
+      setEnrolledCourses([...enrolledCourses, course.id]);
+    } catch (error) {
+      console.error("Error enrolling in course:", error);
+    }
+  };
+
+  const renderCourseButton = (course) => {
+    const isEnrolled = enrolledCourses.includes(course.id);
+    const isInCart = cartItems.some((item) => item.id === course.id);
+    const isFree = typeof course.price === "number" ? course.price === 0 : true;
+
+    let buttonProps = {
+      variant: "contained",
+      fullWidth: true,
+      onClick: (e) => {
+        e.stopPropagation();
+        if (!isEnrolled && !isInCart) {
+          if (isFree) {
+            handleEnrollFreeCourse(course);
+          } else {
+            addToCart({
+              ...course,
+              price: typeof course.price === "number" ? course.price : 0,
+            });
+          }
+        }
+      },
+      disabled: isEnrolled,
+      startIcon: isEnrolled ? (
+        <CheckCircleIcon />
+      ) : isFree ? (
+        <SchoolIcon />
+      ) : (
+        <AddShoppingCartIcon />
+      ),
+      sx: {
+        bgcolor: isEnrolled
+          ? "#4caf50"
+          : isInCart
+          ? "#e0e0e0"
+          : isFree
+          ? "#4caf50"
+          : "#a435f0",
+        color: isInCart ? "#6a1b9a" : "white",
+        "&:hover": {
+          bgcolor: isEnrolled
+            ? "#45a049"
+            : isInCart
+            ? "#d5d5d5"
+            : isFree
+            ? "#45a049"
+            : "#8710d8",
+          transform: "translateY(-1px)",
+          boxShadow: 2,
+        },
+        transition: "all 0.2s ease-in-out",
+        textTransform: "none",
+        fontWeight: "bold",
+        fontSize: "0.9rem",
+        py: 1,
+        borderRadius: "4px",
+      },
+    };
+
+    return (
+      <Button {...buttonProps}>
+        {isEnrolled
+          ? "Enrolled"
+          : isInCart
+          ? "In Cart"
+          : isFree
+          ? "Enroll Free"
+          : "Add to Cart"}
+      </Button>
+    );
+  };
+
   if (loading) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", p: 5 }}>
@@ -82,6 +206,7 @@ function Category() {
       </Box>
     );
   }
+
   return (
     <Box sx={{ p: 3 }}>
       <Typography variant="h4" sx={{ mb: 3, fontWeight: "bold" }}>
@@ -99,8 +224,7 @@ function Category() {
             variant={selectedCategory === category ? "contained" : "outlined"}
             onClick={() => handleCategoryChange(category)}
             sx={{
-              bgcolor:
-                selectedCategory === category ? "#8000ff" : "transparent",
+              bgcolor: selectedCategory === category ? "#8000ff" : "transparent",
               color: selectedCategory === category ? "white" : "#8000ff",
               borderColor: "#8000ff",
               "&:hover": {
@@ -132,6 +256,11 @@ function Category() {
                   display: "flex",
                   flexDirection: "column",
                   position: "relative",
+                  transition: "all 0.2s ease-in-out",
+                  "&:hover": {
+                    transform: "translateY(-4px)",
+                    boxShadow: 3,
+                  },
                 }}
               >
                 <IconButton
@@ -142,10 +271,13 @@ function Category() {
                     backgroundColor: "rgba(255, 255, 255, 0.9)",
                     "&:hover": {
                       backgroundColor: "rgba(255, 255, 255, 1)",
+                      transform: "scale(1.1)",
                     },
+                    transition: "all 0.2s ease-in-out",
                     color: wishlistItems.some((item) => item.id === course.id)
                       ? "#a435f0"
-                      : "inherit",
+                      : grey[600],
+                    zIndex: 1,
                   }}
                   onClick={(e) => {
                     e.preventDefault();
@@ -166,12 +298,14 @@ function Category() {
                     <FavoriteBorderIcon />
                   )}
                 </IconButton>
+
                 <CardMedia
                   component="img"
                   height="140"
                   image={course.image}
                   alt={course.title}
                 />
+
                 <CardContent>
                   <Typography variant="h6" sx={{ fontWeight: "bold", mb: 1 }}>
                     {course.title}
@@ -201,7 +335,7 @@ function Category() {
                       readOnly
                     />
                     <Typography variant="body2" color="text.secondary">
-                      ({course.studentsCount.toLocaleString()} students)
+                      ({course.studentsCount?.toLocaleString() || 0} students)
                     </Typography>
                   </Stack>
 
@@ -231,33 +365,28 @@ function Category() {
 
                   <Stack direction="row" alignItems="center" spacing={1}>
                     <Typography variant="h6" fontWeight="bold">
-                      ${course.price}
+                      ${typeof course.price === "number"
+                        ? course.price.toFixed(2)
+                        : "0.00"}
                     </Typography>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        textDecoration: "line-through",
-                        color: grey[600],
-                      }}
-                    >
-                      ${course.originalPrice}
-                    </Typography>
+                    {course.originalPrice && (
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          textDecoration: "line-through",
+                          color: grey[600],
+                        }}
+                      >
+                        ${typeof course.originalPrice === "number"
+                          ? course.originalPrice.toFixed(2)
+                          : "0.00"}
+                      </Typography>
+                    )}
                   </Stack>
                 </CardContent>
 
                 <Box sx={{ p: 2, mt: "auto" }}>
-                  <Button
-                    variant="contained"
-                    fullWidth
-                    sx={{
-                      bgcolor: "#8000ff",
-                      "&:hover": {
-                        bgcolor: "#6a1b9a",
-                      },
-                    }}
-                  >
-                    Add to cart
-                  </Button>
+                  {renderCourseButton(course)}
                 </Box>
               </Card>
             </Grid>
