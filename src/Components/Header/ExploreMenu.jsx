@@ -1,14 +1,8 @@
 /** @format */
 
-import {
-	Box,
-	CircularProgress,
-	Menu,
-	MenuItem,
-	Typography,
-} from "@mui/material";
+import { Box, Button, Menu, MenuItem, Typography } from "@mui/material";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState } from "react";
 
 const ExploreMenu = ({
 	categories,
@@ -18,239 +12,198 @@ const ExploreMenu = ({
 	selectedSubCategory,
 	setSelectedSubCategory,
 	courses,
-	isLoading,
-	isMenuHovered,
-	setIsMenuHovered,
 	handleNavigate,
 	closeAllMenus,
 	t,
 }) => {
-	const [categoryMenuAnchor, setCategoryMenuAnchor] = useState(null);
-	const [subCategoryMenuAnchor, setSubCategoryMenuAnchor] = useState(null);
-	const [courseMenuAnchor, setCourseMenuAnchor] = useState(null);
-	const hoverTimeoutRef = useRef(null);
+	const [categoryAnchor, setCategoryAnchor] = useState(null);
+	const [subCategoryAnchor, setSubCategoryAnchor] = useState(null);
+	const [courseAnchor, setCourseAnchor] = useState(null);
 
-	// التأكد من تحديث subCategoryMenuAnchor بناءً على selectedCategory
-	useEffect(() => {
-		if (selectedCategory && categoryMenuAnchor && subCategories.length > 0) {
-			setSubCategoryMenuAnchor(categoryMenuAnchor); // استخدام categoryMenuAnchor كـ anchor
+	const handleExploreClick = (event) => {
+		if (categoryAnchor) {
+			handleClose();
 		} else {
-			setSubCategoryMenuAnchor(null);
+			setCategoryAnchor(event.currentTarget);
 		}
-	}, [selectedCategory, subCategories, categoryMenuAnchor]);
-
-	const handleCategoryClick = (event) => {
-		event.preventDefault();
-		setCategoryMenuAnchor(event.currentTarget);
-		setIsMenuHovered(true);
 	};
 
-	const handleCategoryMouseEnter = (category) => {
-		if (hoverTimeoutRef.current) {
-			clearTimeout(hoverTimeoutRef.current);
-		}
-
-		hoverTimeoutRef.current = setTimeout(() => {
-			setSelectedCategory(category);
-			setCourseMenuAnchor(null);
-			setSelectedSubCategory(null);
-			setIsMenuHovered(true);
-		}, 100);
+	const handleCategoryClick = (category, event) => {
+		event.stopPropagation();
+		setSelectedCategory(category);
+		setSubCategoryAnchor(event.currentTarget);
+		setCourseAnchor(null);
+		setSelectedSubCategory(null);
 	};
 
-	const handleSubCategoryMouseEnter = (subCategory, event) => {
-		if (hoverTimeoutRef.current) {
-			clearTimeout(hoverTimeoutRef.current);
-		}
-
-		hoverTimeoutRef.current = setTimeout(() => {
-			setSelectedSubCategory(subCategory);
-			setCourseMenuAnchor(event.currentTarget);
-			setIsMenuHovered(true);
-		}, 100);
+	const handleSubCategoryClick = (subCategory, event) => {
+		event.stopPropagation();
+		setSelectedSubCategory(subCategory);
+		setCourseAnchor(event.currentTarget);
 	};
 
-	const handleMenuMouseEnter = () => {
-		setIsMenuHovered(true);
+	const handleClose = () => {
+		setCategoryAnchor(null);
+		setSubCategoryAnchor(null);
+		setCourseAnchor(null);
+		closeAllMenus();
 	};
 
-	const handleMenuMouseLeave = () => {
-		if (hoverTimeoutRef.current) {
-			clearTimeout(hoverTimeoutRef.current);
-		}
+	const handleCourseClick = (courseId) => {
+		handleNavigate("course", courseId);
+		handleClose();
+	};
 
-		hoverTimeoutRef.current = setTimeout(() => {
-			setIsMenuHovered(false);
-			closeAllMenus();
-			setCategoryMenuAnchor(null);
-			setSubCategoryMenuAnchor(null);
-			setCourseMenuAnchor(null);
-		}, 200);
+	const handleViewAllCategory = () => {
+		handleNavigate("category", selectedCategory?.id);
+		setSubCategoryAnchor(null);
+		setCourseAnchor(null);
+	};
+
+	const handleViewAllSubCategory = () => {
+		handleNavigate("subcategory", selectedSubCategory?.id);
+		setCourseAnchor(null);
 	};
 
 	return (
-		<Box
-			sx={{ position: "relative" }}
-			onMouseEnter={handleMenuMouseEnter}
-			onMouseLeave={handleMenuMouseLeave}>
-			<Typography onClick={handleCategoryClick} sx={linkStyle}>
-				{t("Explore")}
-			</Typography>
-			<Box
+		<Box sx={{ position: "relative" }}>
+			<Button
+				onClick={handleExploreClick}
 				sx={{
-					display: "flex",
-					position: "absolute",
-					top: "100%",
-					left: 0,
-					zIndex: 1300,
+					color: "#1c1d1f",
+					textTransform: "none",
+					fontWeight: "bold",
+					px: 2,
+					py: 1,
+					bgcolor: categoryAnchor ? "#f7f9fa" : "transparent",
+					"&:hover": {
+						backgroundColor: "#f7f9fa",
+					},
 				}}>
-				<Menu
-					anchorEl={categoryMenuAnchor}
-					open={Boolean(categoryMenuAnchor) && isMenuHovered}
-					onClose={closeAllMenus}
-					anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-					transformOrigin={{ vertical: "top", horizontal: "left" }}
-					PaperProps={menuPaperProps}>
-					{isLoading ? (
-						<Box sx={{ display: "flex", justifyContent: "center", p: 2 }}>
-							<CircularProgress size={24} />
-						</Box>
-					) : categories.length > 0 ? (
-						categories.map((category) => (
-							<MenuItem
-								key={category.id}
-								onMouseEnter={(e) => handleCategoryMouseEnter(category, e)}
-								onClick={() => handleNavigate("category", category.id)}
-								selected={selectedCategory?.id === category.id}
-								sx={{
-									display: "flex",
-									justifyContent: "space-between",
-									alignItems: "center",
-								}}>
-								<Typography variant="body1">{category.name}</Typography>
-								<ChevronRightIcon sx={{ ml: 1, color: "#6a6f73" }} />
-							</MenuItem>
-						))
-					) : (
-						<MenuItem disabled>
-							<Typography variant="body1">
-								{t("No categories available")}
+				{t("Explore")}
+			</Button>
+
+			{/* Categories Menu */}
+			<Menu
+				anchorEl={categoryAnchor}
+				open={Boolean(categoryAnchor)}
+				onClose={handleClose}
+				anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+				transformOrigin={{ vertical: "top", horizontal: "left" }}
+				PaperProps={menuPaperProps}>
+				{categories.map((category) => (
+					<MenuItem
+						key={category.id}
+						onClick={(e) => handleCategoryClick(category, e)}
+						selected={selectedCategory?.id === category.id}
+						sx={{
+							display: "flex",
+							justifyContent: "space-between",
+							alignItems: "center",
+							minWidth: 200,
+						}}>
+						<Typography variant="body1">{category.name}</Typography>
+						<ChevronRightIcon sx={{ ml: 1, color: "#6a6f73" }} />
+					</MenuItem>
+				))}
+			</Menu>
+
+			{/* SubCategories Menu */}
+			<Menu
+				anchorEl={subCategoryAnchor}
+				open={Boolean(subCategoryAnchor) && subCategories.length > 0}
+				onClose={() => setSubCategoryAnchor(null)}
+				anchorOrigin={{ vertical: "top", horizontal: "right" }}
+				transformOrigin={{ vertical: "top", horizontal: "left" }}
+				PaperProps={menuPaperProps}>
+				{/* View All Category Option */}
+				<MenuItem
+					onClick={handleViewAllCategory}
+					sx={{
+						borderBottom: "1px solid #e5e7eb",
+						color: "#8000ff",
+						fontWeight: "bold",
+					}}>
+					{t("View all")} {selectedCategory?.name}
+				</MenuItem>
+
+				{/* SubCategories List */}
+				{subCategories.map((subCategory) => (
+					<MenuItem
+						key={subCategory.id}
+						onClick={(e) => handleSubCategoryClick(subCategory, e)}
+						selected={selectedSubCategory?.id === subCategory.id}
+						sx={{
+							display: "flex",
+							justifyContent: "space-between",
+							alignItems: "center",
+							minWidth: 200,
+						}}>
+						<Typography variant="body1">{subCategory.name}</Typography>
+						<ChevronRightIcon sx={{ ml: 1, color: "#6a6f73" }} />
+					</MenuItem>
+				))}
+			</Menu>
+
+			{/* Courses Menu */}
+			<Menu
+				anchorEl={courseAnchor}
+				open={Boolean(courseAnchor)}
+				onClose={() => setCourseAnchor(null)}
+				anchorOrigin={{ vertical: "top", horizontal: "right" }}
+				transformOrigin={{ vertical: "top", horizontal: "left" }}
+				PaperProps={courseMenuProps}>
+				{/* View All SubCategory Option */}
+				<MenuItem
+					onClick={handleViewAllSubCategory}
+					sx={{
+						borderBottom: "1px solid #e5e7eb",
+						color: "#8000ff",
+						fontWeight: "bold",
+					}}>
+					{t("View all")} {selectedSubCategory?.name}
+				</MenuItem>
+
+				{/* Courses List */}
+				{courses.map((course) => (
+					<MenuItem
+						key={course.id}
+						onClick={() => handleCourseClick(course.id)}
+						sx={{
+							display: "flex",
+							flexDirection: "column",
+							alignItems: "flex-start",
+							gap: 0.5,
+							minWidth: 250,
+						}}>
+						<Typography variant="subtitle1" noWrap>
+							{course.title}
+						</Typography>
+						<Box
+							sx={{
+								display: "flex",
+								alignItems: "center",
+								gap: 1,
+								width: "100%",
+							}}>
+							<Typography
+								variant="caption"
+								color="text.secondary"
+								sx={{ flex: 1 }}>
+								{course.instructor}
 							</Typography>
-						</MenuItem>
-					)}
-				</Menu>
-				<Menu
-					anchorEl={subCategoryMenuAnchor}
-					open={
-						Boolean(subCategoryMenuAnchor) &&
-						isMenuHovered &&
-						subCategories.length > 0
-					}
-					onClose={closeAllMenus}
-					anchorOrigin={{ vertical: "top", horizontal: "right" }}
-					transformOrigin={{ vertical: "top", horizontal: "left" }}
-					PaperProps={nestedMenuProps}>
-					{isLoading ? (
-						<Box sx={{ display: "flex", justifyContent: "center", p: 2 }}>
-							<CircularProgress size={24} />
-						</Box>
-					) : subCategories.length > 0 ? (
-						subCategories.map((subCategory) => (
-							<MenuItem
-								key={subCategory.id}
-								onMouseEnter={(e) =>
-									handleSubCategoryMouseEnter(subCategory, e)
-								}
-								onClick={() => handleNavigate("subcategory", subCategory.id)}
-								selected={selectedSubCategory?.id === subCategory.id}
-								sx={{
-									display: "flex",
-									justifyContent: "space-between",
-									alignItems: "center",
-								}}>
-								<Typography variant="body1">{subCategory.name}</Typography>
-								<ChevronRightIcon sx={{ ml: 1, color: "#6a6f73" }} />
-							</MenuItem>
-						))
-					) : (
-						<MenuItem disabled>
-							<Typography variant="body1">
-								{t("No subcategories available")}
+							<Typography variant="caption" color="text.secondary">
+								{course.price} {t("EGP")}
 							</Typography>
-						</MenuItem>
-					)}
-				</Menu>
-				<Menu
-					anchorEl={courseMenuAnchor}
-					open={Boolean(courseMenuAnchor) && isMenuHovered}
-					onClose={closeAllMenus}
-					anchorOrigin={{ vertical: "top", horizontal: "right" }}
-					transformOrigin={{ vertical: "top", horizontal: "left" }}
-					PaperProps={courseMenuProps}>
-					{isLoading ? (
-						<Box sx={{ display: "flex", justifyContent: "center", p: 2 }}>
-							<CircularProgress size={24} />
 						</Box>
-					) : courses.length > 0 ? (
-						courses.map((course) => (
-							<MenuItem
-								key={course.id}
-								onClick={() => handleNavigate("course", course.id)}
-								sx={{
-									display: "flex",
-									flexDirection: "column",
-									alignItems: "flex-start",
-									gap: 0.5,
-								}}>
-								<Typography variant="subtitle1" noWrap>
-									{course.title}
-								</Typography>
-								<Box
-									sx={{
-										display: "flex",
-										alignItems: "center",
-										gap: 1,
-										width: "100%",
-									}}>
-									<Typography
-										variant="caption"
-										color="text.secondary"
-										sx={{ flex: 1 }}>
-										{course.instructor_name}
-									</Typography>
-									<Typography variant="caption" color="text.secondary">
-										{course.price} {t("EGP")}
-									</Typography>
-								</Box>
-							</MenuItem>
-						))
-					) : (
-						<MenuItem disabled>
-							<Typography variant="body1">
-								{t("No courses available")}
-							</Typography>
-						</MenuItem>
-					)}
-				</Menu>
-			</Box>
+					</MenuItem>
+				))}
+			</Menu>
 		</Box>
 	);
 };
 
 // Styles
-const linkStyle = {
-	cursor: "pointer",
-	px: 1,
-	py: 1,
-	borderRadius: "4px",
-	transition: "0.2s",
-	color: "#1c1d1f",
-	"&:hover": {
-		color: "#8000ff",
-		backgroundColor: "#e0ccff",
-	},
-};
-
 const menuPaperProps = {
 	elevation: 3,
 	sx: {
@@ -265,32 +218,24 @@ const menuPaperProps = {
 			px: 2,
 			color: "#1c1d1f",
 			transition: "background-color 0.2s ease",
-			"&:hover, &.Mui-selected, &.Mui-selected:hover": {
-				backgroundColor: "#ede5f9",
-				color: "#6e29d2",
+			"&:hover": {
+				backgroundColor: "#f7f9fa",
 				"& .MuiTypography-root": {
-					color: "#6e29d2",
+					color: "#8000ff",
 				},
 				"& .MuiSvgIcon-root": {
-					color: "#6e29d2",
+					color: "#8000ff",
 				},
 			},
-			"&.active": {
-				backgroundColor: "#ede5f9",
-				color: "#6e29d2",
+			"&.Mui-selected": {
+				backgroundColor: "#f7f9fa",
+				"& .MuiTypography-root": {
+					color: "#8000ff",
+				},
+				"& .MuiSvgIcon-root": {
+					color: "#8000ff",
+				},
 			},
-		},
-	},
-};
-
-const nestedMenuProps = {
-	...menuPaperProps,
-	sx: {
-		...menuPaperProps.sx,
-		ml: 0.5,
-		"& .MuiMenuItem-root": {
-			...menuPaperProps.sx["& .MuiMenuItem-root"],
-			minWidth: 200,
 		},
 	},
 };
@@ -300,14 +245,13 @@ const courseMenuProps = {
 	sx: {
 		...menuPaperProps.sx,
 		ml: 0.5,
-		width: 300,
-		maxHeight: 400,
-		overflow: "auto",
 		"& .MuiMenuItem-root": {
 			...menuPaperProps.sx["& .MuiMenuItem-root"],
-			flexDirection: "column",
-			alignItems: "flex-start",
-			gap: 0.5,
+			"&:not(:first-child)": {
+				flexDirection: "column",
+				alignItems: "flex-start",
+				gap: 0.5,
+			},
 		},
 	},
 };
