@@ -46,10 +46,10 @@ export async function getSubcategories(categoryId) {
 }
 export async function addCourse(courseData) {
   try {
-    let newCourseRef = await setDoc(
-      doc(db, "Courses", courseData.course_id),
-      courseData
-    );
+    let newCourseRef = await setDoc(doc(db, "Courses", courseData.course_id), {
+      ...courseData,
+      is_published: false,
+    });
     return newCourseRef;
   } catch (error) {
     console.error("Error adding course:", error);
