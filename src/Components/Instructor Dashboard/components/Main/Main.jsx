@@ -173,7 +173,12 @@ const InsMain = () => {
                 variant="body1"
                 onClick={() => nav("/")}
                 color={grey[700]}
-                sx={{ fontWeight: "bold"  , borderRadius : 1, cursor: "pointer" , ":hover": { backgroundColor: "#ede5f9" }}}
+                sx={{
+                  fontWeight: "bold",
+                  borderRadius: 1,
+                  cursor: "pointer",
+                  ":hover": { backgroundColor: "#ede5f9" },
+                }}
               >
                 {t("Student")}
               </Typography>
@@ -186,24 +191,58 @@ const InsMain = () => {
                 color="inherit"
               >
                 <AccountCircle sx={{ color: "black" }} />
-              </IconButton>
+              </IconButton>{" "}
               <Menu
                 id="menu-appbar"
                 anchorEl={anchorEl}
                 anchorOrigin={{
-                  vertical: "top",
+                  vertical: "bottom",
                   horizontal: "right",
                 }}
-                keepMounted
                 transformOrigin={{
                   vertical: "top",
                   horizontal: "right",
                 }}
                 open={Boolean(anchorEl)}
                 onClose={handleClose}
+                disableScrollLock={true}
+                slotProps={{
+                  paper: {
+                    sx: {
+                      mt: 1,
+                      minWidth: 180,
+                      boxShadow: "0px 2px 8px rgba(0,0,0,0.15)",
+                    },
+                  },
+                }}
+                MenuListProps={{
+                  sx: {
+                    py: 0.5,
+                  },
+                }}
               >
-                <MenuItem onClick={handleClose}>{t("Profile")}</MenuItem>
-                <MenuItem onClick={handleClose}>{t("My account")}</MenuItem>
+                <MenuItem
+                  onClick={handleClose}
+                  sx={{
+                    py: 1.5,
+                    "&:hover": {
+                      backgroundColor: "#e0ccff",
+                    },
+                  }}
+                >
+                  {t("Profile")}
+                </MenuItem>
+                <MenuItem
+                  onClick={handleClose}
+                  sx={{
+                    py: 1.5,
+                    "&:hover": {
+                      backgroundColor: "#e0ccff",
+                    },
+                  }}
+                >
+                  {t("My account")}
+                </MenuItem>
               </Menu>
             </Box>
           </Stack>

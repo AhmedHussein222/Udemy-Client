@@ -1,5 +1,6 @@
 /** @format */
 
+import { useTranslation } from "react-i18next";
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
@@ -25,6 +26,7 @@ import { WishlistContext } from "../context/wishlist-context";
 import { db } from "../Firebase/firebase.js";
 
 const CourseCard = ({ course, isHovered, onHover, onLeave }) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { wishlistItems, addToWishlist, removeFromWishlist } =
     useContext(WishlistContext);
@@ -176,7 +178,7 @@ const CourseCard = ({ course, isHovered, onHover, onLeave }) => {
                 variant="h6"
                 sx={{ fontWeight: "bold", fontSize: "1.1rem" }}
               >
-                {course.price === 0 ? "Free" : `${course.price} EGP`}
+                {course.price === 0 ? t("Free") : `${course.price} EGP`}
               </Typography>
               {course.original_price &&
                 course.original_price > course.price && (
@@ -262,7 +264,7 @@ const CourseCard = ({ course, isHovered, onHover, onLeave }) => {
               },
             }}
           >
-            {isInCart ? "In cart" : "Add to cart"}
+            {isInCart ? t("In cart") : t("Add to cart")}
           </Button>
           <IconButton
             onClick={handleWishlistToggle}
@@ -287,6 +289,7 @@ const CourseCard = ({ course, isHovered, onHover, onLeave }) => {
 };
 
 const CoursesSection = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [courses, setCourses] = useState([]);
   const [subCategories, setSubCategories] = useState([]);
@@ -328,7 +331,7 @@ const CoursesSection = () => {
         color="#0d1b2a"
         sx={{ mb: 4 }}
       >
-        What to learn next
+        {t("What to learn next")}
       </Typography>
       {subCategories.map((sub, index) => {
         const filteredCourses = courses.filter(
@@ -342,7 +345,7 @@ const CoursesSection = () => {
               fontWeight="bold"
               sx={{ mb: 3, display: "flex", alignItems: "center" }}
             >
-              <span>Featured courses in </span>
+              <span>{t("Featured courses in")} </span>
               <Box
                 component="span"
                 sx={{
