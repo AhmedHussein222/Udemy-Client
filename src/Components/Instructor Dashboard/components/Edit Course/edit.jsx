@@ -120,7 +120,8 @@ const EditCourse = () => {
           });
       } else {
         const course_id = v4();
-        await addCourse({ ...courseData, course_id, instructor_id: user.uid });
+      
+        await addCourse({ ...courseData, course_id, instructor_id: user.uid , is_published: false});
         await addLessons(curriculumData, course_id);
         successModal("Course created successfully");
         navigate("/instructor/");

@@ -17,8 +17,8 @@ import {
 } from "@mui/material";
 import React, { useEffect } from "react";
 import { getInstructorTransactions } from "../../../Firebase/courses";
-// إضافة hook الترجمة
 import { useTranslation } from "react-i18next";
+import { User } from "lucide-react";
 
 const Revenue = () => {
   const { t } = useTranslation();
@@ -29,7 +29,7 @@ const Revenue = () => {
   useEffect(() => {
     const fetchRevenueData = async () => {
       try {
-        const data = await getInstructorTransactions("11");
+        const data = await getInstructorTransactions(User.uid);
         setRevenueData(data);
       } catch (error) {
         console.error("Error fetching revenue data:", error);
@@ -61,7 +61,6 @@ const Revenue = () => {
 
   const transactionsCount = transactions.length;
 
-  // فلترة المعاملات حسب الفلتر المختار
   const filteredTransactions = React.useMemo(() => {
     if (monthFilter === "1m") {
       const now = new Date();

@@ -10,21 +10,22 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { getInsCourses, getInstructorReviews } from "../../../Firebase/courses";
+import { UserContext } from "../../../context/UserContext";
 const udemyPurple = "#A435F0";
 const udemyPurpleDark = "#5624d0";
 const udemyGray = "#f7f7fa";
-
 const Reviews = () => {
+  const {user} = useContext(UserContext);
   const [coursesWithReviews, setCoursesWithReviews] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const coursesData = await getInsCourses("2");
-        const reviewsResponse = await getInstructorReviews("2");
+        const coursesData = await getInsCourses(user.uid);
+        const reviewsResponse = await getInstructorReviews(user.uid);
 
         const processedCourses = coursesData.map((course) => {
           let total = 0;

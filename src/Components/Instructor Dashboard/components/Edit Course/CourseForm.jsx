@@ -1,16 +1,5 @@
 import { Add as AddIcon, Delete as DeleteIcon } from "@mui/icons-material";
-import {
-  Box,
-  Button,
-  Container,
-  Divider,
-  FormControl,
-  IconButton,
-  InputLabel,
-  MenuItem,
-  Select,
-  TextField,
-  Typography,
+import {Box,Button,Container,Divider,FormControl,IconButton,InputLabel,MenuItem,Select,TextField,Typography,
 } from "@mui/material";
 import { useEffect } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
@@ -34,10 +23,10 @@ const CourseForm = ({ defaultValues, onChange, categories, subCategories }) => {
       duration: 0,
       discount: 0,
       what_will_learn: [""],
-      requirements: [""],
+      requirements: [""], 
       language: "",
       level: "",
-      is_published: false,
+      is_published: false,   
       created_at: new Date(),
     },
     mode: "onTouched",
