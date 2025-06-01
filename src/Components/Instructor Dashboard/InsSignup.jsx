@@ -22,6 +22,7 @@ function InsSignup() {
             case true:
               successModal("Success","You are now an instructor! Welcome to the community.")
               navigate("/instructor/");
+              location.reload();
               break;
             case false:
               errorModal("Error","An error occurred while becoming an instructor. Please try again.");

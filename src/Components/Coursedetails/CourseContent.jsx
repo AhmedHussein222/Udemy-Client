@@ -14,6 +14,7 @@ import {
   Link,
   Modal,
   IconButton,
+  CircularProgress,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
@@ -190,7 +191,11 @@ const CourseContent = ({ course }) => {
   };
 
   if (loading) {
-    return <Typography>Loading course content...</Typography>;
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100px' }}>
+        <CircularProgress sx={{ color: '#1976d2' }} />
+      </Box>
+    );
   }
 
   return (

@@ -1,17 +1,17 @@
 /** @format */
 
-import React, { useState, useContext, useEffect } from "react";
-import { db } from "../Firebase/firebase";
 import {
+	arrayRemove,
+	arrayUnion,
 	doc,
 	getDoc,
 	setDoc,
-	arrayUnion,
-	arrayRemove,
 } from "firebase/firestore";
+import { useContext, useEffect, useState } from "react";
+import { db } from "../Firebase/firebase";
+import { warningModal } from "../services/swal";
 import { UserContext } from "./UserContext";
 import { CartContext } from "./cart-context";
-import { warningModal } from "../services/swal";
 import { enrollCourse } from "../services/enrollments";
 
 export const CartProvider = ({ children }) => {
@@ -19,6 +19,7 @@ export const CartProvider = ({ children }) => {
 	const [loading, setLoading] = useState(false);
 	const { user } = useContext(UserContext);
 
+	// Fetch cart items from Firestore when user changes
 	useEffect(() => {
 		const fetchCartItems = async () => {
 			if (!user) {
@@ -49,7 +50,10 @@ export const CartProvider = ({ children }) => {
 
 	const addToCart = async (course) => {
 		if (!user) {
-			warningModal("Warning", "You need to be logged in to enroll in courses");
+			warningModal(
+				"Warning",
+				"You need to be logged in to add courses to cart"
+			);
 			return false;
 		}
 
@@ -72,16 +76,17 @@ export const CartProvider = ({ children }) => {
 				const newItem = {
 					id: course.id,
 					title: course.title,
-					price: course.price,
+					price: Number(course.price) || 0,
 					thumbnail: course.thumbnail,
-					instructor_name: course.instructor_name,
-					description: course.description,
-					rating: course.rating,
+					instructor_name: course.instructor_name || "Unknown Instructor",
+					description: course.description || "",
+					rating: course.rating || { rate: 0, count: 0 },
 					totalHours: Number(course.totalHours || 0),
 					lectures: Number(course.lectures || 0),
 					addedAt: new Date().toISOString(),
 				};
 
+				// Update Firestore
 				await setDoc(
 					doc(db, "Carts", user.uid),
 					{
@@ -91,9 +96,9 @@ export const CartProvider = ({ children }) => {
 				);
 
 				setCartItems((prev) => [...prev, newItem]);
-				return true; 
+				return true; // Successfully added
 			}
-			return false; 
+			return false; // Item already in cart
 		} catch (error) {
 			console.error("Error adding to cart:", error);
 			return false;
@@ -133,12 +138,12 @@ export const CartProvider = ({ children }) => {
 
 		try {
 			setLoading(true);
-			// Clear in Firestore
 			await setDoc(doc(db, "Carts", user.uid), { items: [] });
-			// Clear local state
 			setCartItems([]);
+			return true;
 		} catch (error) {
 			console.error("Error clearing cart:", error);
+			throw error;
 		} finally {
 			setLoading(false);
 		}

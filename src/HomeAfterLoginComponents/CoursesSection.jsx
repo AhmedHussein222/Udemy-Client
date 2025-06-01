@@ -9,6 +9,8 @@ import {
 	updateDoc,
 	setDoc,
 	arrayUnion,
+	query,
+	where,
 } from "firebase/firestore";
 import { db } from "../Firebase/firebase.js";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
@@ -47,6 +49,7 @@ const CourseCard = ({ course, isHovered, onHover, onLeave }) => {
 	);
 	const [isEnrolled, setIsEnrolled] = useState(false);
 
+	// Check cart status
 	useEffect(() => {
 		setIsInCart(cartItems.some((item) => item.id === course.id));
 	}, [cartItems, course.id]);
@@ -90,27 +93,6 @@ const CourseCard = ({ course, isHovered, onHover, onLeave }) => {
 			addToWishlist(course);
 		}
 	};
-	const handleAddToCart = async (e) => {
-		e.preventDefault();
-		e.stopPropagation();
-		const courseInCart = cartItems.some((item) => item.id === course.id);
-		if (!courseInCart) {
-			const courseToAdd = {
-				id: course.id,
-				title: course.title,
-				price: Number(course.price) || 0,
-				thumbnail: course.thumbnail,
-				instructor_name: course.instructor_name || "Unknown Instructor",
-				description: course.description || "",
-				rating: course.rating || { rate: 0, count: 0 },
-				lectures: course.lectures || 0,
-				addedAt: new Date().toISOString(),
-			};
-			await addToCart(courseToAdd);
-			setIsInCart(true);
-		}
-	};
-
 	const handleEnroll = async (e) => {
 		e.preventDefault();
 		e.stopPropagation();
@@ -148,7 +130,26 @@ const CourseCard = ({ course, isHovered, onHover, onLeave }) => {
 		}
 	};
 
-	const open = Boolean(anchorEl);
+	const handleAddToCart = async (e) => {
+		e.preventDefault();
+		e.stopPropagation();
+		const courseInCart = cartItems.some((item) => item.id === course.id);
+		if (!courseInCart) {
+			const courseToAdd = {
+				id: course.id,
+				title: course.title,
+				price: Number(course.price) || 0,
+				thumbnail: course.thumbnail,
+				instructor_name: course.instructor_name || "Unknown Instructor",
+				description: course.description || "",
+				rating: course.rating || { rate: 0, count: 0 },
+				lectures: course.lectures || 0,
+				addedAt: new Date().toISOString(),
+			};
+			await addToCart(courseToAdd);
+			setIsInCart(true);
+		}
+	};
 
 	const getButtonProps = () => {
 		if (isEnrolled) {
@@ -214,6 +215,7 @@ const CourseCard = ({ course, isHovered, onHover, onLeave }) => {
 		};
 	};
 
+	const open = Boolean(anchorEl);
 	const buttonProps = getButtonProps();
 
 	return (
@@ -416,20 +418,26 @@ const CoursesSection = () => {
 
 	useEffect(() => {
 		const fetchData = async () => {
-			const coursesSnapshot = await getDocs(collection(db, "Courses"));
-			const coursesData = coursesSnapshot.docs.map((doc) => ({
-				id: doc.id,
-				...doc.data(),
-			}));
+			try {
+				const coursesSnapshot = await getDocs(
+					query(collection(db, "Courses"), where("is_published", "==", true))
+				);
+				const coursesData = coursesSnapshot.docs.map((doc) => ({
+					id: doc.id,
+					...doc.data(),
+				}));
 
-			const subSnapshot = await getDocs(collection(db, "SubCategories"));
-			const subData = subSnapshot.docs.map((doc) => ({
-				id: doc.id,
-				...doc.data(),
-			}));
+				const subSnapshot = await getDocs(collection(db, "SubCategories"));
+				const subData = subSnapshot.docs.map((doc) => ({
+					id: doc.id,
+					...doc.data(),
+				}));
 
-			setCourses(coursesData);
-			setSubCategories(subData);
+				setCourses(coursesData);
+				setSubCategories(subData);
+			} catch (error) {
+				console.error("Error fetching data:", error);
+			}
 		};
 
 		fetchData();

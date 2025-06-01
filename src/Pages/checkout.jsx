@@ -6,11 +6,9 @@ import PayPalButton from "../Components/payment/PayPalButton";
 import { updateEnrollments } from "../Firebase/courses";
 import { addOrder, emptyCart } from "../services/enrollments";
 import { errorModal, successModal } from "../services/swal";
-import { useNavigate } from "react-router-dom";
 
 const CheckoutComponent = () => {
 
-  const navigate = useNavigate();
   const handleSuccess = async (userid,details, cartItems) => {
   
     
@@ -20,7 +18,8 @@ const CheckoutComponent = () => {
       await updateEnrollments( userid, cartItems );
       await emptyCart(userid);
       successModal("Payment Successful!","Courses have been added to your account",)
-      navigate("/");
+      location.href = "/MyLearning";
+      clearCart();
     } catch ({ message }) {
 
       console.error("Error saving payment:", message);
@@ -28,7 +27,7 @@ const CheckoutComponent = () => {
     }
   };
 
-  const { cartItems, getCartTotal } = useContext(CartContext);
+  const { cartItems, getCartTotal , clearCart } = useContext(CartContext);
 
   let [total, setTotal] = useState(0);
   useEffect(() => {

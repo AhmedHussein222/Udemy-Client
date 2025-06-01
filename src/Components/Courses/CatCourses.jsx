@@ -1,21 +1,19 @@
-import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import { collection, getDocs, query, where } from "firebase/firestore";
-import { db } from "../../Firebase/firebase.js";
-import { useNavigate } from "react-router-dom";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import {
   Accordion,
-  AccordionSummary,
   AccordionDetails,
-  Typography,
-  RadioGroup,
-  FormControlLabel,
-  Radio,
+  AccordionSummary,
   Box,
   Button,
+  FormControlLabel,
+  Radio,
+  RadioGroup,
+  Typography,
 } from "@mui/material";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { Link } from "react-router-dom";
+import { collection, getDocs, query, where } from "firebase/firestore";
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { db } from "../../Firebase/firebase.js";
 // import getAverageRatings from "../../Functions/Rating.js";
 
 const CategoryPage = () => {
@@ -80,7 +78,6 @@ const CategoryPage = () => {
   const handlePriceChange = (e) => setSelectedPrice(e.target.value);
   const handleDurationChange = (e) => setSelectedDuration(e.target.value);
 
-
   const selectedCourses = courses.slice(0, 2);
 
   const totalPriceSelected = selectedCourses.reduce((acc, course) => {
@@ -92,7 +89,6 @@ const CategoryPage = () => {
   const discountValue = (totalPriceSelected * discountPercentage) / 100;
 
   const discountedPrice = totalPriceSelected - discountValue;
-
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -217,7 +213,8 @@ const CategoryPage = () => {
         // Fetch courses filtered by selected subcategory
         const q = query(
           collection(db, "Courses"),
-          where("subcategory_id", "==", selectedSubcategory)
+          where("subcategory_id", "==", selectedSubcategory),
+          where("is_published", "==", true)
         );
         const snapshot = await getDocs(q);
 
@@ -567,7 +564,7 @@ const CategoryPage = () => {
         )}
 
         {/* عرض الكورسات بعد الفلترة */}
-        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 3}}>
+        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
           {courses
             .filter((course) => {
               // Rating Filter
