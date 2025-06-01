@@ -38,6 +38,7 @@ import {
 } from "../../Firebase/firebase";
 import { CartContext } from "../../context/cart-context";
 import { WishlistContext } from "../../context/wishlist-context";
+import { UserContext } from "../../context/UserContext";
 import { errorModal } from "../../services/swal";
 
 const CourseSidebar = ({ course }) => {
@@ -46,6 +47,7 @@ const CourseSidebar = ({ course }) => {
 	const [openModal, setOpenModal] = useState(false);
 	const [videoError, setVideoError] = useState(null);
 	const [isInCart, setIsInCart] = useState(false);
+	const [isEnrolled, setIsEnrolled] = useState(false);
 	const {
 		addToCart,
 		loading: cartLoading,
@@ -53,6 +55,7 @@ const CourseSidebar = ({ course }) => {
 	} = useContext(CartContext);
 	const { addToWishlist, removeFromWishlist, wishlistItems } =
 		useContext(WishlistContext);
+	const { user } = useContext(UserContext);
 
 	const isWishlisted = wishlistItems.some((item) => item.id === course?.id);
 
@@ -142,6 +145,25 @@ const CourseSidebar = ({ course }) => {
 		fetchCourseData();
 	}, [course?.id]);
 
+	useEffect(() => {
+		const checkEnrollmentStatus = async () => {
+			if (!course?.id || !user?.uid) return;
+
+			try {
+				const enrollmentsRef = doc(db, "Enrollments", user.uid);
+				const enrollmentsDoc = await getDoc(enrollmentsRef);
+				if (enrollmentsDoc.exists()) {
+					const enrollments = enrollmentsDoc.data().courses || [];
+					setIsEnrolled(enrollments.some((c) => c.id === course.id));
+				}
+			} catch (error) {
+				console.error("Error checking enrollment status:", error);
+			}
+		};
+
+		checkEnrollmentStatus();
+	}, [course?.id, user?.uid]);
+
 	const calculateDiscount = (price, discountedPrice) => {
 		if (!price || !discountedPrice || discountedPrice >= price) return null;
 		const discount = ((price - discountedPrice) / price) * 100;
@@ -224,6 +246,28 @@ const CourseSidebar = ({ course }) => {
 		} else {
 			errorModal("Error", "Failed to add to cart. Please try again.");
 		}
+	};
+
+	const buttonText = () => {
+		if (isEnrolled) return "Enrolled";
+		if (cartLoading) return "Adding...";
+		if (isInCart) return "Added to Cart";
+		if (courseData?.price === 0) return "Enroll Now - Free";
+		return "Add to Cart";
+	};
+
+	const buttonColor = () => {
+		if (isEnrolled) return "#4caf50";
+		if (isInCart) return "#f5f5f5";
+		if (courseData?.price === 0) return "#4caf50";
+		return "#a435f0";
+	};
+
+	const buttonHoverColor = () => {
+		if (isEnrolled) return "#388e3c";
+		if (isInCart) return "#f0f0f0";
+		if (courseData?.price === 0) return "#388e3c";
+		return "#8710d8";
 	};
 
 	if (!courseData) {
@@ -350,7 +394,6 @@ const CourseSidebar = ({ course }) => {
 						</>
 					)}
 				</Box>
-
 				{courseData.discountedPrice &&
 					courseData.discountedPrice < courseData.price && (
 						<Typography
@@ -360,29 +403,43 @@ const CourseSidebar = ({ course }) => {
 							sx={{ mb: 2 }}>
 							2 days left at this price!
 						</Typography>
-					)}
-
+					)}{" "}
 				<Box sx={{ display: "flex", gap: 1, mb: 1 }}>
 					<Button
 						variant="contained"
 						fullWidth
 						sx={{
-							bgcolor: isInCart ? "#4caf50" : "#a435f0",
-							"&:hover": { bgcolor: isInCart ? "#388e3c" : "#8710d8" },
+							bgcolor: buttonColor(),
+							color: isInCart ? "#6a1b9a" : "white",
+							"&:hover": { bgcolor: buttonHoverColor() },
 							fontWeight: "bold",
 							py: 1.5,
 							textTransform: "none",
 						}}
-						startIcon={isInCart ? <CheckCircleIcon /> : <ShoppingCartIcon />}
+						startIcon={
+							isEnrolled ? (
+								<CheckCircleIcon />
+							) : isInCart ? (
+								<CheckCircleIcon />
+							) : (
+								<ShoppingCartIcon />
+							)
+						}
 						onClick={handleAddToCart}
-						disabled={cartLoading || isInCart}
-						aria-label={isInCart ? "Course added to cart" : "Add to cart"}>
-						{cartLoading
-							? "Adding..."
-							: isInCart
-							? "Added to Cart"
-							: "Add to Cart"}
+						disabled={isEnrolled || cartLoading || isInCart}
+						aria-label={
+							isEnrolled
+								? "Already enrolled"
+								: isInCart
+								? "Course added to cart"
+								: courseData?.price === 0
+								? "Enroll in free course"
+								: "Add to cart"
+						}>
+						{buttonText()}
 					</Button>
+				</Box>{" "}
+				{!isEnrolled && (
 					<IconButton
 						onClick={handleWishlistToggle}
 						sx={{
@@ -395,29 +452,28 @@ const CourseSidebar = ({ course }) => {
 						}>
 						{isWishlisted ? <FavoriteIcon /> : <FavoriteBorderIcon />}
 					</IconButton>
-				</Box>
-
-				<Button
-					variant="outlined"
-					color="inherit"
-					fullWidth
-					sx={{
-						borderColor: "grey.800",
-						color: "grey.800",
-						fontWeight: "bold",
-						py: 1.5,
-						mb: 2,
-						textTransform: "none",
-						"&:hover": { bgcolor: "grey.50", borderColor: "grey.800" },
-					}}
-					aria-label="Buy now">
-					Buy now
-				</Button>
-
+				)}
+				{!isEnrolled && (
+					<Button
+						variant="outlined"
+						color="inherit"
+						fullWidth
+						sx={{
+							borderColor: "grey.800",
+							color: "grey.800",
+							fontWeight: "bold",
+							py: 1.5,
+							mb: 2,
+							textTransform: "none",
+							"&:hover": { bgcolor: "grey.50", borderColor: "grey.800" },
+						}}
+						aria-label="Buy now">
+						Buy now
+					</Button>
+				)}
 				<Typography variant="body2" align="center" sx={{ mb: 3 }}>
 					30-Day Money-Back Guarantee
 				</Typography>
-
 				<Box sx={{ mb: 2 }}>
 					<Typography variant="subtitle2" fontWeight="bold" sx={{ mb: 1 }}>
 						This course includes:
@@ -472,9 +528,7 @@ const CourseSidebar = ({ course }) => {
 						</ListItem>
 					</List>
 				</Box>
-
 				<Divider sx={{ my: 2 }} />
-
 				<Box sx={{ display: "flex", justifyContent: "center", gap: 2 }}>
 					<Button
 						variant="text"

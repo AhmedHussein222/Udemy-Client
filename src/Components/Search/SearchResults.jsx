@@ -2,8 +2,16 @@
 
 import React, { useEffect, useState, useContext } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import {
+	collection,
+	getDocs,
+	query,
+	where,
+	doc,
+	getDoc,
+} from "firebase/firestore";
 import { db } from "../../Firebase/firebase";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import {
 	Box,
 	Typography,
@@ -21,12 +29,14 @@ import {
 } from "@mui/material";
 import { CartContext } from "../../context/cart-context";
 import { WishlistContext } from "../../context/wishlist-context";
+import { UserContext } from "../../context/UserContext";
 import { useTranslation } from "react-i18next";
 import PeopleIcon from "@mui/icons-material/People";
 import StarIcon from "@mui/icons-material/Star";
 import VideoLibraryIcon from "@mui/icons-material/VideoLibrary";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
+import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
 
 const SearchResults = () => {
 	const [searchResults, setSearchResults] = useState({
@@ -34,6 +44,7 @@ const SearchResults = () => {
 		instructors: [],
 	});
 	const [loading, setLoading] = useState(true);
+	const [enrolledCourses, setEnrolledCourses] = useState([]);
 	const location = useLocation();
 	const navigate = useNavigate();
 	const searchQuery = new URLSearchParams(location.search).get("q");
@@ -41,6 +52,7 @@ const SearchResults = () => {
 	const { addToCart, cartItems } = useContext(CartContext);
 	const { addToWishlist, removeFromWishlist, wishlistItems } =
 		useContext(WishlistContext);
+	const { user } = useContext(UserContext);
 
 	const handleAddToCart = async (e, course) => {
 		e.preventDefault();
@@ -259,6 +271,68 @@ const SearchResults = () => {
 			setLoading(false);
 		}
 	}, [searchQuery]);
+
+	useEffect(() => {
+		const checkEnrollmentStatus = async () => {
+			if (!user?.uid) {
+				setEnrolledCourses([]);
+				return;
+			}
+			try {
+				const enrollmentsRef = doc(db, "Enrollments", user.uid);
+				const enrollmentsDoc = await getDoc(enrollmentsRef);
+				if (enrollmentsDoc.exists()) {
+					const enrollments = enrollmentsDoc.data().courses || [];
+					setEnrolledCourses(enrollments.map((c) => c.id));
+				}
+			} catch (error) {
+				console.error("Error checking enrollment status:", error);
+			}
+		};
+		checkEnrollmentStatus();
+	}, [user]);
+
+	const renderCourseButton = (course) => {
+		const isEnrolled = enrolledCourses.includes(course.id);
+		const isInCart = cartItems.some((item) => item.id === course.id);
+
+		return (
+			<Button
+				variant="contained"
+				startIcon={isEnrolled ? <CheckCircleIcon /> : <AddShoppingCartIcon />}
+				onClick={(e) => handleAddToCart(e, course)}
+				disabled={isEnrolled}
+				sx={{
+					bgcolor: isEnrolled
+						? "#4caf50"
+						: isInCart
+						? "#f5f5f5"
+						: course.price === 0
+						? "#4caf50"
+						: "#a435f0",
+					color: isInCart ? "#6a1b9a" : "white",
+					"&:hover": {
+						bgcolor: isEnrolled
+							? "#388e3c"
+							: isInCart
+							? "#f0f0f0"
+							: course.price === 0
+							? "#388e3c"
+							: "#8710d8",
+					},
+					textTransform: "none",
+					fontWeight: "bold",
+				}}>
+				{isEnrolled
+					? "Enrolled"
+					: isInCart
+					? "In Cart"
+					: course.price === 0
+					? "Enroll Free"
+					: "Add to Cart"}
+			</Button>
+		);
+	};
 
 	if (loading) {
 		return (
@@ -533,22 +607,7 @@ const SearchResults = () => {
 													)}
 												</IconButton>
 											</Box>
-											<Button
-												variant="contained"
-												fullWidth
-												color="primary"
-												onClick={(e) => handleAddToCart(e, course)}
-												disabled={cartItems.some(
-													(item) => item.id === course.id
-												)}
-												sx={{
-													textTransform: "none",
-													py: 1,
-												}}>
-												{cartItems.some((item) => item.id === course.id)
-													? t("In Cart")
-													: t("Add to Cart")}
-											</Button>
+											{renderCourseButton(course)}
 										</Box>
 									</CardContent>
 								</Card>

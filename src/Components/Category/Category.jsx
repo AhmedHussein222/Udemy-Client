@@ -1,6 +1,5 @@
 /** @format */
-
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
 	Box,
 	Card,
@@ -16,10 +15,14 @@ import {
 	IconButton,
 } from "@mui/material";
 import { purple, grey } from "@mui/material/colors";
-import { db, collection, getDocs } from "../../Firebase/firebase";
+import { db, collection, getDocs, doc, getDoc } from "../../Firebase/firebase";
 import { useWishlist } from "../../context/wishlist-context";
+import { CartContext } from "../../context/cart-context";
+import { UserContext } from "../../context/UserContext";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
+import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 
 function Category() {
 	const categories = [
@@ -33,7 +36,10 @@ function Category() {
 	const [selectedCategory, setSelectedCategory] = useState("Development");
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState(null);
+	const [enrolledCourses, setEnrolledCourses] = useState([]);
 	const { wishlistItems, addToWishlist, removeFromWishlist } = useWishlist();
+	const { user } = useContext(UserContext);
+	const { cartItems, addToCart } = useContext(CartContext);
 
 	const handleCategoryChange = (category) => {
 		setSelectedCategory(category);
@@ -64,6 +70,107 @@ function Category() {
 
 		fetchCourses();
 	}, [selectedCategory]);
+
+	useEffect(() => {
+		const fetchEnrolledCourses = async () => {
+			if (!user) return;
+			try {
+				const userDoc = doc(db, "users", user.uid);
+				const userSnapshot = await getDoc(userDoc);
+				if (userSnapshot.exists()) {
+					const userData = userSnapshot.data();
+					setEnrolledCourses(userData.enrolledCourses || []);
+				}
+			} catch (err) {
+				console.error("Error fetching enrolled courses:", err);
+			}
+		};
+
+		fetchEnrolledCourses();
+	}, [user]);
+
+	useEffect(() => {
+		const checkEnrollmentStatus = async () => {
+			if (!user?.uid) {
+				setEnrolledCourses([]);
+				return;
+			}
+			try {
+				const enrollmentsRef = doc(db, "Enrollments", user.uid);
+				const enrollmentsDoc = await getDoc(enrollmentsRef);
+				if (enrollmentsDoc.exists()) {
+					const enrollments = enrollmentsDoc.data().courses || [];
+					setEnrolledCourses(enrollments.map((c) => c.id));
+				}
+			} catch (error) {
+				console.error("Error checking enrollment status:", error);
+			}
+		};
+		checkEnrollmentStatus();
+	}, [user]);
+
+	const renderCourseButton = (course) => {
+		const isEnrolled = enrolledCourses.includes(course.id);
+		const isInCart = cartItems.some((item) => item.id === course.id);
+		const isFree = typeof course.price === "number" ? course.price === 0 : true;
+
+		return (
+			<Button
+				variant="contained"
+				fullWidth
+				startIcon={isEnrolled ? <CheckCircleIcon /> : <AddShoppingCartIcon />}
+				onClick={(e) => {
+					e.stopPropagation();
+					if (!isEnrolled && !isInCart) {
+						if (isFree) {
+							console.log("Free course enrollment");
+						} else {
+							// Ensure price is a number when adding to cart
+							addToCart({
+								...course,
+								price: typeof course.price === "number" ? course.price : 0,
+							});
+						}
+					}
+				}}
+				disabled={isEnrolled}
+				sx={{
+					bgcolor: isEnrolled
+						? "#4caf50"
+						: isInCart
+						? "#e0e0e0"
+						: isFree
+						? "#4caf50"
+						: "#a435f0",
+					color: isInCart ? "#6a1b9a" : "white",
+					"&:hover": {
+						bgcolor: isEnrolled
+							? "#45a049"
+							: isInCart
+							? "#d5d5d5"
+							: isFree
+							? "#45a049"
+							: "#8710d8",
+						transform: "translateY(-1px)",
+						boxShadow: 2,
+					},
+					transition: "all 0.2s ease-in-out",
+					textTransform: "none",
+					fontWeight: "bold",
+					fontSize: "0.9rem",
+					py: 1,
+					borderRadius: "4px",
+				}}>
+				{isEnrolled
+					? "Enrolled"
+					: isInCart
+					? "In Cart"
+					: isFree
+					? "Enroll Free"
+					: "Add to Cart"}
+			</Button>
+		);
+	};
 
 	if (loading) {
 		return (
@@ -130,6 +237,11 @@ function Category() {
 									display: "flex",
 									flexDirection: "column",
 									position: "relative",
+									transition: "all 0.2s ease-in-out",
+									"&:hover": {
+										transform: "translateY(-4px)",
+										boxShadow: 3,
+									},
 								}}>
 								<IconButton
 									sx={{
@@ -139,10 +251,13 @@ function Category() {
 										backgroundColor: "rgba(255, 255, 255, 0.9)",
 										"&:hover": {
 											backgroundColor: "rgba(255, 255, 255, 1)",
+											transform: "scale(1.1)",
 										},
+										transition: "all 0.2s ease-in-out",
 										color: wishlistItems.some((item) => item.id === course.id)
 											? "#a435f0"
-											: "inherit",
+											: grey[600],
+										zIndex: 1,
 									}}
 									onClick={(e) => {
 										e.preventDefault();
@@ -225,7 +340,10 @@ function Category() {
 
 									<Stack direction="row" alignItems="center" spacing={1}>
 										<Typography variant="h6" fontWeight="bold">
-											${course.price}
+											$
+											{typeof course.price === "number"
+												? course.price.toFixed(2)
+												: "0.00"}
 										</Typography>
 										<Typography
 											variant="body2"
@@ -233,23 +351,16 @@ function Category() {
 												textDecoration: "line-through",
 												color: grey[600],
 											}}>
-											${course.originalPrice}
+											$
+											{typeof course.originalPrice === "number"
+												? course.originalPrice.toFixed(2)
+												: "0.00"}
 										</Typography>
 									</Stack>
 								</CardContent>
 
 								<Box sx={{ p: 2, mt: "auto" }}>
-									<Button
-										variant="contained"
-										fullWidth
-										sx={{
-											bgcolor: "#8000ff",
-											"&:hover": {
-												bgcolor: "#6a1b9a",
-											},
-										}}>
-										Add to cart
-									</Button>
+									{renderCourseButton(course)}
 								</Box>
 							</Card>
 						</Grid>

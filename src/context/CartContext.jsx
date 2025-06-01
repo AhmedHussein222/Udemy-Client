@@ -12,13 +12,13 @@ import {
 import { UserContext } from "./UserContext";
 import { CartContext } from "./cart-context";
 import { warningModal } from "../services/swal";
+import { enrollCourse } from "../services/enrollments";
 
 export const CartProvider = ({ children }) => {
 	const [cartItems, setCartItems] = useState([]);
 	const [loading, setLoading] = useState(false);
 	const { user } = useContext(UserContext);
 
-	// Fetch cart items from Firestore when user changes
 	useEffect(() => {
 		const fetchCartItems = async () => {
 			if (!user) {
@@ -49,15 +49,28 @@ export const CartProvider = ({ children }) => {
 
 	const addToCart = async (course) => {
 		if (!user) {
-			warningModal()
+			warningModal("Warning", "You need to be logged in to enroll in courses");
 			return false;
 		}
 
 		try {
 			setLoading(true);
-			if (!cartItems.some((item) => item.id === course.course_id)) {
+			// For free courses, enroll directly
+			if (course.price === 0) {
+				await enrollCourse(user.uid, {
+					...course,
+					enrolled_at: new Date(),
+					progress: 0,
+					completed_lessons: [],
+					last_accessed: new Date(),
+				});
+				return true;
+			}
+
+			// For paid courses, add to cart if not already there
+			if (!cartItems.some((item) => item.id === course.id)) {
 				const newItem = {
-					id: course.id || course.course_id, 
+					id: course.id,
 					title: course.title,
 					price: course.price,
 					thumbnail: course.thumbnail,
@@ -69,7 +82,6 @@ export const CartProvider = ({ children }) => {
 					addedAt: new Date().toISOString(),
 				};
 
-				// Update Firestore
 				await setDoc(
 					doc(db, "Carts", user.uid),
 					{
@@ -79,9 +91,9 @@ export const CartProvider = ({ children }) => {
 				);
 
 				setCartItems((prev) => [...prev, newItem]);
-				return true; // Successfully added
+				return true; 
 			}
-			return false; // Item already in cart
+			return false; 
 		} catch (error) {
 			console.error("Error adding to cart:", error);
 			return false;

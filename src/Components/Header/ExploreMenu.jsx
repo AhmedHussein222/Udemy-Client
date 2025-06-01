@@ -8,7 +8,7 @@ import {
 	Typography,
 } from "@mui/material";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 
 const ExploreMenu = ({
 	categories,
@@ -28,6 +28,16 @@ const ExploreMenu = ({
 	const [categoryMenuAnchor, setCategoryMenuAnchor] = useState(null);
 	const [subCategoryMenuAnchor, setSubCategoryMenuAnchor] = useState(null);
 	const [courseMenuAnchor, setCourseMenuAnchor] = useState(null);
+	const hoverTimeoutRef = useRef(null);
+
+	// التأكد من تحديث subCategoryMenuAnchor بناءً على selectedCategory
+	useEffect(() => {
+		if (selectedCategory && categoryMenuAnchor && subCategories.length > 0) {
+			setSubCategoryMenuAnchor(categoryMenuAnchor); // استخدام categoryMenuAnchor كـ anchor
+		} else {
+			setSubCategoryMenuAnchor(null);
+		}
+	}, [selectedCategory, subCategories, categoryMenuAnchor]);
 
 	const handleCategoryClick = (event) => {
 		event.preventDefault();
@@ -35,18 +45,29 @@ const ExploreMenu = ({
 		setIsMenuHovered(true);
 	};
 
-	const handleCategoryMouseEnter = (category, event) => {
-		setSelectedCategory(category);
-		setSubCategoryMenuAnchor(event.currentTarget);
-		setCourseMenuAnchor(null);
-		setSelectedSubCategory(null);
-		setIsMenuHovered(true);
+	const handleCategoryMouseEnter = (category) => {
+		if (hoverTimeoutRef.current) {
+			clearTimeout(hoverTimeoutRef.current);
+		}
+
+		hoverTimeoutRef.current = setTimeout(() => {
+			setSelectedCategory(category);
+			setCourseMenuAnchor(null);
+			setSelectedSubCategory(null);
+			setIsMenuHovered(true);
+		}, 100);
 	};
 
 	const handleSubCategoryMouseEnter = (subCategory, event) => {
-		setSelectedSubCategory(subCategory);
-		setCourseMenuAnchor(event.currentTarget);
-		setIsMenuHovered(true);
+		if (hoverTimeoutRef.current) {
+			clearTimeout(hoverTimeoutRef.current);
+		}
+
+		hoverTimeoutRef.current = setTimeout(() => {
+			setSelectedSubCategory(subCategory);
+			setCourseMenuAnchor(event.currentTarget);
+			setIsMenuHovered(true);
+		}, 100);
 	};
 
 	const handleMenuMouseEnter = () => {
@@ -54,8 +75,17 @@ const ExploreMenu = ({
 	};
 
 	const handleMenuMouseLeave = () => {
-		setIsMenuHovered(false);
-		closeAllMenus();
+		if (hoverTimeoutRef.current) {
+			clearTimeout(hoverTimeoutRef.current);
+		}
+
+		hoverTimeoutRef.current = setTimeout(() => {
+			setIsMenuHovered(false);
+			closeAllMenus();
+			setCategoryMenuAnchor(null);
+			setSubCategoryMenuAnchor(null);
+			setCourseMenuAnchor(null);
+		}, 200);
 	};
 
 	return (
@@ -111,7 +141,11 @@ const ExploreMenu = ({
 				</Menu>
 				<Menu
 					anchorEl={subCategoryMenuAnchor}
-					open={Boolean(subCategoryMenuAnchor) && isMenuHovered}
+					open={
+						Boolean(subCategoryMenuAnchor) &&
+						isMenuHovered &&
+						subCategories.length > 0
+					}
 					onClose={closeAllMenus}
 					anchorOrigin={{ vertical: "top", horizontal: "right" }}
 					transformOrigin={{ vertical: "top", horizontal: "left" }}

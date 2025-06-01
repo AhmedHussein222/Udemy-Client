@@ -1,31 +1,76 @@
 /** @format */
 
 import React, { useEffect, useState, useContext } from "react";
-import { collection, getDocs } from "firebase/firestore";
+import {
+	collection,
+	getDocs,
+	doc,
+	getDoc,
+	updateDoc,
+	setDoc,
+	arrayUnion,
+} from "firebase/firestore";
 import { db } from "../Firebase/firebase.js";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
-import {Card,CardMedia,CardContent,Typography,Container,Box,IconButton,Rating,Popover,Button,} from "@mui/material";
+import {
+	Card,
+	CardMedia,
+	CardContent,
+	Typography,
+	Container,
+	Box,
+	IconButton,
+	Rating,
+	Popover,
+	Button,
+} from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import SchoolIcon from "@mui/icons-material/School";
 import { WishlistContext } from "../context/wishlist-context";
 import { CartContext } from "../context/cart-context";
+import { UserContext } from "../context/UserContext";
 
 const CourseCard = ({ course, isHovered, onHover, onLeave }) => {
 	const navigate = useNavigate();
 	const { wishlistItems, addToWishlist, removeFromWishlist } =
 		useContext(WishlistContext);
 	const { cartItems, addToCart } = useContext(CartContext);
+	const { user } = useContext(UserContext);
 	const [anchorEl, setAnchorEl] = useState(null);
 	const [isInCart, setIsInCart] = useState(
 		cartItems.some((item) => item.id === course.id)
 	);
+	const [isEnrolled, setIsEnrolled] = useState(false);
 
 	useEffect(() => {
 		setIsInCart(cartItems.some((item) => item.id === course.id));
 	}, [cartItems, course.id]);
+
+	// Check enrollment status
+	useEffect(() => {
+		const checkEnrollment = async () => {
+			if (!user?.uid || !course?.id) return;
+
+			try {
+				const enrollmentRef = doc(db, "Enrollments", user.uid);
+				const enrollmentDoc = await getDoc(enrollmentRef);
+
+				if (enrollmentDoc.exists()) {
+					const enrollments = enrollmentDoc.data().courses || [];
+					setIsEnrolled(enrollments.some((c) => c.id === course.id));
+				}
+			} catch (error) {
+				console.error("Error checking enrollment:", error);
+			}
+		};
+
+		checkEnrollment();
+	}, [user?.uid, course?.id]);
 
 	const handlePopoverOpen = (event) => {
 		setAnchorEl(event.currentTarget);
@@ -66,7 +111,110 @@ const CourseCard = ({ course, isHovered, onHover, onLeave }) => {
 		}
 	};
 
+	const handleEnroll = async (e) => {
+		e.preventDefault();
+		e.stopPropagation();
+
+		if (!user?.uid || isEnrolled) return;
+
+		try {
+			const enrollmentRef = doc(db, "Enrollments", user.uid);
+			const enrollmentDoc = await getDoc(enrollmentRef);
+
+			const courseToEnroll = {
+				id: course.id,
+				title: course.title,
+				thumbnail: course.thumbnail,
+				instructor_name: course.instructor_name || "Unknown Instructor",
+				enrolledAt: new Date().toISOString(),
+				progress: 0,
+				rating: course.rating || { rate: 0, count: 0 },
+				lectures: course.lectures || 0,
+			};
+
+			if (enrollmentDoc.exists()) {
+				await updateDoc(enrollmentRef, {
+					courses: arrayUnion(courseToEnroll),
+				});
+			} else {
+				await setDoc(enrollmentRef, {
+					courses: [courseToEnroll],
+				});
+			}
+
+			setIsEnrolled(true);
+		} catch (error) {
+			console.error("Error enrolling in course:", error);
+		}
+	};
+
 	const open = Boolean(anchorEl);
+
+	const getButtonProps = () => {
+		if (isEnrolled) {
+			return {
+				text: "Enrolled",
+				startIcon: <CheckCircleIcon />,
+				sx: {
+					bgcolor: "#4caf50",
+					color: "white",
+					"&:hover": {
+						bgcolor: "#388e3c",
+					},
+				},
+				onClick: (e) => e.preventDefault(),
+				disabled: true,
+			};
+		}
+
+		if (course.price === 0) {
+			return {
+				text: "Enroll",
+				startIcon: <SchoolIcon />,
+				sx: {
+					bgcolor: "#a435f0",
+					color: "white",
+					"&:hover": {
+						bgcolor: "#8710d8",
+					},
+				},
+				onClick: handleEnroll,
+			};
+		}
+
+		if (isInCart) {
+			return {
+				text: "In cart",
+				startIcon: <AddShoppingCartIcon />,
+				sx: {
+					bgcolor: "white",
+					color: "#6a1b9a",
+					border: "1px solid #6a1b9a",
+					"&:hover": {
+						bgcolor: "#f7f1fa",
+						border: "1px solid #6a1b9a",
+					},
+				},
+				onClick: (e) => e.preventDefault(),
+				disabled: true,
+			};
+		}
+
+		return {
+			text: "Add to cart",
+			startIcon: <AddShoppingCartIcon />,
+			sx: {
+				bgcolor: "#a435f0",
+				color: "white",
+				"&:hover": {
+					bgcolor: "#8710d8",
+				},
+			},
+			onClick: handleAddToCart,
+		};
+	};
+
+	const buttonProps = getButtonProps();
 
 	return (
 		<Box
@@ -222,42 +370,38 @@ const CourseCard = ({ course, isHovered, onHover, onLeave }) => {
 					{course.description}
 				</Typography>
 				<Box sx={{ display: "flex", gap: 1 }}>
-					{" "}
 					<Button
 						variant="contained"
-						startIcon={<AddShoppingCartIcon />}
-						onClick={handleAddToCart}
+						startIcon={buttonProps.startIcon}
+						onClick={buttonProps.onClick}
+						disabled={buttonProps.disabled}
 						sx={{
-							bgcolor: isInCart ? "white" : "#a435f0",
-							color: isInCart ? "#6a1b9a" : "white",
-							border: isInCart ? "1px solid #6a1b9a" : "none",
-							"&:hover": {
-								bgcolor: isInCart ? "#f7f1fa" : "#8710d8",
-								border: isInCart ? "1px solid #6a1b9a" : "none",
-							},
+							...buttonProps.sx,
 							flex: 1,
 							"&.MuiButton-root": {
 								textTransform: "none",
 								fontWeight: "bold",
 							},
 						}}>
-						{isInCart ? "In cart" : "Add to cart"}
+						{buttonProps.text}
 					</Button>
-					<IconButton
-						onClick={handleWishlistToggle}
-						sx={{
-							border: "1px solid #e0e0e0",
-							borderRadius: 1,
-							color: wishlistItems.some((item) => item.id === course.id)
-								? "#a435f0"
-								: "inherit",
-						}}>
-						{wishlistItems.some((item) => item.id === course.id) ? (
-							<FavoriteIcon />
-						) : (
-							<FavoriteBorderIcon />
-						)}
-					</IconButton>
+					{!isEnrolled && (
+						<IconButton
+							onClick={handleWishlistToggle}
+							sx={{
+								border: "1px solid #e0e0e0",
+								borderRadius: 1,
+								color: wishlistItems.some((item) => item.id === course.id)
+									? "#a435f0"
+									: "inherit",
+							}}>
+							{wishlistItems.some((item) => item.id === course.id) ? (
+								<FavoriteIcon />
+							) : (
+								<FavoriteBorderIcon />
+							)}
+						</IconButton>
+					)}
 				</Box>
 			</Popover>
 		</Box>
