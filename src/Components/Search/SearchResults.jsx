@@ -137,7 +137,12 @@ const SearchResults = () => {
 		const fetchSearchResults = async () => {
 			setLoading(true);
 			try {
-				const coursesSnapshot = await getDocs(collection(db, "Courses"));
+				// Get all published courses
+				const coursesQuery = query(
+					collection(db, "Courses"),
+					where("is_published", "==", true)
+				);
+				const coursesSnapshot = await getDocs(coursesQuery);
 				const allCourses = coursesSnapshot.docs.map((doc) => {
 					const data = doc.data();
 					return {

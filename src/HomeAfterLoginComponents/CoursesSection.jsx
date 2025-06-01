@@ -419,6 +419,7 @@ const CoursesSection = () => {
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
+				// Get all published courses
 				const coursesSnapshot = await getDocs(
 					query(collection(db, "Courses"), where("is_published", "==", true))
 				);
