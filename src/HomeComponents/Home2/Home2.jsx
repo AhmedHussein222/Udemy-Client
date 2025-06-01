@@ -1,16 +1,22 @@
 /** @format */
 
 import React, { useState, useEffect, useRef, useContext } from "react";
+import { useTranslation } from "react-i18next";
 import "./Home2.css";
 import { db } from "../../Firebase/firebase";
-import { collection, getDocs, doc, getDoc } from "firebase/firestore";
+import {
+	collection,
+	getDocs,
+	doc,
+	getDoc,
+	query,
+	where,
+} from "firebase/firestore";
 import {
 	Card,
 	CardContent,
-	CardMedia,
 	Typography,
 	Box,
-	Rating,
 	IconButton,
 	Button,
 } from "@mui/material";
@@ -30,53 +36,26 @@ import preview1 from "../../assets/S1.png";
 import preview2 from "../../assets/S2.png";
 import preview3 from "../../assets/S3.png";
 import preview4 from "../../assets/S4.png";
-import { useNavigate } from "react-router-dom";
 import { useCart } from "../../context/cart-context";
 import { useWishlist } from "../../context/wishlist-context";
 import { UserContext } from "../../context/UserContext";
 
-const leftCards = [
-	{
-		id: 1,
-		img: logo1,
-		title: "Hands-on training",
-		description:
-			"Upskill effectively with AI-powered coding exercises, practice tests, and quizzes.",
-		previewImg: preview1,
-	},
-	{
-		id: 2,
-		img: logo2,
-		title: "Certification programs",
-		description: "Earn credentials that boost your career prospects.",
-		previewImg: preview2,
-	},
-	{
-		id: 3,
-		img: logo3,
-		title: "Interactive learning",
-		description: "Engage with content that adapts to your pace and style.",
-		previewImg: preview3,
-	},
-	{
-		id: 4,
-		img: logo4,
-		title: "Expert-led content",
-		description:
-			"Learn from industry professionals with real-world experience.",
-		previewImg: preview4,
-	},
-];
-
+// CourseCard component
 const CourseCard = ({ course }) => {
+	const { t } = useTranslation();
 	const { addToCart, cartItems } = useCart();
 	const { addToWishlist, wishlistItems } = useWishlist();
 	const { user } = useContext(UserContext);
 	const [hovered, setHovered] = useState(false);
 	const [popupPosition, setPopupPosition] = useState("right");
 	const [isEnrolled, setIsEnrolled] = useState(false);
-	const navigate = useNavigate();
 	const timeoutRef = useRef(null);
+
+	// Format price safely
+	const formatPrice = (price) => {
+		const numPrice = Number(price);
+		return !isNaN(numPrice) ? numPrice.toFixed(2) : "0.00";
+	};
 
 	// Check enrollment status
 	useEffect(() => {
@@ -160,162 +139,66 @@ const CourseCard = ({ course }) => {
 	};
 
 	const buttonText = () => {
-		if (isEnrolled) return "Enrolled";
-		if (cartItems.some((item) => item.id === course.id)) return "In Cart";
-		return course.price === 0 ? "Enroll Free" : "Add to Cart";
+		if (isEnrolled) return t("Enrolled");
+		if (cartItems.some((item) => item.id === course.id)) return t("In Cart");
+		return course.price === 0 ? t("Enroll Free") : t("Add to Cart");
 	};
 
 	return (
-		<Box
-			key={course.id}
-			sx={{ position: "relative", width: 280, flex: "0 0 auto" }}
+		<Card
+			className="course-card"
 			onMouseEnter={handleMouseEnter}
-			onMouseLeave={handleMouseLeave}>
-			<Card
-				onClick={(e) => {
-					if (e.target.closest("button")) return;
-					navigate(`/course/${course.id}`);
-				}}
-				sx={{
-					cursor: "pointer",
-					height: "420px",
-					display: "flex",
-					flexDirection: "column",
-				}}>
-				{" "}
+			onMouseLeave={handleMouseLeave}
+			sx={{
+				cursor: "pointer",
+				height: "420px",
+				display: "flex",
+				flexDirection: "column",
+			}}>
+			<div className="course-image-container">
 				<img
-					src={course.thumbnail}
-					alt={course.title}
-					style={{
-						width: "100%",
-						height: "150px",
-						objectFit: "cover",
-						objectPosition: "center",
-						borderRadius: "8px 8px 0 0",
-						minHeight: "150px",
-						maxHeight: "150px",
-					}}
+					src={course.image}
+					alt={t("Course thumbnail")}
+					className="course-image"
 				/>
-				<CardContent>
-					{" "}
-					<Typography
-						gutterBottom
-						variant="h6"
-						component="div"
-						sx={{
-							fontWeight: "bold",
-							color: "#000000",
-							width: "100%",
-							height: "72px",
-							wordBreak: "normal",
-							overflowWrap: "break-word",
-							whiteSpace: "normal",
-							display: "-webkit-box",
-							WebkitLineClamp: 3,
-							WebkitBoxOrient: "vertical",
-							overflow: "hidden",
-							mb: 1,
-							fontSize: "1rem",
-							lineHeight: "1.5",
-						}}>
-						{course.title}
-					</Typography>{" "}
-					<Typography
-						variant="body2"
-						color="text.secondary"
-						sx={{
-							width: "100%",
-							minHeight: "84px",
-							maxHeight: "84px",
-							display: "block",
-							overflow: "hidden",
-							wordBreak: "normal",
-							overflowWrap: "break-word",
-							whiteSpace: "normal",
-							mb: 2,
-							lineHeight: "1.4",
-							fontSize: "0.875rem",
-							"& > *": {
-								display: "-webkit-box",
-								WebkitBoxOrient: "vertical",
-								WebkitLineClamp: 4,
-							},
-						}}>
-						{course.description}
+				{course.bestseller && (
+					<div className="bestseller-badge">{t("Bestseller")}</div>
+				)}
+			</div>
+			<CardContent>
+				<Typography variant="h6" className="course-title">
+					{course.title}
+				</Typography>
+				<Typography variant="body2" color="textSecondary">
+					{course.instructorName}
+				</Typography>
+				<Box className="course-stats">
+					<Typography variant="body2">
+						{course.totalHours} {t("total hours")} • {course.lectureCount}{" "}
+						{t("lectures")} • {course.totalMinutes} {t("minutes")}
 					</Typography>
-					{/* التقييم والسعر */}
-					{(() => {
-						const ratingValue = course.rating?.rate || 0;
-						const ratingCount = course.rating?.count || 0;
-						const price = Number(course.price) || 0;
-						const discount = Number(course.discount) || 0;
-
-						return (
-							<>
-								{" "}
-								<div
-									className="rating"
-									style={{
-										marginBottom: 16,
-										display: "flex",
-										alignItems: "center",
-										gap: 8,
-										height: "24px",
-									}}>
-									<span style={{ fontWeight: "bold" }}>
-										{ratingValue.toFixed(1)}
-									</span>
-									<span style={{ color: "#ffb400", fontSize: "18px" }}>
-										{"★".repeat(Math.round(ratingValue)) +
-											"☆".repeat(5 - Math.round(ratingValue))}
-									</span>
-									<span style={{ color: "#666" }}>
-										({ratingCount.toLocaleString()})
-									</span>
-								</div>
-								<div
-									className="pricing"
-									style={{
-										marginBottom: 8,
-										fontWeight: "bold",
-										height: "24px",
-									}}>
-									{price === 0 ? (
-										<>
-											<span style={{ color: "green" }}>Free</span>
-											{discount > 0 && (
-												<span
-													style={{
-														textDecoration: "line-through",
-														marginLeft: 8,
-														color: "#999",
-													}}>
-													{(price + discount).toFixed(2)} EGP
-												</span>
-											)}
-										</>
-									) : (
-										<>
-											<span>{price.toFixed(2)} EGP</span>
-											{discount > 0 && (
-												<span
-													style={{
-														textDecoration: "line-through",
-														marginLeft: 8,
-														color: "#999",
-													}}>
-													{(price + discount).toFixed(2)} EGP
-												</span>
-											)}
-										</>
-									)}
-								</div>
-							</>
-						);
-					})()}
-				</CardContent>
-			</Card>{" "}
-			{/* Popup on hover */}{" "}
+				</Box>
+				<Typography variant="body2">
+					{course.students} {t("Students")}
+				</Typography>
+				<Typography variant="body2">
+					{t("Last updated")}: {course.lastUpdated}
+				</Typography>
+				<Typography variant="body2">{t("All levels")}</Typography>
+				<Box className="course-price">
+					<Typography variant="h6">
+						{t("Current price")}: ${formatPrice(course.price)}
+					</Typography>
+					{course.originalPrice && (
+						<Typography
+							variant="body2"
+							color="textSecondary"
+							style={{ textDecoration: "line-through" }}>
+							{t("Original price")}: ${formatPrice(course.originalPrice)}
+						</Typography>
+					)}
+				</Box>
+			</CardContent>
 			{hovered && (
 				<Box
 					sx={{
@@ -399,7 +282,9 @@ const CourseCard = ({ course }) => {
 							mb: 2,
 						}}>
 						<Typography variant="body1" fontWeight="bold">
-							{course.price === 0 ? "Free" : `${course.price} EGP`}
+							{Number(course.price) === 0
+								? t("Free")
+								: `${formatPrice(course.price)} ${t("EGP")}`}
 						</Typography>
 						<IconButton
 							onClick={(e) => handleWishlistToggle(e)}
@@ -419,12 +304,18 @@ const CourseCard = ({ course }) => {
 						variant="contained"
 						color="primary"
 						size="small"
+						onClick={(e) => {
+							e.stopPropagation();
+							if (!isEnrolled) {
+								handleAddToCart(e);
+							}
+						}}
 						sx={{
 							bgcolor: isEnrolled
 								? "#4caf50"
 								: cartItems.some((item) => item.id === course.id)
 								? "white"
-								: course.price === 0
+								: Number(course.price) === 0
 								? "#4caf50"
 								: "#8e2de2",
 							color: cartItems.some((item) => item.id === course.id)
@@ -453,12 +344,6 @@ const CourseCard = ({ course }) => {
 									: "#7016b3",
 							},
 						}}
-						onClick={(e) => {
-							e.stopPropagation();
-							if (!isEnrolled) {
-								handleAddToCart(e);
-							}
-						}}
 						disabled={isEnrolled}
 						fullWidth
 						startIcon={isEnrolled ? <CheckCircleIcon /> : <ShoppingCart />}>
@@ -466,14 +351,50 @@ const CourseCard = ({ course }) => {
 					</Button>
 				</Box>
 			)}
-		</Box>
+		</Card>
 	);
 };
 
 const Home2 = () => {
+	const { t } = useTranslation();
 	const [selected, setSelected] = useState(1);
 	const [courses, setCourses] = useState([]);
 	const scrollRef = useRef(null);
+
+	const leftCards = [
+		{
+			id: 1,
+			img: logo1,
+			title: t("Hands-on training"),
+			description: t(
+				"Upskill effectively with AI-powered coding exercises, practice tests, and quizzes."
+			),
+			previewImg: preview1,
+		},
+		{
+			id: 2,
+			img: logo2,
+			title: t("Certification programs"),
+			description: t("Earn credentials that boost your career prospects."),
+			previewImg: preview2,
+		},
+		{
+			id: 3,
+			img: logo3,
+			title: t("Interactive learning"),
+			description: t("Engage with content that adapts to your pace and style."),
+			previewImg: preview3,
+		},
+		{
+			id: 4,
+			img: logo4,
+			title: t("Expert-led content"),
+			description: t(
+				"Learn from industry professionals with real-world experience."
+			),
+			previewImg: preview4,
+		},
+	];
 
 	const scrollLeft = () => {
 		if (scrollRef.current) {
@@ -496,6 +417,11 @@ const Home2 = () => {
 	useEffect(() => {
 		const fetchCoursesWithRatings = async () => {
 			try {
+				const coursesQuery = query(
+					collection(db, "Courses"),
+					where("is_published", "==", true)
+				);
+				const coursesSnapshot = await getDocs(coursesQuery);
 				const reviewsSnapshot = await getDocs(collection(db, "Reviews"));
 				const ratingsMap = {};
 
@@ -518,8 +444,7 @@ const Home2 = () => {
 					averageRatings[courseId] = avg;
 				});
 
-				const querySnapshot = await getDocs(collection(db, "Courses"));
-				const coursesData = querySnapshot.docs.map((doc) => {
+				const coursesData = coursesSnapshot.docs.map((doc) => {
 					const courseData = doc.data();
 					const avgRating = averageRatings[doc.id] || 0;
 
@@ -546,10 +471,13 @@ const Home2 = () => {
 		<>
 			{/* Learners are viewing */}
 			<section className="courses-section">
-				<h2 className="section-title">Learners are viewing</h2>
+				<h2 className="section-title">{t("Popular with learners")}</h2>
 
 				<div className="courses-scroll-wrapper">
-					<button className="scroll-button left" onClick={scrollLeft}>
+					<button
+						className="scroll-button left"
+						onClick={scrollLeft}
+						aria-label={t("Scroll left")}>
 						<ArrowBackIos />
 					</button>
 
@@ -559,7 +487,10 @@ const Home2 = () => {
 						))}
 					</div>
 
-					<button className="scroll-button right" onClick={scrollRight}>
+					<button
+						className="scroll-button right"
+						onClick={scrollRight}
+						aria-label={t("Scroll right")}>
 						<ArrowForwardIos />
 					</button>
 				</div>
@@ -567,7 +498,7 @@ const Home2 = () => {
 
 			{/* Learning focused on your goals */}
 			<section className="focus-section">
-				<h2 className="section-title">Learning focused on your goals</h2>
+				<h2 className="section-title">{t("Learning focused on your goals")}</h2>
 				<div className="focus-grid">
 					<div className="left-options">
 						{leftCards.map((card) => (
@@ -582,7 +513,7 @@ const Home2 = () => {
 									<h4>{card.title}</h4>
 									<p>{card.description}</p>
 									<a className="explore-link">
-										Explore course <ArrowForwardIos fontSize="small" />
+										{t("Explore course")} <ArrowForwardIos fontSize="small" />
 									</a>
 								</div>
 							</div>
@@ -592,7 +523,7 @@ const Home2 = () => {
 					<div className="right-preview">
 						<img
 							src={leftCards.find((c) => c.id === selected)?.previewImg}
-							alt="Preview"
+							alt={t("Preview")}
 							className="preview-img"
 						/>
 					</div>

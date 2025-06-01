@@ -21,17 +21,15 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import StarIcon from "@mui/icons-material/Star";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import React, { useState, useRef, useEffect, useContext } from "react";
-import { grey } from "@mui/material/colors";
 import { useWishlist } from "../../context/wishlist-context";
 import { useCart } from "../../context/cart-context";
 import { UserContext } from "../../context/UserContext";
-import { useNavigate, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { db, doc, getDoc } from "../../Firebase/firebase";
 
 function Wishlist() {
 	const { t } = useTranslation();
-	const navigate = useNavigate();
 	const { wishlistItems, removeFromWishlist } = useWishlist();
 	const { addToCart, cartItems } = useCart();
 	const { user } = useContext(UserContext);
@@ -226,16 +224,34 @@ function Wishlist() {
 		);
 	};
 
+	const renderEmptyWishlist = () => (
+		<Box
+			sx={{
+				display: "flex",
+				flexDirection: "column",
+				alignItems: "center",
+				justifyContent: "center",
+				minHeight: "60vh",
+				gap: 2,
+			}}>
+			<Typography variant="h5" gutterBottom>
+				{t("Your wishlist is empty")}
+			</Typography>
+			<Button
+				component={Link}
+				to="/courses"
+				variant="contained"
+				color="primary">
+				{t("Browse courses now")}
+			</Button>
+		</Box>
+	);
+
 	if (!wishlistItems) {
 		return (
-			<Box
-				sx={{
-					display: "flex",
-					justifyContent: "center",
-					alignItems: "center",
-					height: "50vh",
-				}}>
-				<CircularProgress sx={{ color: "#a435f0" }} />
+			<Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
+				<CircularProgress />
+				<Typography>{t("Loading wishlist...")}</Typography>
 			</Box>
 		);
 	}
@@ -260,52 +276,7 @@ function Wishlist() {
 			</Snackbar>
 
 			{wishlistItems.length === 0 ? (
-				<Stack
-					direction="column"
-					alignItems="center"
-					sx={{ px: { xs: 2, md: 4 }, width: "100%" }}>
-					<Card
-						sx={{
-							width: "100%",
-							maxWidth: "700px",
-							mt: 4,
-							border: "none",
-							boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-							borderRadius: "8px",
-						}}>
-						<CardContent sx={{ textAlign: "center", py: 6 }}>
-							<FavoriteIcon
-								sx={{
-									fontSize: 60,
-									color: grey[300],
-									mb: 2,
-									cursor: "pointer",
-									"&:hover": {
-										color: "#e91e63",
-									},
-								}}
-								onClick={() => navigate("/")}
-							/>
-							<Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
-								{t("Your wishlist is empty")}
-							</Typography>
-							<Button
-								variant="contained"
-								onClick={() => navigate("/")}
-								sx={{
-									bgcolor: "#a435f0",
-									color: "#fff",
-									textTransform: "none",
-									fontWeight: 600,
-									px: 4,
-									py: 1.5,
-									"&:hover": { bgcolor: "#8710d8" },
-								}}>
-								{t("Browse courses now")}
-							</Button>
-						</CardContent>
-					</Card>
-				</Stack>
+				renderEmptyWishlist()
 			) : (
 				<Container>
 					<Typography
