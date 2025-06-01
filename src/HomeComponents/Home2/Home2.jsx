@@ -1,9 +1,9 @@
 /** @format */
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
 import "./Home2.css";
 import { db } from "../../Firebase/firebase";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, doc, getDoc } from "firebase/firestore";
 import {
 	Card,
 	CardContent,
@@ -20,6 +20,7 @@ import {
 	FavoriteBorder as FavoriteBorderIcon,
 	Favorite as FavoriteIcon,
 	ArrowBackIos,
+	CheckCircle as CheckCircleIcon,
 } from "@mui/icons-material";
 import logo1 from "../../assets/hands.webp";
 import logo2 from "../../assets/certificate.webp";
@@ -32,6 +33,7 @@ import preview4 from "../../assets/S4.png";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../../context/cart-context";
 import { useWishlist } from "../../context/wishlist-context";
+import { UserContext } from "../../context/UserContext";
 
 const leftCards = [
 	{
@@ -69,10 +71,34 @@ const leftCards = [
 const CourseCard = ({ course }) => {
 	const { addToCart, cartItems } = useCart();
 	const { addToWishlist, wishlistItems } = useWishlist();
+	const { user } = useContext(UserContext);
 	const [hovered, setHovered] = useState(false);
 	const [popupPosition, setPopupPosition] = useState("right");
+	const [isEnrolled, setIsEnrolled] = useState(false);
 	const navigate = useNavigate();
 	const timeoutRef = useRef(null);
+
+	// Check enrollment status
+	useEffect(() => {
+		const checkEnrollmentStatus = async () => {
+			if (!course.id || !user?.uid) {
+				// Early return if user not logged in
+				setIsEnrolled(false);
+				return;
+			}
+			const enrollmentsRef = doc(db, "Enrollments", user.uid);
+			try {
+				const enrollmentsDoc = await getDoc(enrollmentsRef);
+				if (enrollmentsDoc.exists()) {
+					const enrollments = enrollmentsDoc.data().courses || [];
+					setIsEnrolled(enrollments.some((c) => c.id === course.id));
+				}
+			} catch (error) {
+				console.error("Error checking enrollment status:", error);
+			}
+		};
+		checkEnrollmentStatus();
+	}, [course.id, user?.uid]);
 
 	const handleMouseEnter = (event) => {
 		if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -111,9 +137,9 @@ const CourseCard = ({ course }) => {
 		await addToWishlist(courseToAdd);
 	};
 
-	const handleAddToCart = (e) => {
+	const handleAddToCart = async (e) => {
 		e.stopPropagation();
-		if (!course || !course.id || !course.title || !course.price) {
+		if (!course || !course.id || !course.title) {
 			console.error("Invalid course data:", course);
 			return;
 		}
@@ -130,8 +156,15 @@ const CourseCard = ({ course }) => {
 			lectures: Number(course.lectures || 0),
 			addedAt: new Date().toISOString(),
 		};
-		addToCart(courseToAdd);
+		await addToCart(courseToAdd);
 	};
+
+	const buttonText = () => {
+		if (isEnrolled) return "Enrolled";
+		if (cartItems.some((item) => item.id === course.id)) return "In Cart";
+		return course.price === 0 ? "Enroll Free" : "Add to Cart";
+	};
+
 	return (
 		<Box
 			key={course.id}
@@ -334,7 +367,6 @@ const CourseCard = ({ course }) => {
 						display: "flex",
 						flexDirection: "column",
 					}}>
-					{" "}
 					<Typography
 						variant="h6"
 						fontWeight="bold"
@@ -358,7 +390,7 @@ const CourseCard = ({ course }) => {
 							whiteSpace: "normal",
 						}}>
 						{course.description}
-					</Typography>{" "}
+					</Typography>
 					<Box
 						sx={{
 							display: "flex",
@@ -367,16 +399,16 @@ const CourseCard = ({ course }) => {
 							mb: 2,
 						}}>
 						<Typography variant="body1" fontWeight="bold">
-							{course.price} EGP
+							{course.price === 0 ? "Free" : `${course.price} EGP`}
 						</Typography>
 						<IconButton
-							onClick={(e) => handleWishlistToggle(e, course)}
+							onClick={(e) => handleWishlistToggle(e)}
 							sx={{
-								color: wishlistItems.find((item) => item.id === course.id)
+								color: wishlistItems.some((item) => item.id === course.id)
 									? "#8e2de2"
 									: "grey.400",
 							}}>
-							{wishlistItems.find((item) => item.id === course.id) ? (
+							{wishlistItems.some((item) => item.id === course.id) ? (
 								<FavoriteIcon />
 							) : (
 								<FavoriteBorderIcon />
@@ -388,13 +420,17 @@ const CourseCard = ({ course }) => {
 						color="primary"
 						size="small"
 						sx={{
-							background: cartItems.find((item) => item.id === course.id)
+							bgcolor: isEnrolled
+								? "#4caf50"
+								: cartItems.some((item) => item.id === course.id)
 								? "white"
+								: course.price === 0
+								? "#4caf50"
 								: "#8e2de2",
-							color: cartItems.find((item) => item.id === course.id)
+							color: cartItems.some((item) => item.id === course.id)
 								? "#8e2de2"
 								: "white",
-							border: cartItems.find((item) => item.id === course.id)
+							border: cartItems.some((item) => item.id === course.id)
 								? "1px solid #8e2de2"
 								: "none",
 							borderRadius: "2%",
@@ -408,20 +444,25 @@ const CourseCard = ({ course }) => {
 							alignSelf: "center",
 							transition: "all 0.3s ease",
 							"&:hover": {
-								background: cartItems.find((item) => item.id === course.id)
-									? "white"
+								bgcolor: isEnrolled
+									? "#388e3c"
+									: cartItems.some((item) => item.id === course.id)
+									? "#f5f5f5"
+									: course.price === 0
+									? "#388e3c"
 									: "#7016b3",
 							},
 						}}
 						onClick={(e) => {
 							e.stopPropagation();
-							handleAddToCart(course);
+							if (!isEnrolled) {
+								handleAddToCart(e);
+							}
 						}}
-						fullWidth>
-						{cartItems.find((item) => item.id === course.id)
-							? "In Cart"
-							: "Add to Cart"}
-						<ShoppingCart />
+						disabled={isEnrolled}
+						fullWidth
+						startIcon={isEnrolled ? <CheckCircleIcon /> : <ShoppingCart />}>
+						{buttonText()}
 					</Button>
 				</Box>
 			)}
@@ -503,7 +544,7 @@ const Home2 = () => {
 
 	return (
 		<>
-		{/* Learners are viewing */}
+			{/* Learners are viewing */}
 			<section className="courses-section">
 				<h2 className="section-title">Learners are viewing</h2>
 
@@ -524,7 +565,7 @@ const Home2 = () => {
 				</div>
 			</section>
 
-		{/* Learning focused on your goals */}
+			{/* Learning focused on your goals */}
 			<section className="focus-section">
 				<h2 className="section-title">Learning focused on your goals</h2>
 				<div className="focus-grid">

@@ -42,6 +42,7 @@ import CourseDetails from "./Pages/CourseDetails";
 import CheckoutComponent from "./Pages/checkout";
 import Unauthorized from './Pages/Unauthorized';
 import ForgotPassword from "./Components/LoginUsers/ForgotPassword";
+import Home2 from "./HomeComponents/Home2/Home2";
 
 const router = createBrowserRouter([
   {
@@ -75,6 +76,7 @@ const router = createBrowserRouter([
       { path: "/career-accelerators", element: <Career /> },
 			{ path: "/category/:id", element: <Category /> },
 			{ path: "/unauthorized", element: <Unauthorized /> },
+      {path: "/pro",element:<Home2 />},
       {path:"*", element: <NotFound />},
     ],
   }, 
