@@ -2,15 +2,39 @@
 import FlagOutlinedIcon from "@mui/icons-material/FlagOutlined";
 import ThumbDownAltOutlinedIcon from "@mui/icons-material/ThumbDownAltOutlined";
 import ThumbUpAltOutlinedIcon from "@mui/icons-material/ThumbUpAltOutlined";
-import { Box, Button, Checkbox, List, ListItem, ListItemText, Paper, Stack, Tab, Tabs, Typography, useMediaQuery, useTheme,} from "@mui/material";
+import {
+  Box,
+  Button,
+  Checkbox,
+  List,
+  ListItem,
+  ListItemText,
+  Paper,
+  Stack,
+  Tab,
+  Tabs,
+  Typography,
+  useMediaQuery,
+  useTheme,
+} from "@mui/material";
 import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useParams } from "react-router-dom";
 import Swal from "sweetalert2";
-import {addReview,geCourseLessons,getCourseById,getCourseReviews,} from "../Firebase/courses";
+import {
+  addReview,
+  geCourseLessons,
+  getCourseById,
+  getCourseReviews,
+} from "../Firebase/courses";
 import { auth } from "../Firebase/firebase";
 
-const tabContents = ( selectedCourse, courseReviews = [], courseLessons = [], tabContentProps = {} ) => ({
+const tabContents = (
+  selectedCourse,
+  courseReviews = [],
+  courseLessons = [],
+  tabContentProps = {}
+) => ({
   Overview: (
     <Box sx={{ py: 2, px: 5 }}>
       {/* Title */}
@@ -165,7 +189,13 @@ const tabContents = ( selectedCourse, courseReviews = [], courseLessons = [], ta
         Reviews
       </Typography>
       <Box
-        sx={{ mb: 4, p: 2, bgcolor: "#f7f9fa", borderRadius: 2, border: "1px solid #e4e9f0",}}
+        sx={{
+          mb: 4,
+          p: 2,
+          bgcolor: "#f7f9fa",
+          borderRadius: 2,
+          border: "1px solid #e4e9f0",
+        }}
       >
         <Typography sx={{ fontWeight: 600, mb: 1, fontSize: 18 }}>
           Add your review
@@ -251,10 +281,13 @@ const tabContents = ( selectedCourse, courseReviews = [], courseLessons = [], ta
                 : {})}
               value={tabContentProps.addReviewRating || 0}
               readOnly
-            />
+            />{" "}
             <Button
               type="submit"
               variant="contained"
+              disabled={courseReviews.some(
+                (review) => review.user_id === auth.currentUser?.uid
+              )}
               sx={{
                 bgcolor: "#a435f0",
                 color: "#fff",
@@ -263,9 +296,17 @@ const tabContents = ( selectedCourse, courseReviews = [], courseLessons = [], ta
                 px: 3,
                 alignSelf: "flex-end",
                 "&:hover": { bgcolor: "#7c28c6" },
+                "&.Mui-disabled": {
+                  bgcolor: "#e0e0e0",
+                  color: "#999",
+                },
               }}
             >
-              Submit Review
+              {courseReviews.some(
+                (review) => review.user_id === auth.currentUser?.uid
+              )
+                ? "تم إضافة مراجعتك"
+                : "Submit Review"}
             </Button>
           </Box>
         </form>
@@ -466,15 +507,28 @@ const CourseCondent = ({ courseId }) => {
       setCourseReviews(reviews);
     };
     fetchData();
-  }, [course_id]); 
+  }, [course_id]);
   useEffect(() => {
     if (courseLessons.length > 0 && !currentVideoUrl) {
       setCurrentVideoUrl(courseLessons[0].video_url || "");
     }
   }, [courseLessons, currentVideoUrl]);
-
   // Add review submit handler
   const onSubmitReview = async (data) => {
+    // Check if user has already reviewed this course
+    const hasUserReviewed = courseReviews.some(
+      (review) => review.user_id === auth.currentUser?.uid
+    );
+
+    if (hasUserReviewed) {
+      Swal.fire({
+        title: "تنبيه",
+        text: "لقد قمت بالفعل بإضافة مراجعة لهذا الكورس",
+        icon: "warning",
+      });
+      return;
+    }
+
     const review = {
       user_id: auth.currentUser?.uid,
       rating: data.rating,
@@ -540,23 +594,73 @@ const CourseCondent = ({ courseId }) => {
 
   return (
     <Box sx={{ bgcolor: "#f7f9fa", minHeight: "100vh", pb: 4 }}>
-      <Box sx={{display: "flex",flexDirection: isSmallScreen ? "column" : "row",justifyContent: "center",mt: 0,px: isSmallScreen ? 0 : 3,py: 4,gap: isSmallScreen ? 0 : 4,}}>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: isSmallScreen ? "column" : "row",
+          justifyContent: "center",
+          mt: 0,
+          px: isSmallScreen ? 0 : 3,
+          py: 4,
+          gap: isSmallScreen ? 0 : 4,
+        }}
+      >
         <Box
-          sx={{width: isSmallScreen ? "100%" : "70%",bgcolor: "#fff",pt: 3,borderRadius: 3,boxShadow: "0 2px 16px 0 rgba(44,51,73,0.07)",minHeight: 900,mb: isSmallScreen ? 3 : 0,}}>
-          <Paper elevation={0} sx={{borderRadius: 3,overflow: "hidden",mb: 3,boxShadow: "0 2px 8px 0 rgba(44,51,73,0.07)",}}>
-            <Box sx={{px: 3,py: 1.5,bgcolor: "#f7f9fa",borderTop: "1px solid #eee",}}>
+          sx={{
+            width: isSmallScreen ? "100%" : "70%",
+            bgcolor: "#fff",
+            pt: 3,
+            borderRadius: 3,
+            boxShadow: "0 2px 16px 0 rgba(44,51,73,0.07)",
+            minHeight: 900,
+            mb: isSmallScreen ? 3 : 0,
+          }}
+        >
+          <Paper
+            elevation={0}
+            sx={{
+              borderRadius: 3,
+              overflow: "hidden",
+              mb: 3,
+              boxShadow: "0 2px 8px 0 rgba(44,51,73,0.07)",
+            }}
+          >
+            <Box
+              sx={{
+                px: 3,
+                py: 1.5,
+                bgcolor: "#f7f9fa",
+                borderTop: "1px solid #eee",
+              }}
+            >
               {currentVideoUrl != null ? (
-                <iframe width="100%" height={isSmallScreen ? 220 : 516}
-                  src={ "https://www.youtube.com/embed/" + currentVideoUrl.slice(17) }
+                <iframe
+                  width="100%"
+                  height={isSmallScreen ? 220 : 516}
+                  src={
+                    "https://www.youtube.com/embed/" + currentVideoUrl.slice(17)
+                  }
                   title={selectedCourse?.title || "Course Video"}
                   frameBorder="0"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                   referrerPolicy="strict-origin-when-cross-origin"
                   allowFullScreen
-                  style={{borderRadius: 10,width: "100%",maxHeight: isSmallScreen ? "70%" : "80%",}}
+                  style={{
+                    borderRadius: 10,
+                    width: "100%",
+                    maxHeight: isSmallScreen ? "70%" : "80%",
+                  }}
                 ></iframe>
               ) : (
-                <img src={selectedCourse?.thumbnail} alt={selectedCourse?.title} style={{width: "100%",borderRadius: 10,objectFit: "cover",maxHeight: isSmallScreen ? 220 : 320,}}
+                <img
+                  src={selectedCourse?.thumbnail}
+                  alt={selectedCourse?.title}
+                  style={{
+                    width: "100%",
+                    borderRadius: 10,
+                    objectFit: "cover",
+                    maxHeight: isSmallScreen ? 220 : 320,
+                  }}
                 />
               )}
             </Box>
@@ -579,7 +683,17 @@ const CourseCondent = ({ courseId }) => {
                   <Tab
                     key={tab}
                     label={tab}
-                    sx={{fontWeight: 600,fontSize: 16,color: selectedTab === tab ? "#1c2526" : "#757575",borderBottom:  selectedTab === tab    ? "2.5px solid #a435f0"    : "2.5px solid transparent",pb: 0.5,textTransform: "none",}}
+                    sx={{
+                      fontWeight: 600,
+                      fontSize: 16,
+                      color: selectedTab === tab ? "#1c2526" : "#757575",
+                      borderBottom:
+                        selectedTab === tab
+                          ? "2.5px solid #a435f0"
+                          : "2.5px solid transparent",
+                      pb: 0.5,
+                      textTransform: "none",
+                    }}
                   />
                 ))}
               </Tabs>
@@ -589,7 +703,19 @@ const CourseCondent = ({ courseId }) => {
                   <Typography
                     key={tab}
                     onClick={() => setSelectedTab(tab)}
-                    sx={{fontWeight: 600,fontSize: 16,color: selectedTab === tab ? "#1c2526" : "#757575",cursor: "pointer",borderBottom:  selectedTab === tab    ? "2.5px solid #a435f0"    : "2.5px solid transparent",pb: 0.5,transition: "border 0.2s","&:hover": {  color: "#a435f0",},}}
+                    sx={{
+                      fontWeight: 600,
+                      fontSize: 16,
+                      color: selectedTab === tab ? "#1c2526" : "#757575",
+                      cursor: "pointer",
+                      borderBottom:
+                        selectedTab === tab
+                          ? "2.5px solid #a435f0"
+                          : "2.5px solid transparent",
+                      pb: 0.5,
+                      transition: "border 0.2s",
+                      "&:hover": { color: "#a435f0" },
+                    }}
                   >
                     {tab}
                   </Typography>
@@ -604,7 +730,13 @@ const CourseCondent = ({ courseId }) => {
               <Box>
                 <Typography
                   variant="h6"
-                  sx={{fontWeight: 800,mb: 2,fontSize: 20,color: "#1c2526",fontFamily: "Montserrat, Roboto, Arial",letterSpacing: 0.5,
+                  sx={{
+                    fontWeight: 800,
+                    mb: 2,
+                    fontSize: 20,
+                    color: "#1c2526",
+                    fontFamily: "Montserrat, Roboto, Arial",
+                    letterSpacing: 0.5,
                   }}
                 >
                   Course content
@@ -616,7 +748,18 @@ const CourseCondent = ({ courseId }) => {
                       .map((lesson, idx) => (
                         <ListItem
                           key={lesson.lesson_id || idx}
-                          sx={{bgcolor: idx === 0 ? "#f7f9fa" : "transparent",borderRadius: 1,mb: 0.5,pl: 0.5,pr: 1,minHeight: 44,display: "flex",alignItems: "center",transition: "background 0.2s","&:hover": {  bgcolor: "#f0f4fa",},cursor: lesson.video_url ? "pointer" : "default",
+                          sx={{
+                            bgcolor: idx === 0 ? "#f7f9fa" : "transparent",
+                            borderRadius: 1,
+                            mb: 0.5,
+                            pl: 0.5,
+                            pr: 1,
+                            minHeight: 44,
+                            display: "flex",
+                            alignItems: "center",
+                            transition: "background 0.2s",
+                            "&:hover": { bgcolor: "#f0f4fa" },
+                            cursor: lesson.video_url ? "pointer" : "default",
                           }}
                           onClick={() => {
                             if (lesson.video_url) {
@@ -652,7 +795,20 @@ const CourseCondent = ({ courseId }) => {
                                   <Button
                                     variant="outlined"
                                     size="small"
-                                    sx={{ml: 1,color: "#1c2526",borderColor: "#d1d7dc",fontSize: 12,textTransform: "none",px: 1.5,py: 0.2,minWidth: 0,borderRadius: 1,"&:hover": {  borderColor: "#a435f0",  bgcolor: "#f7f9fa",},
+                                    sx={{
+                                      ml: 1,
+                                      color: "#1c2526",
+                                      borderColor: "#d1d7dc",
+                                      fontSize: 12,
+                                      textTransform: "none",
+                                      px: 1.5,
+                                      py: 0.2,
+                                      minWidth: 0,
+                                      borderRadius: 1,
+                                      "&:hover": {
+                                        borderColor: "#a435f0",
+                                        bgcolor: "#f7f9fa",
+                                      },
                                     }}
                                   >
                                     Preview
@@ -694,11 +850,32 @@ const CourseCondent = ({ courseId }) => {
         {/* Course Content Sidebar (hidden on small screens) */}
         {!isSmallScreen && (
           <Box
-            sx={{width: "30%",bgcolor: "#fff",borderLeft: "1.5px solid #e4e9f0",pt: 3,pl: 3,pr: 1,position: "sticky",top: 0,borderRadius: 3,boxShadow: "0 2px 16px 0 rgba(44,51,73,0.07)",display: "flex",flexDirection: "column",gap: 2,}}
+            sx={{
+              width: "30%",
+              bgcolor: "#fff",
+              borderLeft: "1.5px solid #e4e9f0",
+              pt: 3,
+              pl: 3,
+              pr: 1,
+              position: "sticky",
+              top: 0,
+              borderRadius: 3,
+              boxShadow: "0 2px 16px 0 rgba(44,51,73,0.07)",
+              display: "flex",
+              flexDirection: "column",
+              gap: 2,
+            }}
           >
             <Typography
               variant="h6"
-              sx={{fontWeight: 800,mb: 2,fontSize: 20,color: "#1c2526",fontFamily: "Montserrat, Roboto, Arial",letterSpacing: 0.5,}}
+              sx={{
+                fontWeight: 800,
+                mb: 2,
+                fontSize: 20,
+                color: "#1c2526",
+                fontFamily: "Montserrat, Roboto, Arial",
+                letterSpacing: 0.5,
+              }}
             >
               Course content
             </Typography>
@@ -709,7 +886,18 @@ const CourseCondent = ({ courseId }) => {
                   .map((lesson, idx) => (
                     <ListItem
                       key={lesson.lesson_id || idx}
-                      sx={{bgcolor: idx === 0 ? "#f7f9fa" : "transparent",borderRadius: 1,mb: 0.5,pl: 0.5,pr: 1,minHeight: 44,display: "flex",alignItems: "center",transition: "background 0.2s","&:hover": {  bgcolor: "#f0f4fa",},cursor: lesson.video_url ? "pointer" : "default",
+                      sx={{
+                        bgcolor: idx === 0 ? "#f7f9fa" : "transparent",
+                        borderRadius: 1,
+                        mb: 0.5,
+                        pl: 0.5,
+                        pr: 1,
+                        minHeight: 44,
+                        display: "flex",
+                        alignItems: "center",
+                        transition: "background 0.2s",
+                        "&:hover": { bgcolor: "#f0f4fa" },
+                        cursor: lesson.video_url ? "pointer" : "default",
                       }}
                       onClick={() => {
                         if (lesson.video_url) {
@@ -726,7 +914,11 @@ const CourseCondent = ({ courseId }) => {
                             spacing={1}
                           >
                             <Typography
-                              sx={{  fontSize: 15,  fontWeight: idx === 0 ? 700 : 500,  color: "#1c2526",}}
+                              sx={{
+                                fontSize: 15,
+                                fontWeight: idx === 0 ? 700 : 500,
+                                color: "#1c2526",
+                              }}
                             >
                               {lesson.title}
                             </Typography>
@@ -737,7 +929,21 @@ const CourseCondent = ({ courseId }) => {
                               <Button
                                 variant="outlined"
                                 size="small"
-                                sx={{ ml: 1, color: "#1c2526", borderColor: "#d1d7dc", fontSize: 12, textTransform: "none", px: 1.5, py: 0.2, minWidth: 0, borderRadius: 1, "&:hover": {   borderColor: "#a435f0",   bgcolor: "#f7f9fa", },}}
+                                sx={{
+                                  ml: 1,
+                                  color: "#1c2526",
+                                  borderColor: "#d1d7dc",
+                                  fontSize: 12,
+                                  textTransform: "none",
+                                  px: 1.5,
+                                  py: 0.2,
+                                  minWidth: 0,
+                                  borderRadius: 1,
+                                  "&:hover": {
+                                    borderColor: "#a435f0",
+                                    bgcolor: "#f7f9fa",
+                                  },
+                                }}
                               >
                                 Preview
                               </Button>
