@@ -118,7 +118,7 @@ const faqs = [
 
 const Career = () => {
   return (
-    <Box sx={{ padding: 4 }}>
+    <Box sx={{ padding: 0 }}>
       <Typography
         variant="h4"
         align="center"
@@ -143,15 +143,12 @@ const Career = () => {
         experience that makes you an exceptional candidate.
       </Typography>
 
-      <Grid container spacing={3}>
+      <Grid container spacing={2} justifyContent="center"> 
         {careers.map((career, index) => (
-          <Grid item xs={12} sm={6} md={4} key={index}>
+          <Grid  item xs={12} sm={3} md={3}  key={index} >
             <Card
               sx={{
                 height: "100%",
-                width: "410px",
-                p: 2,
-                pt: 2,
                 borderRadius: 4,
               }}
             >
@@ -161,9 +158,8 @@ const Career = () => {
                 image={career.image}
                 alt={career.title}
                 sx={{
-                  // width: '80%',
                   borderRadius: "8px",
-                  margin: "0 auto", // عشان تبقى الصورة في النص
+                  margin: "0 auto",
                   display: "block",
                   objectFit: "cover",
                 }}

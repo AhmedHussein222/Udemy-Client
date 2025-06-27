@@ -527,6 +527,7 @@ const CoursesSection = () => {
 										isHovered={hoveredCourse === course.id}
 										onHover={() => setHoveredCourse(course.id)}
 										onLeave={() => setHoveredCourse(null)}
+										sx={{backgroundColor: "red"}}
 									/>
 								))}
 							</Box>

@@ -4,30 +4,9 @@ import React, { useState, useEffect, useRef, useContext } from "react";
 import { useTranslation } from "react-i18next";
 import "./Home2.css";
 import { db } from "../../Firebase/firebase";
-import {
-	collection,
-	getDocs,
-	doc,
-	getDoc,
-	query,
-	where,
-} from "firebase/firestore";
-import {
-	Card,
-	CardContent,
-	Typography,
-	Box,
-	IconButton,
-	Button,
-} from "@mui/material";
-import {
-	ArrowForwardIos,
-	ShoppingCart,
-	FavoriteBorder as FavoriteBorderIcon,
-	Favorite as FavoriteIcon,
-	ArrowBackIos,
-	CheckCircle as CheckCircleIcon,
-} from "@mui/icons-material";
+import {collection,getDocs,doc,getDoc,query,where,} from "firebase/firestore";
+import {Card,CardContent,Typography,Box,IconButton,Button,} from "@mui/material";
+import {ArrowForwardIos,ShoppingCart,FavoriteBorder as FavoriteBorderIcon,Favorite as FavoriteIcon,ArrowBackIos,CheckCircle as CheckCircleIcon,} from "@mui/icons-material";
 import logo1 from "../../assets/hands.webp";
 import logo2 from "../../assets/certificate.webp";
 import logo3 from "../../assets/empty.webp";
@@ -124,7 +103,7 @@ const CourseCard = ({ course }) => {
 		}
 
 		const courseToAdd = {
-			id: course.id,
+			id: course.id,   
 			title: course.title,
 			price: Number(course.price) || 0,
 			thumbnail: course.thumbnail || "",
@@ -151,16 +130,25 @@ const CourseCard = ({ course }) => {
 			onMouseLeave={handleMouseLeave}
 			sx={{
 				cursor: "pointer",
-				height: "420px",
 				display: "flex",
+				width: "30%",
 				flexDirection: "column",
+				position: "relative",
+				zIndex: 1,
 			}}>
 			<div className="course-image-container">
-				<img
-					src={course.image}
+				
+				<div  >
+					 <img
+					src={course.thumbnail}
 					alt={t("Course thumbnail")}
-					className="course-image"
+					className=""
+					width={"100%"}
+					height={"200"}
+					
 				/>
+					
+					</div>
 				{course.bestseller && (
 					<div className="bestseller-badge">{t("Bestseller")}</div>
 				)}
@@ -206,8 +194,8 @@ const CourseCard = ({ course }) => {
 						top: "0",
 						...(popupPosition === "right"
 							? {
-									left: "100%",
-									marginLeft: "12px",
+									left: "10%",
+									marginLeft: "2px",
 									"&::before": {
 										content: '""',
 										position: "absolute",
@@ -219,11 +207,11 @@ const CourseCard = ({ course }) => {
 										transform: "rotate(45deg)",
 										borderLeft: "1px solid #ddd",
 										borderBottom: "1px solid #ddd",
-										zIndex: 0,
+										zIndex: 100,
 									},
 							  }
 							: {
-									right: "100%",
+									right: "10%",
 									marginRight: "12px",
 									"&::before": {
 										content: '""',
@@ -236,7 +224,7 @@ const CourseCard = ({ course }) => {
 										transform: "rotate(45deg)",
 										borderTop: "1px solid #ddd",
 										borderRight: "1px solid #ddd",
-										zIndex: 0,
+										zIndex: 100,
 									},
 							  }),
 						width: "280px",
@@ -470,7 +458,7 @@ const Home2 = () => {
 	return (
 		<>
 			{/* Learners are viewing */}
-			<section className="courses-section">
+			<section className="courses-section" >
 				<h2 className="section-title">{t("Popular with learners")}</h2>
 
 				<div className="courses-scroll-wrapper">
@@ -481,9 +469,9 @@ const Home2 = () => {
 						<ArrowBackIos />
 					</button>
 
-					<div className="courses-container" ref={scrollRef}>
+					<div className="courses-container"  ref={scrollRef}>
 						{courses.map((course) => (
-							<CourseCard key={course.id} course={course} />
+							<CourseCard key={course.id} course={course}  />
 						))}
 					</div>
 

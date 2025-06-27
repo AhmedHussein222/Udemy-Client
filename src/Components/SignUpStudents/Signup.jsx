@@ -106,7 +106,7 @@ function Signup() {
 	const { t } = useTranslation();
 
 	return (
-		<Box sx={{ flexGrow: 1, p: { xs: 2, md: 4 } }}>
+		<Box sx={{ flexGrow: 1, p: { xs: 2, md: 2} }}>
 			<Snackbar
 				open={openSnackbar}
 				autoHideDuration={5000}
@@ -123,7 +123,7 @@ function Signup() {
 				spacing={4}
 				alignItems="center"
 				justifyContent={"space-around"}>
-				<Grid item xs={12} lg={6} sx={{ textAlign: "center" }}>
+				<Grid item xs={12} md={4} lg={6} sx={{ textAlign: "center" }}>
 					<Box
 						component="img"
 						src="https://frontends.udemycdn.com/components/auth/desktop-illustration-x1.webp"
@@ -137,8 +137,8 @@ function Signup() {
 					/>
 				</Grid>
 
-				<Grid item xs={12} lg={6}>
-					<Box sx={{ maxWidth: 500, mx: "auto", px: 2 }}>
+				<Grid item xs={12} md={5} lg={6}>
+					<Box sx={{ maxWidth: 500, mx: "auto", p: 5 }}>
 						<Typography
 							variant="h4"
 							gutterBottom

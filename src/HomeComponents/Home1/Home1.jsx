@@ -107,8 +107,8 @@ const Home1 = () => {
 			<Box sx={{ flexGrow: 1, mt: 5 }}>
 				<Grid container spacing={2} justifyContent="center">
 					{/* Full Stack Card */}
-					<Grid item xs={12} sm={6} md={4}>
-						<Card sx={{ borderRadius: 4, width: 400 }}>
+					<Grid item xs={12} sm={6} md={2}>
+						<Card sx={{ borderRadius: 4, }}>
 							<Box
 								component="img"
 								src={fullstackImg}
@@ -141,8 +141,8 @@ const Home1 = () => {
 					</Grid>
 
 					{/* Digital Marketer Card */}
-					<Grid item xs={12} sm={6} md={4}>
-						<Card sx={{ borderRadius: 4, width: 400 }}>
+					<Grid item xs={12} sm={6} md={2}>
+						<Card sx={{ borderRadius: 4, }}>
 							<Box
 								component="img"
 								src={digitalMarketerImg}
@@ -177,8 +177,8 @@ const Home1 = () => {
 					</Grid>
 
 					{/* Data Science Card */}
-					<Grid item xs={12} sm={6} md={4}>
-						<Card sx={{ borderRadius: 4, width: 400 }}>
+					<Grid item xs={12} sm={6} md={2}>
+						<Card sx={{ borderRadius: 4, }}>
 							<Box
 								component="img"
 								src={dataScienceImg}

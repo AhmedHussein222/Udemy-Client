@@ -81,29 +81,28 @@ function Login() {
   const { t } = useTranslation();
 
   return (
-    <Box sx={{ flexGrow: 1, p: { xs: 2, md: 4 } }}>
+    <Box sx={{ flexGrow: 1, p: { xs: 2, md: 5 } }}>
       <Grid
         container
         spacing={4}
         alignItems="center"
         justifyContent={"space-around"}
       >
-        <Grid item xs={12} lg={6} sx={{ textAlign: "center" }}>
+        <Grid item xs={12} md={5} lg={4} sx={{ maxWidth:450, textAlign: "center" }}>
           <Box
             component="img"
             src="https://frontends.udemycdn.com/components/auth/desktop-illustration-x1.webp"
             alt="Illustration"
             sx={{
               width: "100%",
-              maxWidth: 600,
               height: "auto",
               mx: "auto",
             }}
           />
         </Grid>
 
-        <Grid item xs={12} lg={6}>
-          <Box sx={{ maxWidth: 500, mx: "auto", px: 2 }}>
+        <Grid item xs={12} md={5} lg={4}>
+          <Box sx={{ maxWidth: 450, mx: "auto", px: 2}}>
             <Typography
               variant="h4"
               gutterBottom

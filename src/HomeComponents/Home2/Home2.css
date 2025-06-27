@@ -12,15 +12,15 @@
   padding: 20px;
   overflow: visible; /* Ensure no clipping of popup */
   position: relative;
-  z-index: 10000; /* Increased z-index to ensure popups are above all */
+  z-index: 0;
 }
 
 /* Scrollable Container for Horizontal Scroll */
 .courses-container {
   display: flex;
+  z-index: 2;
   gap: 20px;
-  overflow-x: auto;
-  overflow-y: hidden; /* Prevent vertical scroll */
+  overflow-y: hidden;
   padding-bottom: 10px;
   scroll-snap-type: x mandatory;
   scroll-behavior: smooth;
@@ -76,7 +76,6 @@
   margin-top: 50px;
   background-color: #eef1f8;
   position: relative;
-  z-index: 5000; 
 }
 
 .focus-grid {
@@ -126,9 +125,7 @@ h4{
 
 .preview-img{
   border-radius: 10px;
-  max-width: 800px;
-  height: 900px;
-  margin-right: 15px;
+  width: 100%;
 }
 
 

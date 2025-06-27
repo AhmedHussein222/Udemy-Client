@@ -30,8 +30,6 @@ const cardData = [
       "Goal-focused recommendations",
       "AI-powered coding exercises",
       "Analytics and adoption reports",
-     
-      
     ]
   },
   {
@@ -47,7 +45,6 @@ const cardData = [
       "AI-powered coding exercises",
       "Advanced analytics and insights",
       "Dedicated customer success team",
-      "International course collection featuring 15 languages",
       "Customizable content",
       "Hands-on tech training with add-on",
      " Strategic implementation services with add-on",
@@ -66,12 +63,16 @@ function AcceleratorSection () {
       </Typography>
 
 
-      <div style={{ display: "flex", gap: "20px", flexWrap: "wrap",alignItems:"center" }}>
+      <div style={{ display: "flex", gap: "20px", flexWrap: "wrap",alignItems:"center" ,justifyContent:"center" }}>
         {cardData.map((card, idx) => (
           <Card
           key={idx}
+          xs={12}
+          sm={6}  
+          md={4}
           sx={{
-            width: 390,
+            minWidth: "300px",
+
             height:"auto",
             border: "1px solid #ccc",
             borderTop: "6px solid #6a1b9a",
@@ -126,7 +127,6 @@ function AcceleratorSection () {
             </div>
           </CardContent>
         </Card>
-        
         ))}
       </div>
     </div>
